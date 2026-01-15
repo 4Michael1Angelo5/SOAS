@@ -1,47 +1,28 @@
-<<<<<<< Updated upstream
-=======
-package src;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
->>>>>>> Stashed changes
 /**
  * @author Chris Chun, Ayush
  * @version 1.1
  */
 public class DataLoader implements Loader {
 
-<<<<<<< Updated upstream
     public DataLoader(){
         super();
     }
-    @Override
-    public String loadPlayers() {
-        return "";
-    }
 
-    @Override
-    public String loadTransactions() {
-=======
     List<Player> playerData;
     List<Transaction> transactionData;
     List<Drill> drillData;
 
-    private BufferedReader myBfReader;
-
-    public DataLoader(){
-        super();
-    }
-
-    public void setPlayerData(List<Player> playerData) {
+    private void setPlayerData(List<Player> playerData) {
         this.playerData = playerData;
     }
 
-    public void setTransactionData(List<Transaction> transactionData) {
+    private void setTransactionData(List<Transaction> transactionData) {
         this.transactionData = transactionData;
     }
 
@@ -99,16 +80,11 @@ public class DataLoader implements Loader {
             throw new RuntimeException(e);
         }
 
->>>>>>> Stashed changes
         return "";
     }
 
     @Override
     public String loadDrills() {
-<<<<<<< Updated upstream
-        return "";
-    }
-=======
 
         List<Drill> drillsData = new ArrayList<>();
 
@@ -151,5 +127,5 @@ public class DataLoader implements Loader {
         loader.printData(loader.transactionData);
 
     }
->>>>>>> Stashed changes
+
 }
