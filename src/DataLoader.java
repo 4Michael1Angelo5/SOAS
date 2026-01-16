@@ -10,8 +10,12 @@ import java.util.List;
  */
 public class DataLoader implements Loader {
 
+    // Add OperationCounter as a field
+    private OperationCounter counter;
+
     public DataLoader(){
         super();
+        counter = new OperationCounter();
     }
 
     List<Player> playerData;
@@ -42,6 +46,7 @@ public class DataLoader implements Loader {
             // skip first row of data
             nextLine = br.readLine();
             while ( (nextLine = br.readLine()) != null) {
+                counter.increment("lines_read");
                 String[] row = nextLine.split(",");
 
                 Player player = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
@@ -125,6 +130,8 @@ public class DataLoader implements Loader {
         loader.printData(loader.playerData);
         loader.printData(loader.drillData);
         loader.printData(loader.transactionData);
+
+        loader.counter.printReport();
 
     }
 

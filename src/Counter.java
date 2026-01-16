@@ -1,5 +1,3 @@
-package src;
-
 /**
  * @author Chris Chun
  * @version 1.1
