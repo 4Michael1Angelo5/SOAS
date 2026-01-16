@@ -37,10 +37,24 @@ public class DataLoader implements Loader {
     }
 
     @Override
+    public String loadDrills(String theFilePath) {
+        this.drillData = loadData(Drill.class, theFilePath);
+
+        return "";
+    }
+
+    @Override
     public String loadTransactions(String theFilePath) {
+
         this.transactionData = loadData(Transaction.class, theFilePath);
 
         return "";
+    }
+
+    public <T> void printData(List<T> theData){
+        for(T data : theData) {
+            System.out.println(data.toString());
+        }
     }
 
     private <T extends DataType> T parseData(Class<T> dataClass, String theCsvRow) {
@@ -96,19 +110,6 @@ public class DataLoader implements Loader {
         }
 
         return dataArray;
-    }
-
-    @Override
-    public String loadDrills(String theFilePath) {
-        this.drillData = loadData(Drill.class, theFilePath);
-
-        return "";
-    }
-
-    public <T> void printData(List<T> theData){
-        for(T data : theData) {
-            System.out.println(data.toString());
-        }
     }
 
     public static void main() {
