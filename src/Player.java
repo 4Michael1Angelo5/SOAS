@@ -6,8 +6,8 @@
  * @param jersey
  * @param yards
  */
-public record Player(int player_id,
+public record Player (int player_id,
                      String name,
                      String position,
                      String jersey,
-                     int yards) {}
+                     int yards) implements DataType{}

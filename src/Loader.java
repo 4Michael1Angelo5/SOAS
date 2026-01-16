@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
  * src.Loader Interface
  */
 public interface Loader {
-    String loadPlayers() throws FileNotFoundException;
-    String loadTransactions();
-    String loadDrills();
+    String loadPlayers(String theFilePath) throws FileNotFoundException;
+    String loadTransactions(String theFilePath);
+    String loadDrills(String theFilePath);
 }

@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,82 +29,78 @@ public class DataLoader implements Loader {
     }
 
     @Override
-    public String loadPlayers() {
+    public String loadPlayers(String theFilePath) {
 
-
-        List<Player> playerData= new ArrayList<>();
-
-        String nextLine;
-        try (FileReader fileReader = new FileReader("data/seahawks_players.csv")) {
-            BufferedReader br = new BufferedReader(fileReader);
-            // skip first row of data
-            nextLine = br.readLine();
-            while ( (nextLine = br.readLine()) != null) {
-                String[] row = nextLine.split(",");
-
-                Player player = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
-                playerData.add(player);
-            }
-
-            setPlayerData(playerData);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return "";
-    }
-
-
-    @Override
-    public String loadTransactions() {
-        List<Transaction> transActionData= new ArrayList<>();
-
-        String nextLine;
-        try (FileReader fileReader = new FileReader("data/seahawks_transactions.csv")) {
-            BufferedReader br = new BufferedReader(fileReader);
-            // skip first row of data
-            nextLine = br.readLine();
-            while ( (nextLine = br.readLine()) != null) {
-                String[] row = nextLine.split(",");
-
-                Transaction transaction = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
-                transActionData.add(transaction);
-            }
-
-            setTransactionData(transActionData);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.playerData = loadData(Player.class,theFilePath);
 
         return "";
     }
 
     @Override
-    public String loadDrills() {
+    public String loadTransactions(String theFilePath) {
+        this.transactionData = loadData(Transaction.class, theFilePath);
 
-        List<Drill> drillsData = new ArrayList<>();
+        return "";
+    }
 
-        String nextLine;
-        try (FileReader fileReader = new FileReader("data/seahawks_drills.csv")) {
-            BufferedReader br = new BufferedReader(fileReader);
+    private <T extends DataType> T parseData(Class<T> dataClass, String theCsvRow) {
 
-            // skip first line
-            nextLine = br.readLine();
+        String[] row = theCsvRow.split(",");
 
-            while ( (nextLine = br.readLine()) != null) {
-                String[] row = nextLine.split(",");
+        Object result = null;
 
-                Drill drill = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
-                drillsData.add(drill);
+       if (dataClass == Player.class) {
+
+           result = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
+
+       }else
+       if(dataClass == Drill.class) {
+
+           result = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
+
+       }else
+       if (dataClass == Transaction.class) {
+           result = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+        }
+
+       return dataClass.cast(result);
+    }
+
+    private <T extends DataType> List<T> loadData(Class<T> theDataType,String theFilePath) {
+
+        List<T> dataArray = new ArrayList<>();
+
+        try {
+
+            FileReader myFileReader = new FileReader(theFilePath);
+            String nextLine;
+
+            try {
+                 BufferedReader br = new BufferedReader(myFileReader);
+
+                // skip first line
+                nextLine = br.readLine();
+
+                while ( (nextLine = br.readLine()) != null) {
+
+                    dataArray.add(parseData(theDataType, nextLine));
+
+                }
+
+            }catch(IOException e) {
+                e.printStackTrace();
             }
 
-            setDrillData(drillsData);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+
+        return dataArray;
+    }
+
+    @Override
+    public String loadDrills(String theFilePath) {
+        this.drillData = loadData(Drill.class, theFilePath);
 
         return "";
     }
@@ -119,13 +113,12 @@ public class DataLoader implements Loader {
 
     public static void main() {
         DataLoader loader = new DataLoader();
-        loader.loadPlayers();
-        loader.loadDrills();
-        loader.loadTransactions();
+        loader.loadPlayers("data/seahawks_players.csv");
+        loader.loadDrills("data/seahawks_drills.csv");
+        loader.loadTransactions("data/seahawks_transactions.csv");
+
         loader.printData(loader.playerData);
         loader.printData(loader.drillData);
         loader.printData(loader.transactionData);
-
     }
-
 }
