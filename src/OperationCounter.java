@@ -7,7 +7,11 @@ import java.util.Map;
  */
 public class OperationCounter implements Counter {
 
-    private Map<String, Integer> counts;
+    /**
+     * Map containing operation, ie "comparison", or "swap" and their
+     * corresponding count.
+     */
+    final private Map<String, Integer> counts;
 
     public OperationCounter() {
         counts = new HashMap<>();
@@ -23,6 +27,15 @@ public class OperationCounter implements Counter {
         } else {
             counts.put(operationName, 1);
         }
+    }
+
+    /**
+     * Adds the specified count to the operation.
+     * @param operationName name of the operation ie: "comparisons" or "swaps
+     * @param count the integer value you wish to increment the operation count by.
+     */
+    public void increment(String operationName, int count){
+        counts.merge(operationName, count, Integer::sum);
     }
 
     /**

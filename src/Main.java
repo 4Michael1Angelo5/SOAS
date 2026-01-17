@@ -3,13 +3,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
+/**
+ * The entry point of the application. Presents a simple CLI menu
+ * to interact with different statistics from the Seattle Seahawks.
+ * @author Chris Chun
+ * @author Ayush
+ * @version 1.1
+ */
 public class Main {
     private static final BufferedReader reader =
             new BufferedReader( new InputStreamReader(System.in));
 
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    static  void main() throws IOException {
+    public static void main(String[] args) throws IOException {
         DataLoader loader = new DataLoader();
         boolean running = true;
         while (running) {
