@@ -9,9 +9,10 @@ public class Main {
 
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    public static  void main(String[] args) throws IOException {
+    static  void main() throws IOException {
         DataLoader loader = new DataLoader();
-        while (true) {
+        boolean running = true;
+        while (running) {
             printMenu();
             String choice = reader.readLine().trim();
 
@@ -36,6 +37,7 @@ public class Main {
                     loader.printData(loader.drillData);
                     loader.printData(loader.transactionData);
                 }
+                case "5" -> running = false;
                 default -> {
                     logger.info("""
                             Unsupported Option
@@ -55,6 +57,7 @@ public class Main {
                 2) load drills
                 3) load transactions
                 4) load all
+                5) exit
                 """);
     }
 

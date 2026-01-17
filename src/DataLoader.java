@@ -66,7 +66,8 @@ public class DataLoader implements Loader {
      * @return A DataType object either: Player, Drills, or Transaction
      * @param <T> DataType either: Player, Drills, or Transaction
      */
-    private <T extends DataType> T parseData(Class<T> dataClass, String theCsvRow) {
+    private <T extends DataType> T parseData(Class<T> dataClass, String theCsvRow)
+            throws IllegalArgumentException {
 
         String[] row = theCsvRow.split(",");
 
@@ -112,32 +113,27 @@ public class DataLoader implements Loader {
             throws IllegalArgumentException, IOException{
 
         List<T> dataArray = new ArrayList<>();
-        try {
+        try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
 
-            FileReader myFileReader = new FileReader(theFilePath);
+            // skip first line
+            br.readLine();
+
             String nextLine;
-
-            try {
-                 BufferedReader br = new BufferedReader(myFileReader);
-
-                // skip first line
-                br.readLine();
-
-                while ( (nextLine = br.readLine()) != null) {
+            while ( (nextLine = br.readLine()) != null) {
+                try {
 
                     dataArray.add(parseData(theDataType, nextLine));
+
+                } catch (IllegalArgumentException e) {
+                    // Catch errors from parseData (bad columns, bad numbers)
+                    logger.severe("Data error in " + theFilePath + ": " + e.getMessage());
+                    throw new IllegalArgumentException("File " + theFilePath + " is malformed.", e);
                 }
 
-            }catch(IOException e) {
-                logger.severe(e.getMessage());
             }
-
         } catch (FileNotFoundException e) {
             logger.severe(e.getMessage());
             throw new FileNotFoundException("");
-
-        }catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Encountered malformed csv column");
         }
 
         return dataArray;
