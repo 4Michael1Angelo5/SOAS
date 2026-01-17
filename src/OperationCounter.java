@@ -4,6 +4,8 @@ import java.util.Map;
 /**
  * @author Chris Chun, Ayush
  * @version 1.1
+ *
+ * is this finally fixed
  */
 public class OperationCounter implements Counter {
 
