@@ -1,4 +1,4 @@
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * @author Chris Chun, Ayush
@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
  * src.Loader Interface
  */
 public interface Loader {
-    String loadPlayers() throws FileNotFoundException;
-    String loadTransactions();
-    String loadDrills();
+    void loadPlayers(String theFilePath) throws IOException, IllegalArgumentException;
+    void loadTransactions(String theFilePath) throws IOException, IllegalArgumentException;
+    void loadDrills(String theFilePath)throws IOException, IllegalArgumentException;
 }

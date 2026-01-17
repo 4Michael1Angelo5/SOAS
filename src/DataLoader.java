@@ -1,8 +1,7 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Chris Chun, Ayush
@@ -14,118 +13,141 @@ public class DataLoader implements Loader {
         super();
     }
 
+    private static final Logger logger = Logger.getLogger(DataLoader.class.getName());
+
+    /**
+     * A list of Player Data
+     */
     List<Player> playerData;
+
+    /**
+     * A list of Transaction Data
+     */
     List<Transaction> transactionData;
+
+    /**
+     * A list of drill data
+     */
     List<Drill> drillData;
 
-    private void setPlayerData(List<Player> playerData) {
-        this.playerData = playerData;
-    }
-
-    private void setTransactionData(List<Transaction> transactionData) {
-        this.transactionData = transactionData;
-    }
-
-    private void setDrillData(List<Drill> drillData) {
-        this.drillData = drillData;
+    @Override
+    public void loadPlayers(String theFilePath)
+            throws IOException, IllegalArgumentException{
+        this.playerData = loadData(Player.class,theFilePath);
     }
 
     @Override
-    public String loadPlayers() {
-
-
-        List<Player> playerData= new ArrayList<>();
-
-        String nextLine;
-        try (FileReader fileReader = new FileReader("data/seahawks_players.csv")) {
-            BufferedReader br = new BufferedReader(fileReader);
-            // skip first row of data
-            nextLine = br.readLine();
-            while ( (nextLine = br.readLine()) != null) {
-                String[] row = nextLine.split(",");
-
-                Player player = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
-                playerData.add(player);
-            }
-
-            setPlayerData(playerData);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return "";
-    }
-
-
-    @Override
-    public String loadTransactions() {
-        List<Transaction> transActionData= new ArrayList<>();
-
-        String nextLine;
-        try (FileReader fileReader = new FileReader("data/seahawks_transactions.csv")) {
-            BufferedReader br = new BufferedReader(fileReader);
-            // skip first row of data
-            nextLine = br.readLine();
-            while ( (nextLine = br.readLine()) != null) {
-                String[] row = nextLine.split(",");
-
-                Transaction transaction = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
-                transActionData.add(transaction);
-            }
-
-            setTransactionData(transActionData);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return "";
+    public void loadDrills(String theFilePath)
+            throws IOException, IllegalArgumentException {
+        this.drillData = loadData(Drill.class, theFilePath);
     }
 
     @Override
-    public String loadDrills() {
-
-        List<Drill> drillsData = new ArrayList<>();
-
-        String nextLine;
-        try (FileReader fileReader = new FileReader("data/seahawks_drills.csv")) {
-            BufferedReader br = new BufferedReader(fileReader);
-
-            // skip first line
-            nextLine = br.readLine();
-
-            while ( (nextLine = br.readLine()) != null) {
-                String[] row = nextLine.split(",");
-
-                Drill drill = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
-                drillsData.add(drill);
-            }
-
-            setDrillData(drillsData);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return "";
+    public void loadTransactions(String theFilePath)
+            throws IOException, IllegalArgumentException {
+        this.transactionData = loadData(Transaction.class, theFilePath);
     }
 
+    /**
+     * Prints data parsed from a csv file.
+     * @param theData An array list of DataType objects.
+     * @param <T> the Data type to print. can either be Player, Drill, Transaction
+     */
     public <T> void printData(List<T> theData){
         for(T data : theData) {
-            System.out.println(data.toString());
+            logger.info(data.toString());
         }
     }
 
-    public static void main() {
+    /**
+     * Parses Data from a csv row into its corresponding data type.
+     * @param dataClass can either be of type Player, Drills, or Transaction
+     * @param theCsvRow a comma separated string of values.
+     * @return A DataType object either: Player, Drills, or Transaction
+     * @param <T> DataType either: Player, Drills, or Transaction
+     */
+    private <T extends DataType> T parseData(Class<T> dataClass, String theCsvRow)
+            throws IllegalArgumentException {
+
+        String[] row = theCsvRow.split(",");
+
+        Object result;
+
+        try {
+            if (dataClass == Player.class) {
+
+                result = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
+            }else
+            if(dataClass == Drill.class) {
+
+                result = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
+
+            }else
+            if (dataClass == Transaction.class) {
+
+                result = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+
+            }else {
+
+                throw new IllegalArgumentException(dataClass.getName() + " is not a supported data type");
+            }
+
+        }catch(IndexOutOfBoundsException e) {
+
+             throw new IllegalArgumentException("Encountered malformed column input in the csv.");
+        }
+
+       return dataClass.cast(result);
+    }
+
+    /**
+     * Helper method to load data from a csv file.
+     * @param theDataType the data type the csv file is supposed to represent.
+     *                    Can either be Player, Drill, Transaction.
+     * @param theFilePath a string path to resource csv file.
+     * @param <T> the data type to load: Can either be Player, Drill, Transaction.
+     * @return an array list of data objects.
+     */
+    private <T extends DataType>
+    List<T> loadData(Class<T> theDataType,String theFilePath)
+            throws IllegalArgumentException, IOException{
+
+        List<T> dataArray = new ArrayList<>();
+        try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
+
+            // skip first line
+            br.readLine();
+
+            String nextLine;
+            while ( (nextLine = br.readLine()) != null) {
+                try {
+
+                    dataArray.add(parseData(theDataType, nextLine));
+
+                } catch (IllegalArgumentException e) {
+                    // Catch errors from parseData (bad columns, bad numbers)
+                    logger.severe("Data error in " + theFilePath + ": " + e.getMessage());
+                    throw new IllegalArgumentException("File " + theFilePath + " is malformed.", e);
+                }
+
+            }
+        } catch (FileNotFoundException e) {
+            logger.severe(e.getMessage());
+            throw new FileNotFoundException("");
+        }
+
+        return dataArray;
+    }
+
+    static void main() throws IOException {
         DataLoader loader = new DataLoader();
-        loader.loadPlayers();
-        loader.loadDrills();
-        loader.loadTransactions();
+
+        loader.loadPlayers("data/seahawks_players.csv");
+        loader.loadDrills("data/seahawks_drills.csv");
+        loader.loadTransactions("data/seahawks_transactions.csv");
+
         loader.printData(loader.playerData);
         loader.printData(loader.drillData);
         loader.printData(loader.transactionData);
-
     }
-
 }
