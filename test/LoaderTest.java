@@ -22,8 +22,8 @@ public class LoaderTest {
 
         assertAll(
                 () -> {
-                    assertThrows(FileNotFoundException.class,()->loader.loadDrills("bad path"));
-                    assertThrows(IOException.class, ()-> loader.loadPlayers("test/badFormatPlayers.csv"));
+                    assertThrows(IOException.class,()->loader.loadDrills("bad path"));
+                    assertThrows(IllegalArgumentException.class, ()-> loader.loadPlayers("test/badFormatPlayers.csv"));
                 }
         );
 
