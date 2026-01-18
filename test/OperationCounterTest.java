@@ -29,4 +29,16 @@ public class OperationCounterTest {
                     assertEquals(0, counter.getCount(operationName));
                 });
     }
+
+    @Test
+    void testMultipleCounters() {
+        OperationCounter counter1 = new OperationCounter();
+        OperationCounter counter2 = new OperationCounter();
+
+        counter1.increment("swaps", 5);
+        counter2.increment("swaps", 3);
+
+        assertEquals(5, counter1.getCount("swaps"));
+        assertEquals(3, counter2.getCount("swaps"));
+    }
 }
