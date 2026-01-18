@@ -165,20 +165,4 @@ public class DataLoader implements Loader {
 
         return dataArray;
     }
-
-    static void main() throws IOException {
-        DataLoader loader = new DataLoader();
-
-        loader.loadPlayers("data/seahawks_players.csv");
-        loader.loadDrills("data/seahawks_drills.csv");
-        loader.loadTransactions("data/seahawks_transactions.csv");
-
-        // test empty csv error handling
-        loader.loadTransactions("test/empty.csv");
-
-        loader.printData(loader.playerData);
-        loader.printData(loader.drillData);
-        loader.printData(loader.transactionData);
-
-    }
 }

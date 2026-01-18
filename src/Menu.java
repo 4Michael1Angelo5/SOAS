@@ -50,5 +50,3 @@ public class Menu {
     public record SubMenuItem(String label, Menu menu) implements MenuItem {}
 
 }
-
-
