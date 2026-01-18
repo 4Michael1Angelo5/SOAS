@@ -5,7 +5,7 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
  * The app tracks how many operations the CSV parsing algorithm performs and generates a report.
  * Benchmark timer tracks algorithm run time in milliseconds.
  * CLI-driven menu to navigate application options for improved UX.
- * CSV parsing optimized using a `BufferedReader` and `StringBuilder`.  
+ * CSV parsing optimized using a `BufferedReader`.  
 
 
 
@@ -19,28 +19,28 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 | Role | Member(s) | Primary Responsibilities |
 | :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris, Ayush | Developed the `DataLoader` class, CSV parsing algorithm, and integrated Java Reflection. |
+| **Implementer: Core Logic** | Chris, Ayush | Developed the `DataLoader` class, CSV parsing algorithm, and `Main` CLI menu. |
 | **Tester: JUnit Tests** | Chris | Designed the JUnit 5 test suite, including edge-case testing for File I/O and malformed data. |
-| **Analyst: Benchmark + Analysis** | Ayush | Implemented the `OperationCounter` and conducted performance analysis on data loading efficiency. |
+| **Analyst: Benchmark + Analysis** | Ayush | Implemented the `OperationCounter`, `BenchmarkRunner`, and conducted performance analysis on data loading efficiency. |
 
 ---
 
 ## Analysis Section
 1. Why do we repeat benchmarks instead of timing once?
    - We repeat benchmarks instead of just timing once to get more reliable data. Simply running a test once is not enough because we do not know how consistent the data is. Running tests multiple times allows us to compare test trials and to see if the data is consistent and measure the standard deviation. If it is not consistent, then we know there is something wrong with the code. Additionally, there may be outliers in the data, but without multiple trials, there is no way to identify the outliers. 
-3. What factors can make timing unreliable?
+2. What factors can make timing unreliable?
    - Measuring algorithm run time in seconds or milliseconds can become unreliable because it can differ significantly between machines and programming languages.   
-5. Why might operation counting be more informative than raw time?
+3. Why might operation counting be more informative than raw time?
    - Operation counting might be more informative than raw run-time data to measure algorithm time complexity because run-time data is more dependent on the machine and programming language, whereas operation counting is less tightly coupled to the operating system and the programming language. 
-7. What challenges did you encounter in building the harness?
+4. What challenges did you encounter in building the harness?
 
   We encountered numerous challenges with the assignment. Ayush faced challenges integrating his local workspace with GitHub. Chris grappled with design decision tradeoffs when architecting the project structure. 
   
-  Ayush initially struggled when collaborating on the project using GitHub. The main challenge was getting back into the flow after having winter break and familiarizing himself with continuous integration/ continuous deployment (CI/CD) pipelines. Additionally, Ayush kept forgetting his GitHub password, which made authenticating himself challenging. Fortunately, Chris and Ayush were able to resolve the merge conflicts on GitHub and most of the other difficulties using Discord on a live conference call. 
+> **Integration & Git:** Ayush initially struggled when collaborating on the project using GitHub. The main challenge was getting back into the flow after having winter break and familiarizing himself with continuous integration/ continuous deployment (CI/CD) pipelines. Additionally, Ayush kept forgetting his GitHub password, which made authenticating himself challenging. Fortunately, Chris and Ayush were able to resolve the merge conflicts on GitHub and most of the other difficulties using Discord on a live conference call. 
   
-  Chris quickly iterated the implementation of the `DataLoader` class, but realized there was an opportunity to make the code more modular by abstracting how individual methods loaded data from a comma-separated value (csv) file into a generic `loadData` helper method. This improved code maintainability and made the code “DRY” (Don’t Repeat Yourself). Chris often struggles with spending too much time thinking of the perfect code instead of quickly iterating and optimizing later. Fortunately Chris was able to pull himself out when he saw himself getting in the weeds. 
+> **Architectural Tradeoffs:** Chris quickly iterated the implementation of the `DataLoader` class, but realized there was an opportunity to make the code more modular by abstracting how individual methods loaded data from a comma-separated value (csv) file into a generic `loadData` helper method. This improved code maintainability and made the code “DRY” (Don’t Repeat Yourself). Chris often struggles with spending too much time thinking of the perfect code instead of quickly iterating and optimizing later. Fortunately Chris was able to pull himself out when he saw himself getting in the weeds. 
   
-  When designing the command line interface (CLI) menu, which drives the main interaction between the user and the application, Chris realized there was a potential rich user experience (UX) opportunity. Chris envisioned a nested HashMap or Tree data structure with a main menu containing options and submenus with options. Then a stack could be used to navigate between menu histories to navigate forward and backward throughout the menu. However, the time constraints of the assignment only allowed for Chris to craft a rough sketch of what this might look like, and its actual implementation was pushed aside in favor of meeting the sprint’s requirements. In future releases of the application, this feature may become available.  
+> **UX & UI Design:** When designing the command line interface (CLI) menu, which drives the main interaction between the user and the application, Chris realized there was a potential rich user experience (UX) opportunity. Chris envisioned a nested HashMap or Tree data structure with a main menu containing options and submenus with options. Then a stack could be used to navigate between menu histories to navigate forward and backward throughout the menu. However, the time constraints of the assignment only allowed for Chris to craft a rough sketch of what this might look like, and its actual implementation was pushed aside in favor of meeting the sprint’s requirements. In future releases of the application, this feature may become available.  
 
 
 ---
