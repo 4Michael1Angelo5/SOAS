@@ -9,6 +9,8 @@ import java.util.logging.Logger;
  */
 public class DataLoader implements Loader {
 
+    OperationCounter myCounter = new OperationCounter();
+
     public DataLoader(){
         super();
     }
@@ -77,20 +79,25 @@ public class DataLoader implements Loader {
             if (dataClass == Player.class) {
 
                 result = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
+                myCounter.increment("assignments",4);
             }else
             if(dataClass == Drill.class) {
 
                 result = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
+                myCounter.increment("assignments",3);
 
             }else
             if (dataClass == Transaction.class) {
 
                 result = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+                myCounter.increment("assignments",4);
 
             }else {
 
                 throw new IllegalArgumentException(dataClass.getName() + " is not a supported data type");
             }
+
+            myCounter.increment("lines read");
 
         }catch(IndexOutOfBoundsException e) {
 
@@ -149,5 +156,6 @@ public class DataLoader implements Loader {
         loader.printData(loader.playerData);
         loader.printData(loader.drillData);
         loader.printData(loader.transactionData);
+
     }
 }

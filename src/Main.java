@@ -3,14 +3,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
+/**
+ * The entry point of the application. Presents a simple CLI menu
+ * to interact with different statistics from the Seattle Seahawks.
+ * @author Chris Chun
+ * @author Ayush
+ * @version 1.1
+ */
 public class Main {
     private static final BufferedReader reader =
             new BufferedReader( new InputStreamReader(System.in));
 
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    static  void main() throws IOException {
+    public static void main(String[] args) throws IOException {
         DataLoader loader = new DataLoader();
+        BenchmarkRunner benchmark = new BenchmarkRunner();
         boolean running = true;
         while (running) {
             printMenu();
@@ -37,7 +45,24 @@ public class Main {
                     loader.printData(loader.drillData);
                     loader.printData(loader.transactionData);
                 }
-                case "5" -> running = false;
+                case "5" -> {
+                    // Benchmark - file paths come from Main, not hardcoded in BenchmarkRunner
+                    benchmark.runSpeedTest(10, () -> {
+                        try {
+                            loader.loadPlayers("data/seahawks_players.csv");
+                            loader.loadDrills("data/seahawks_drills.csv");
+                            loader.loadTransactions("data/seahawks_transactions.csv");
+                        } catch (IOException e) {
+                            logger.severe("Error: " + e.getMessage());
+                        }
+                    }, "Loading All Data");
+                }
+                case "6" -> {
+                    // Show operation counter report
+                    loader.myCounter.printReport();
+                }
+
+                case "7" -> running = false;
                 default -> {
                     logger.info("""
                             Unsupported Option
@@ -57,7 +82,9 @@ public class Main {
                 2) load drills
                 3) load transactions
                 4) load all
-                5) exit
+                5) run benchmark
+                6) operation counts
+                7) exit
                 """);
     }
 
