@@ -2,6 +2,7 @@
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +17,7 @@ public class LoaderTest {
     static {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
     }
+
 
     @Test
     public void testDataLoading() throws IOException {
@@ -50,7 +52,6 @@ public class LoaderTest {
                 }
         );
     }
-
 }
 
 
