@@ -143,8 +143,6 @@ public class DataLoader implements Loader {
             throw new FileNotFoundException("");
         }
 
-        myCounter.printReport();
-
         return dataArray;
     }
 
