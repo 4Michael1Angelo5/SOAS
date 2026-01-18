@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -11,14 +13,31 @@ import java.util.logging.Logger;
  * @version 1.1
  */
 public class Main {
+
+
+    static {
+        // attempt to use logging properties file
+        try (var is = Main.class.getClassLoader().getResourceAsStream("logging.properties")) {
+            if (is != null) {
+                java.util.logging.LogManager.getLogManager().readConfiguration(is);
+            } else {
+                // Fallback: Manually set the format if file isn't found
+                System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
+            }
+        } catch (Exception e) {
+            System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
+        }
+    }
     private static final BufferedReader reader =
             new BufferedReader( new InputStreamReader(System.in));
 
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) throws IOException {
+
         DataLoader loader = new DataLoader();
         BenchmarkRunner benchmark = new BenchmarkRunner();
+
         boolean running = true;
         while (running) {
             printMenu();
@@ -59,6 +78,7 @@ public class Main {
                 }
                 case "6" -> {
                     // Show operation counter report
+                    // @TODO create option to run task and have the report generated at the same time.
                     loader.myCounter.printReport();
                 }
 
@@ -87,5 +107,4 @@ public class Main {
                 7) exit
                 """);
     }
-
 }

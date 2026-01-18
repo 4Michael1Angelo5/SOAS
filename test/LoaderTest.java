@@ -12,8 +12,14 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class LoaderTest {
 
+    // remove the time stamp from the logger
+    static {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
+    }
+
     @Test
     public void testDataLoading() throws IOException {
+
         DataLoader loader = new DataLoader();
 
         loader.loadPlayers("data/seahawks_players.csv");
@@ -22,13 +28,14 @@ public class LoaderTest {
 
         assertAll("Loading Test",
                 () -> {
-                    assertNotNull(loader.playerData,"the player data should not be null");
+                    assertNotNull(loader.playerData, "the player data should not be null");
                     assertNotNull(loader.drillData, "the drill data should not be null");
                     assertNotNull(loader.transactionData, "the transaction data should not be null");
                     assertFalse(loader.playerData.isEmpty(), "the player data should not be empty");
                     assertFalse(loader.drillData.isEmpty(), "the drill data should not be empty");
                     assertFalse(loader.transactionData.isEmpty(), "the transaction data should not be empty");
                 }
+
         );
 
     }
