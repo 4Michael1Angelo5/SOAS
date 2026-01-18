@@ -8,8 +8,14 @@ import java.util.logging.Logger;
  * @version 1.1
  */
 public class DataLoader implements Loader {
-
+    /**
+     * keep tally of all named operations
+     */
     OperationCounter myCounter = new OperationCounter();
+
+
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public DataLoader(){
         super();
@@ -57,7 +63,7 @@ public class DataLoader implements Loader {
      */
     public <T> void printData(List<T> theData){
         for(T data : theData) {
-            logger.info(data.toString());
+            logger.info(ANSI_GREEN + data.toString() + ANSI_RESET);
         }
     }
 
