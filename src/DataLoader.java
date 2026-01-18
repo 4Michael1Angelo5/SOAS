@@ -128,8 +128,22 @@ public class DataLoader implements Loader {
         List<T> dataArray = new ArrayList<>();
         try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
 
-            // skip first line
-            br.readLine();
+            // see if csv is empty
+            String headerColumns = br.readLine();
+            if (headerColumns == null) {
+                throw new IllegalArgumentException("the CSV is empty");
+            };
+
+            // mark current position (second row)
+            br.mark(1024);
+            String secondLine = br.readLine();
+            // rewind back to second row where data should be
+            br.reset();
+
+            // check if second row is empty
+            if (secondLine == null || secondLine.isBlank()) {
+                throw new IllegalArgumentException("CSV has no data rows");
+            }
 
             String nextLine;
             while ( (nextLine = br.readLine()) != null) {
@@ -158,6 +172,9 @@ public class DataLoader implements Loader {
         loader.loadPlayers("data/seahawks_players.csv");
         loader.loadDrills("data/seahawks_drills.csv");
         loader.loadTransactions("data/seahawks_transactions.csv");
+
+        // test empty csv error handling
+        loader.loadTransactions("test/empty.csv");
 
         loader.printData(loader.playerData);
         loader.printData(loader.drillData);
