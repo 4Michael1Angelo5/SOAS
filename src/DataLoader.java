@@ -84,7 +84,7 @@ public class DataLoader implements Loader {
         try {
             if (dataClass == Player.class) {
 
-                result = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
+                result = new Player(Integer.parseInt(row[0]),row[1],row[2],Integer.parseInt(row[3]), Integer.parseInt(row[4]));
                 myCounter.increment("assignments",4);
             }else
             if(dataClass == Drill.class) {
