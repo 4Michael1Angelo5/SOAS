@@ -1,3 +1,5 @@
+package types;
+
 /**
  * A record class for storing Seahawk player data
  * @param player_id
@@ -10,7 +12,12 @@ public record Player (int player_id,
                      String name,
                      String position,
                      int jersey,
-                     int yards) implements DataType{
+                     int yards) implements DataType {
+
+    @Override
+    public int id() {
+        return player_id;
+    }
 
     /**
      * Custom toString method
