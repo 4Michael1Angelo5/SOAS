@@ -6,6 +6,13 @@ import types.Player;
 import util.ArrayStore;
 
 /**
+ * Responsible for
+ * Storing players using an array
+ * Adding players
+ * Removing players
+ * Updating stats
+ * Searching
+ * Printing
  * @author Chris Chun, Ayush
  * @version 1.1
  */
@@ -79,10 +86,17 @@ final public class RosterManager extends DataManager<Player> {
         return index;
     }
 
+    /**
+     * Prints the roster
+     */
     public void printRoster() {
         this.printData(this.getPlayerData());
     }
 
+    /**
+     * getter
+     * @return an ArrayStore of the player roster.
+     */
     public ArrayStore<Player> getPlayerData() {
         return this.getData();
     }

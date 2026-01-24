@@ -1,11 +1,13 @@
 import benchmark.BenchmarkRunner;
 import manager.RosterManager;
 import types.Player;
+import results.Results;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
+
 
 /**
  * The entry point of the application. Presents a simple CLI menu
@@ -47,6 +49,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         BenchmarkRunner benchmark = new BenchmarkRunner();
+        Results tests = new Results();
         RosterManager rosterManager = new RosterManager();
 
         boolean running = true;
@@ -99,8 +102,8 @@ public class Main {
                     rosterManager.printRoster();
                 }
                 case "7" -> {
-                    //@TODO need to run bench mark tests.
-                    running = false;
+                    tests.runSpeedTestWith5000Removes();
+
                 }
                 case "0" -> running = false;
                 default -> {
