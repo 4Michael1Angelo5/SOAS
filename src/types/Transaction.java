@@ -1,3 +1,5 @@
+package types;
+
 /**
  * A simple Record class for storing transaction Data
  * @param trans_id
@@ -9,7 +11,7 @@ public record Transaction(
         int trans_id,
         String type,
         String player,
-        String timestamp) implements DataType{
+        String timestamp) implements DataType {
 
     @Override
     public int id() {

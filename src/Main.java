@@ -1,3 +1,7 @@
+import benchmark.BenchmarkRunner;
+import manager.RosterManager;
+import types.Player;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,7 +12,7 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.1
+ * @version 1.2
  */
 public class Main {
 
@@ -52,7 +56,7 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    rosterManager.addCsvData("data/seahawks_players.csv");
+                    rosterManager.loadPlayerData("data/seahawks_players.csv");
                 }
                 case "2" -> {
                     Player newPlayer = new Player(101,

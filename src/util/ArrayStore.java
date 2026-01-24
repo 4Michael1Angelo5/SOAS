@@ -1,3 +1,5 @@
+package util;
+
 public class ArrayStore<T>{
 
     private T[] myData;

@@ -1,4 +1,6 @@
+import manager.RosterManager;
 import org.junit.jupiter.api.Test;
+import types.Player;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +19,7 @@ public class RosterManagerTest {
         assertAll("Test Roster Manager Constructor",
                 () -> assertEquals(0,rosterManager.getPlayerData().size(),
                         "The roster should have no players in it"),
-                () -> assertNotNull(rosterManager.getData(), "The roster should be empty, but not null")
+                () -> assertNotNull(rosterManager.getPlayerData(), "The roster should be empty, but not null")
 
         );
     }

@@ -1,3 +1,5 @@
+package types;
+
 /**
  * A simple Record class for storing Drills Data
  * @param drill_id the drill id

@@ -1,5 +1,11 @@
+package manager;
+
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import loader.DataLoader;
+import types.DataType;
+import util.ArrayStore;
 
 /**
  *
@@ -18,7 +24,7 @@ public abstract class DataManager <T extends DataType> {
 
     private static final Logger logger = Logger.getLogger(DataManager.class.getName());
 
-    public final DataLoader myDataLoader = new DataLoader();
+    private final DataLoader myDataLoader = new DataLoader();
 
     /**
      * An array based data structure holding data:
@@ -77,7 +83,7 @@ public abstract class DataManager <T extends DataType> {
      *              you wish to delete.
      * @return the removed data.
      */
-    protected T removeById(int theId) {
+    public T removeById(int theId) {
 
         // find the index;
         int index = findById(theId);

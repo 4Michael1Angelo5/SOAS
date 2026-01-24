@@ -1,4 +1,9 @@
+package manager;
+
 import java.io.IOException;
+
+import types.Player;
+import util.ArrayStore;
 
 /**
  * @author Chris Chun, Ayush
@@ -19,7 +24,7 @@ final public class RosterManager extends DataManager<Player> {
     }
 
     public void loadPlayerData(String theFilePath) throws IOException {
-        getPlayerData().append(myDataLoader.loadPlayers(theFilePath));
+        this.addCsvData(theFilePath);
     }
 
     /**
