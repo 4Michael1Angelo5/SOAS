@@ -77,7 +77,7 @@ public class Main {
                 case "6" -> {
                     // Show operation counter report
                     // @TODO create option to run task and have the report generated at the same time.
-                    loader.myCounter.printReport();
+//                    loader.myCounter.printReport();
                 }
 
                 case "7" -> running = false;

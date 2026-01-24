@@ -12,6 +12,11 @@ public record Player (int player_id,
                      int jersey,
                      int yards) implements DataType{
 
+    @Override
+    public int id() {
+        return player_id;
+    }
+
     /**
      * Custom toString method
      * @return formatted string representation of Player
