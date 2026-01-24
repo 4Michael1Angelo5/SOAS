@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 /**
  * @author Chris Chun, Ayush
  * @version 1.1
@@ -14,6 +16,10 @@ final public class RosterManager extends DataManager<Player> {
      */
     public void addPlayer(Player thePlayer) {
         this.addData(thePlayer);
+    }
+
+    public void loadPlayerData(String theFilePath) throws IOException {
+        getPlayerData().append(myDataLoader.loadPlayers(theFilePath));
     }
 
     /**
@@ -66,6 +72,10 @@ final public class RosterManager extends DataManager<Player> {
             }
         }
         return index;
+    }
+
+    public void printRoster() {
+        this.printData(this.getPlayerData());
     }
 
     public ArrayStore<Player> getPlayerData() {

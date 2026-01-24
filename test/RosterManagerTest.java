@@ -15,7 +15,7 @@ public class RosterManagerTest {
     public void testRosterManagerConstructor(){
         RosterManager rosterManager = new RosterManager();
         assertAll("Test Roster Manager Constructor",
-                () -> assertEquals(0,rosterManager.size(),
+                () -> assertEquals(0,rosterManager.getPlayerData().size(),
                         "The roster should have no players in it"),
                 () -> assertNotNull(rosterManager.getData(), "The roster should be empty, but not null")
 
@@ -25,7 +25,7 @@ public class RosterManagerTest {
     @Test
     public void testAddPlayer() {
         RosterManager rosterManager = new RosterManager();
-        final int playerId = 198;
+        final int playerId = 123;
         final String playerName = "Jerry Rice";
         final String position = "WR";
         final int jersey = 88;
@@ -36,7 +36,7 @@ public class RosterManagerTest {
             rosterManager.addPlayer(thePlayer);
         }
         assertAll("Test addPlayer",
-                () -> assertEquals(THE_NUM_ADDS, rosterManager.size(),
+                () -> assertEquals(THE_NUM_ADDS, rosterManager.getPlayerData().size(),
                         "RosterManager should add the player the specified number times"),
                 () -> {
                     for (int i = 0; i < THE_NUM_ADDS; i++) {
@@ -59,13 +59,14 @@ public class RosterManagerTest {
 
     @Test void testRemovePlayer() {
         RosterManager rosterManager = new RosterManager();
-        final int playerId = 198;
+        final int playerId = 111;
         final String playerName = "Jerry Rice";
         final String position = "WR";
         final int jersey = 88;
         final int yards = 1000;
 
         Player thePlayer = new Player(playerId, playerName, position, jersey, yards);
+
         for (int i = 0; i < THE_NUM_ADDS; i++) {
             rosterManager.addPlayer(thePlayer);
         }
@@ -73,7 +74,7 @@ public class RosterManagerTest {
             Player theRemovedPlayer = rosterManager.removeById(playerId);
             final int index = i;
             assertAll("Test removeByID" ,
-                    () -> assertEquals(THE_NUM_ADDS - (index + 1), rosterManager.size()),
+                    () -> assertEquals(THE_NUM_ADDS - (index + 1), rosterManager.getPlayerData().size()),
                     () -> assertEquals(playerId, theRemovedPlayer.id()),
                     () -> assertEquals(playerName, theRemovedPlayer.name()),
                     () -> assertEquals(position, theRemovedPlayer.position()),

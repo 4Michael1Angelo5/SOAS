@@ -26,15 +26,24 @@ public class Main {
             System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s%n");
         }
     }
+
+
+    /**
+     * Reader to read user inputs from the command line.
+     */
     private static final BufferedReader reader =
             new BufferedReader( new InputStreamReader(System.in));
 
+
+    /**
+     * Logger for all your logging needs
+     */
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) throws IOException {
 
-        DataLoader loader = new DataLoader();
         BenchmarkRunner benchmark = new BenchmarkRunner();
+        RosterManager rosterManager = new RosterManager();
 
         boolean running = true;
         while (running) {
@@ -43,44 +52,53 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    loader.loadPlayers("data/seahawks_players.csv");
-                    loader.printData(loader.playerData);
+                    rosterManager.addCsvData("data/seahawks_players.csv");
                 }
                 case "2" -> {
-                    loader.loadDrills("data/seahawks_drills.csv");
-                    loader.printData(loader.drillData);
+                    Player newPlayer = new Player(101,
+                            "Ayush",
+                            "qb",
+                            91,
+                            199);
+                    rosterManager.addPlayer(newPlayer);
                 }
                 case "3" -> {
-                    loader.loadTransactions("data/seahawks_transactions.csv");
-                    loader.printData(loader.transactionData);
+                    try {
+                        Player p = rosterManager.removeById(10);
+                        logger.info("Removed: " + p.toString() + "From the roster.");
+                    } catch (RuntimeException e) {
+                        logger.warning("could not remove the player with id: " + 10 + ",id not found");
+                    }
                 }
                 case "4" -> {
-                    loader.loadPlayers("data/seahawks_players.csv");
-                    loader.loadDrills("data/seahawks_drills.csv");
-                    loader.loadTransactions("data/seahawks_transactions.csv");
-                    loader.printData(loader.playerData);
-                    loader.printData(loader.drillData);
-                    loader.printData(loader.transactionData);
+                    try {
+
+                        rosterManager.updateStats(101, 109);
+                        logger.info("Succesfully updated player stats");
+
+                    }catch(RuntimeException e) {
+                        logger.warning(
+                                "could not update player with id, "
+                                + 101
+                                + ", because the player is not in the roster");
+                    }
                 }
                 case "5" -> {
-                    // Benchmark - file paths come from Main, not hardcoded in BenchmarkRunner
-                    benchmark.runSpeedTest(10, () -> {
-                        try {
-                            loader.loadPlayers("data/seahawks_players.csv");
-                            loader.loadDrills("data/seahawks_drills.csv");
-                            loader.loadTransactions("data/seahawks_transactions.csv");
-                        } catch (IOException e) {
-                            logger.severe("Error: " + e.getMessage());
-                        }
-                    }, "Loading All Data");
+                    int index = rosterManager.findByName("Ayush");
+                    if (index == -1) {
+                        logger.warning("could not find Ayush in roster");
+                    } else {
+                        logger.info("found Ayush in the roster");
+                    }
                 }
                 case "6" -> {
-                    // Show operation counter report
-                    // @TODO create option to run task and have the report generated at the same time.
-//                    loader.myCounter.printReport();
+                    rosterManager.printRoster();
                 }
-
-                case "7" -> running = false;
+                case "7" -> {
+                    //@TODO need to run bench mark tests.
+                    running = false;
+                }
+                case "0" -> running = false;
                 default -> {
                     logger.info("""
                             Unsupported Option
@@ -96,13 +114,14 @@ public class Main {
         logger.info("""
                 Seahawks Data Options
                 =====================
-                1) load players
-                2) load drills
-                3) load transactions
-                4) load all
-                5) run benchmark
-                6) operation counts
-                7) exit
+                1. Load roster
+                2. Add player
+                3. Remove player
+                4. Update stats
+                5. Search
+                6. Print roster
+                7. Run benchmark
+                0. Exit
                 """);
     }
 }

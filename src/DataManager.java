@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Chris Chun, Ayush
@@ -10,20 +13,28 @@
  */
 public abstract class DataManager <T extends DataType> {
 
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
+    private static final Logger logger = Logger.getLogger(DataManager.class.getName());
+
+    public final DataLoader myDataLoader = new DataLoader();
+
     /**
      * An array based data structure holding data:
      * ie Players, Transactions, or Drills
      */
     private final ArrayStore<T> myData;
 
-    /**
-     * The type of data the DataManager is managing.
-     */
-    final private Class<T> dataClass;
+    private final Class<T> myDataClass;
 
     public DataManager(Class<T> theDataClass){
-        dataClass = theDataClass;
         myData = new ArrayStore<>(theDataClass,16);
+        myDataClass = theDataClass;
+    }
+
+    public void addCsvData(String theFilePath) throws IOException {
+        myData.append(myDataLoader.loadData(myDataClass,theFilePath));
     }
 
     /**
@@ -32,14 +43,6 @@ public abstract class DataManager <T extends DataType> {
      */
     public void addData(T theData) {
         myData.add(theData);
-    }
-
-    /**
-     *
-     * @return the number of data items in the array.
-     */
-    public int size() {
-        return myData.size();
     }
 
     /**
@@ -92,4 +95,17 @@ public abstract class DataManager <T extends DataType> {
 
         return theRemovedData;
     }
+
+    /**
+     * Prints data parsed from a csv file.
+     * @param theData An ArrayStore of DataType objects,
+     *                either Players, Transactions, or Drills
+     */
+    public void printData(ArrayStore<T> theData){
+
+        for (int i = 0; i < theData.size(); i++) {
+            logger.info(ANSI_GREEN + theData.get(i).toString() + ANSI_RESET);
+        }
+    }
+
 }

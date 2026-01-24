@@ -41,12 +41,12 @@ public class ArrayStore<T>{
         return theItemRemoved;
     }
 
-    public int size() {
-        return size;
-    }
-
     public void setData(int theIndex, T theData) {
         myData[theIndex] = theData;
+    }
+
+    public int size() {
+        return size;
     }
 
 
@@ -55,6 +55,18 @@ public class ArrayStore<T>{
         T[] newArray = (T[]) java.lang.reflect.Array.newInstance(dataClass, myData.length*2);
         System.arraycopy(myData, 0, newArray, 0, size);
         myData = newArray;
+    }
+
+    public void append(ArrayStore<T> theArray) {
+        while (myData.length - size < theArray.size) {
+            resize();
+        }
+        int index = 0;
+        int newSize = size + theArray.size;
+        for (int i = size; i < newSize; i++) {
+            setData(i, theArray.get(index++));
+        }
+        size = newSize;
     }
 
 }

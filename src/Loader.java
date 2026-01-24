@@ -6,7 +6,7 @@ import java.io.IOException;
  * src.Loader Interface
  */
 public interface Loader {
-    void loadPlayers(String theFilePath) throws IOException, IllegalArgumentException;
-    void loadTransactions(String theFilePath) throws IOException, IllegalArgumentException;
-    void loadDrills(String theFilePath)throws IOException, IllegalArgumentException;
+    ArrayStore<Player> loadPlayers(String theFilePath) throws IOException, IllegalArgumentException;
+    ArrayStore<Transaction> loadTransactions(String theFilePath) throws IOException, IllegalArgumentException;
+    ArrayStore<Drill> loadDrills(String theFilePath)throws IOException, IllegalArgumentException;
 }

@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -18,38 +17,22 @@ public class DataLoader implements Loader {
 
     private static final Logger logger = Logger.getLogger(DataLoader.class.getName());
 
-    /**
-     * A list of Player Data
-     */
-    List<Player> playerData;
-
-
-    /**
-     * A list of Transaction Data
-     */
-    List<Transaction> transactionData;
-
-    /**
-     * A list of drill data
-     */
-    List<Drill> drillData;
-
     @Override
-    public void loadPlayers(String theFilePath)
+    public ArrayStore<Player> loadPlayers(String theFilePath)
             throws IOException, IllegalArgumentException{
-        this.playerData = loadData(Player.class,theFilePath);
+        return loadData(Player.class,theFilePath);
     }
 
     @Override
-    public void loadDrills(String theFilePath)
+    public ArrayStore<Drill> loadDrills(String theFilePath)
             throws IOException, IllegalArgumentException {
-        this.drillData = loadData(Drill.class, theFilePath);
+        return loadData(Drill.class, theFilePath);
     }
 
     @Override
-    public void loadTransactions(String theFilePath)
+    public ArrayStore<Transaction> loadTransactions(String theFilePath)
             throws IOException, IllegalArgumentException {
-        this.transactionData = loadData(Transaction.class, theFilePath);
+        return loadData(Transaction.class, theFilePath);
     }
 
     /**
@@ -112,11 +95,11 @@ public class DataLoader implements Loader {
      * @param <T> the data type to load: Can either be Player, Drill, Transaction.
      * @return an array list of data objects.
      */
-    private <T extends DataType>
-    List<T> loadData(Class<T> theDataType,String theFilePath)
+    public <T extends DataType>
+    ArrayStore<T> loadData(Class<T> theDataType,String theFilePath)
             throws IllegalArgumentException, IOException{
 
-        List<T> dataArray = new ArrayList<>();
+        ArrayStore<T> dataArray = new ArrayStore<>(theDataType, 16);
 
         try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
 
