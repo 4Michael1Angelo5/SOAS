@@ -7,9 +7,15 @@ import util.ArrayStore;
 
 import java.io.IOException;
 
+/**
+ * @author Chris Chun, Ayush
+ * @version 1.1
+ */
 public class Results {
 
     public static int initCapacity = 16;
+    public static int runs = 25;
+    public static int removeRuns = 1;  // Remove can only run once
 
     final static String roster50 = "data/seahawks_roster_50.csv";
     final static String roster500 = "data/seahawks_roster_500.csv";
@@ -19,6 +25,8 @@ public class Results {
     RosterManager rosterManager = new RosterManager();
 
     ArrayStore<Player> roster = new ArrayStore<>(Player.class,16);
+    ArrayStore<Player> tempForRemove;  // Class-level variable
+
     public Results(){
         super();
     }
@@ -35,13 +43,21 @@ public class Results {
         }
     }
 
-    public void removeFromFrontNTimes() {
-        ArrayStore<Player> temp = roster;
-        while (temp.size() > 0) {
-            temp.removeAtIndex(0);
+
+    // Setup method - NOT timed
+    public void setupRemoveTest() {
+        tempForRemove = new ArrayStore<>(Player.class, initCapacity);
+        for (int i = 0; i < roster.size(); i++) {
+            tempForRemove.add(roster.get(i));
         }
     }
 
+    // Only the remove operation - this is timed
+    public void removeFromFrontNTimes() {
+        while (tempForRemove.size() > 0) {
+            tempForRemove.removeAtIndex(0);
+        }
+    }
 
     public void searchNTimes() {
         for (int i = 0; i < roster.size(); i++) {
