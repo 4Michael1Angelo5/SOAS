@@ -30,7 +30,7 @@ public abstract class DataManager <T extends DataType> {
      * An array based data structure holding data:
      * ie Players, Transactions, or Drills
      */
-    private final ArrayStore<T> myData;
+    private ArrayStore<T> myData;
 
     private final Class<T> myDataClass;
 
@@ -39,8 +39,13 @@ public abstract class DataManager <T extends DataType> {
         myDataClass = theDataClass;
     }
 
+    /**
+     * Resets data to the loaded csv.
+     * @param theFilePath the file path to the data you want to load.
+     * @throws IOException if file not found.
+     */
     public void addCsvData(String theFilePath) throws IOException {
-        myData.append(myDataLoader.loadData(myDataClass,theFilePath));
+        myData = myDataLoader.loadData(myDataClass, theFilePath);
     }
 
     /**

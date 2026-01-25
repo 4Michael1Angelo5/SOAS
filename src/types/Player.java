@@ -43,9 +43,6 @@ public record Player (int player_id,
         if (obj == null || getClass() != obj.getClass()) return false;
         Player player = (Player) obj;
         return player_id == player.player_id &&
-                jersey == player.jersey &&
-                yards == player.yards &&
-                name.equals(player.name) &&
-                position.equals(player.position);
+                name.equals(player.name);
     }
 }

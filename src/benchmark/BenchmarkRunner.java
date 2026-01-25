@@ -7,8 +7,8 @@ package benchmark;
  */
 public class BenchmarkRunner implements Benchmark {
 
-    StringBuilder  builder = new StringBuilder();
     public BenchmarkRunner() {
+        super();
     }
 
     /**
@@ -18,9 +18,7 @@ public class BenchmarkRunner implements Benchmark {
      */
     @Override
     public void runSpeedTest(int theTimesToRun, Runnable theTask) {
-        builder.append("\"\\n=== Running Speed Test ===\"");
-        builder.append("Number of runs: ");
-        builder.append(theTimesToRun);
+
         System.out.println("\n=== Running Speed Test ===");
         System.out.println("Number of runs: " + theTimesToRun);
 
@@ -34,10 +32,6 @@ public class BenchmarkRunner implements Benchmark {
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         double avgTime = (double) totalTime / theTimesToRun;
-
-        builder.append("Total time: " + totalTime + " ms");
-        builder.append("Average time per run: " + avgTime + " ms");
-        builder.append("==========================\n");
 
 
         System.out.println("Total time: " + totalTime + " ms");
@@ -80,9 +74,5 @@ public class BenchmarkRunner implements Benchmark {
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         return (double) totalTime / theTimesToRun;
-    }
-
-    public String printResults() {
-        return builder.toString();
     }
 }
