@@ -31,6 +31,7 @@ public class Results {
         rosterManager.loadPlayerData("data/seahawks_roster_5000.csv");
         roster = rosterManager.getPlayerData();
     }
+
     public void addNTimes() {
         ArrayStore<Player> temp = new ArrayStore<>(Player.class, initCapacity);
         for (int i = 0; i < roster.size(); i++ ) {
@@ -38,34 +39,71 @@ public class Results {
         }
     }
 
-    public void removeFromFrontNTimes(){
-        while (roster.size() > 0) {
-            roster.removeAtIndex(0);
+    public void removeFromFrontNTimes() {
+        ArrayStore<Player> temp = new ArrayStore<>(Player.class, roster.size());
+        for (int i = 0; i < roster.size(); i++) {
+            temp.add(roster.get(i));
+        }
+        while (temp.size() > 0) {
+            temp.removeAtIndex(0);
         }
     }
 
-    public void runSpeedTestWith50Adds() throws IOException{
+    public void searchNTimes() {
+        for (int i = 0; i < roster.size(); i++) {
+            roster.get(i);
+        }
+    }
+
+    public void runAllExperiments() throws IOException {
+        System.out.println("\n========== Benchmark Results ==========\n");
+        System.out.printf("%-10s %-15s %-15s%n", "Size", "Operation", "Avg Time (ms)");
+        System.out.println("----------------------------------------");
+
+        // Test with 50 players
         load50Players();
-        benchmarkRunner.runSpeedTest(1, this::addNTimes);
-    }
+        double add50 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::addNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "50", "Add", add50);
 
-    public void runSpeedTestWith500Adds() throws IOException{
+        load50Players();
+        double remove50 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "50", "Remove", remove50);
+
+        load50Players();
+        double search50 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::searchNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "50", "Search", search50);
+
+        // Test with 500 players
         load500Players();
-        benchmarkRunner.runSpeedTest(1, this::addNTimes);
-    }
+        double add500 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::addNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "500", "Add", add500);
 
-    public void runSpeedTestWith5000Adds() throws IOException{
+        load500Players();
+        double remove500 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "500", "Remove", remove500);
+
+        load500Players();
+        double search500 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::searchNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "500", "Search", search500);
+
+        // Test with 5000 players
         load5000Players();
-        benchmarkRunner.runSpeedTest(1, this::addNTimes);
-    }
+        double add5000 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::addNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "5000", "Add", add5000);
 
-    public void runSpeedTestWith5000Removes() throws IOException{
         load5000Players();
-        benchmarkRunner.runSpeedTest(1, this::removeFromFrontNTimes);
+        double remove5000 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "5000", "Remove", remove5000);
+
+        load5000Players();
+        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(1, this::searchNTimes);
+        System.out.printf("%-10s %-15s %-15.1f%n", "5000", "Search", search5000);
+
+        System.out.println("========================================\n");
     }
 
-
-
-
-
+    public static void main(String[] args) throws IOException {
+        Results results = new Results();
+        results.runAllExperiments();
+    }
 }
