@@ -1,10 +1,15 @@
 package benchmark;
 
+
 /**
  * @author Chris Chun, Ayush
  * @version 1.1
  */
 public class BenchmarkRunner implements Benchmark {
+
+    StringBuilder  builder = new StringBuilder();
+    public BenchmarkRunner() {
+    }
 
     /**
      * Runs a speed test on a given task multiple times and reports the results
