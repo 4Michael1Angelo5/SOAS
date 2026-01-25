@@ -102,7 +102,7 @@ public class Main {
                     rosterManager.printRoster();
                 }
                 case "7" -> {
-                    tests.runSpeedTestWith5000Removes();
+                    tests.runAllExperiments();
 
                 }
                 case "0" -> running = false;
