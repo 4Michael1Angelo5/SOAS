@@ -26,16 +26,20 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 ---
 
 ## Analysis Section
-1. Why do we repeat benchmarks instead of timing once?
-   - We repeat benchmarks instead of just timing once to get more reliable data. Simply running a test once is not enough because we do not know how consistent the data is. Running tests multiple times allows us to compare test trials and to see if the data is consistent and measure the standard deviation. If it is not consistent, then we know there is something wrong with the code. Additionally, there may be outliers in the data, but without multiple trials, there is no way to identify the outliers. 
-2. What factors can make timing unreliable?
-   - Measuring algorithm run time in seconds or milliseconds can become unreliable because it can differ significantly between machines and programming languages.   
-3. Why might operation counting be more informative than raw time?
-   - Operation counting might be more informative than raw run-time data to measure algorithm time complexity because run-time data is more dependent on the machine and programming language, whereas operation counting is less tightly coupled to the operating system and the programming language. 
-4. What challenges did you encounter in building the harness?
+1. Why does removal become slower as the roster grows?
+   - Removal in an array-based data structure becomes slower as the roster grows because the number of reassignments and shifts grows linearly with the number of players in the roster.
+2. What causes shifting?
+   - Shifting is caused in array-based data when elements are removed from an index other than the end of the list. After the element at index i in the array is removed. All elements to the right of i must shift back one index position to fill the “hole” created by the removal.
+3. Why is searching $O(n)$? 
+   - Searching is O(n) because, in the worst case, the element we are searching for is not in the list, and we must exhaustively search each element before we can conclude it is not in the list.
 
-  We encountered numerous challenges with the assignment. Ayush faced challenges integrating his local workspace with GitHub. Chris grappled with design decision tradeoffs when architecting the project structure. 
-  
+4. Would this structure scale to 100,000 players?
+   - No. While $O(n)$ is acceptable for 5,000 players, the shifting cost for removals and the comparison cost for searches would cause significant latency at 100,000 players. At that scale, an array-based structure is inefficient compared to a `HashMap` (for $O(1)$ search) or a `TreeMap` (for $O(\log n)$ operations).
+5. When is an array-based structure a good choice?
+   - An array-based data structure is a great choice when you do not know the exact length or size of the data you need to add. It is possible to achieve amortized constant time complexity for adding elements to the list if we dynamically resize by doubling the capacity as we get full. It is also a great choice if we know the exact position of the element we need because it has O(1) constant time retrieval through memory address arithmetic. If, however, we need to remove frequently from a position other than the end of the list, an array-based data structure can become inefficient because it requires shifting all the elements to the right of the removed element back one space. Additionally, if frequent searching is required as the array grows, the search can also become costly.
+
+## Analysis Section
+
 > **Integration & Git:** Ayush initially struggled when collaborating on the project using GitHub. The main challenge was getting back into the flow after having winter break and familiarizing himself with continuous integration/ continuous deployment (CI/CD) pipelines. Additionally, Ayush kept forgetting his GitHub password, which made authenticating himself challenging. Fortunately, Chris and Ayush were able to resolve the merge conflicts on GitHub and most of the other difficulties using Discord on a live conference call. 
   
 > **Architectural Tradeoffs:** Chris quickly iterated the implementation of the `DataLoader` class, but realized there was an opportunity to make the code more modular by abstracting how individual methods loaded data from a comma-separated value (csv) file into a generic `loadData` helper method. This improved code maintainability and made the code “DRY” (Don’t Repeat Yourself). Chris often struggles with spending too much time thinking of the perfect code instead of quickly iterating and optimizing later. Fortunately Chris was able to pull himself out when he saw himself getting in the weeds. 
@@ -49,8 +53,29 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 The project is organized with separate source and test roots to maintain clean code separation:
 
 * **src/**: Contains production source code.
-    * `DataLoader.java`: Core logic for file reading and generic data parsing.
-    * `Player.java`, `Drill.java`, `Transaction.java`: Data models.
+    * benchmark/ 
+      * `Benchmark` interface for defining `BencharkRunner` contract 
+      * `BencharkRunner` responsible for benchmark speed testing 
+    * counter/
+      * `Counter` interface for defining `OperationCounter` contract
+      * `OperationCounter` responsible for counting algorithm operations: ie swaps, assignments, comparisons
+    * loader/ 
+      * `Loader` interface for defining `DataLoader` contract
+      * `DataLoader.java`: Core logic for file reading and generic data parsing.
+    * manager/
+      * `DataManager` abstract class defining common behavior to all future managers, ie : DrillsManger, Transaction 
+            Manager, etc.
+      * `RosterManager` concrete class that brings specific functionality needed to manage the seahawks roster.
+    * results/
+        * `Results.java`: The benchmarking suite. It automates experiments across 50, 500, and 5000 records,
+            calculating the average execution time (ms) for Add, Remove, and Search operations.
+    * types/
+      * `DataType` : Sealed interface that ensures all data managed by the system has a consistent identity.
+      * `Player.java`, `Drill.java`, `Transaction.java`: Data models.
+    * util/
+      * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`). 
+      It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
+    * `Main` - CLI driven menu interface for interacting with the SOASS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
     * `badFormatPlayers.csv`: Resource for testing error handling.
@@ -65,8 +90,8 @@ The project is organized with separate source and test roots to maintain clean c
 * **IntelliJ IDEA**
 
 ## Tools Used
-* Gemini, chatgpt
-    - Syntax clarification, Java docs, architecture brainstorming, and readme.md template
+* Gemini, ChatGPT
+    - Syntax clarification, Javadocs, architecture brainstorming, and readme.md template
   
 
 

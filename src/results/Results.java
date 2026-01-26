@@ -92,7 +92,7 @@ public class Results {
 
         System.out.printf("%-10s %-15s %-15.1f%n", "50", "Remove", remove50avg);
 
-        double search50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchNTimes);
+        double search50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, ()-> rosterManager.findByName("NOT FINDABLE"));
         System.out.printf("%-10s %-15s %-15.1f%n", "50", "Search", search50);
 
         resetRoster();
@@ -114,7 +114,7 @@ public class Results {
 
         System.out.printf("%-10s %-15s %-15.1f%n", "500", "Remove", remove500avg);
 
-        double search500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchNTimes);
+        double search500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, ()-> rosterManager.findByName("NOT FINDABLE"));
         System.out.printf("%-10s %-15s %-15.1f%n", "500", "Search", search500);
 
         resetRoster();
@@ -135,7 +135,7 @@ public class Results {
         final double remove5000avg = remove5000/runTrials;
         System.out.printf("%-10s %-15s %-15.1f%n", "5000", "Remove", remove5000avg);
 
-        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchNTimes);
+        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, ()-> rosterManager.findByName("NOT FINDABLE"));
         System.out.printf("%-10s %-15s %-15.1f%n", "5000", "Search", search5000);
 
         System.out.println("========================================\n");
