@@ -1,8 +1,15 @@
+package benchmark;
+
+
 /**
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-public class BenchmarkRunner implements Benchmark{
+public class BenchmarkRunner implements Benchmark {
+
+    public BenchmarkRunner() {
+        super();
+    }
 
     /**
      * Runs a speed test on a given task multiple times and reports the results
@@ -11,6 +18,7 @@ public class BenchmarkRunner implements Benchmark{
      */
     @Override
     public void runSpeedTest(int theTimesToRun, Runnable theTask) {
+
         System.out.println("\n=== Running Speed Test ===");
         System.out.println("Number of runs: " + theTimesToRun);
 
@@ -24,6 +32,7 @@ public class BenchmarkRunner implements Benchmark{
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         double avgTime = (double) totalTime / theTimesToRun;
+
 
         System.out.println("Total time: " + totalTime + " ms");
         System.out.println("Average time per run: " + avgTime + " ms");
@@ -53,5 +62,17 @@ public class BenchmarkRunner implements Benchmark{
         System.out.println("Total time: " + totalTime + " ms");
         System.out.println("Average time per run: " + avgTime + " ms");
         System.out.println("==========================\n");
+    }
+
+    public double runSpeedTestAndGetAvg(int theTimesToRun, Runnable theTask) {
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < theTimesToRun; i++) {
+            theTask.run();
+        }
+
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        return (double) totalTime / theTimesToRun;
     }
 }

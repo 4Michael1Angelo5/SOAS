@@ -1,3 +1,4 @@
+package benchmark;
 
 /**
  * @author Chris Chun, Ayush

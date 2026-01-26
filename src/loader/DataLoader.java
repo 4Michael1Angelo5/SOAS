@@ -1,18 +1,19 @@
+package loader;
+
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import util.ArrayStore;
+import types.Player;
+import types.Drill;
+import types.Transaction;
+import types.DataType;
 
 /**
  * @author Chris Chun, Ayush
- * @version 1.1
+ * @version 1.2
  */
 public class DataLoader implements Loader {
-    /**
-     * keep tally of all named operations
-     */
-    OperationCounter myCounter = new OperationCounter();
-
 
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
@@ -23,37 +24,22 @@ public class DataLoader implements Loader {
 
     private static final Logger logger = Logger.getLogger(DataLoader.class.getName());
 
-    /**
-     * A list of Player Data
-     */
-    List<Player> playerData;
-
-    /**
-     * A list of Transaction Data
-     */
-    List<Transaction> transactionData;
-
-    /**
-     * A list of drill data
-     */
-    List<Drill> drillData;
-
     @Override
-    public void loadPlayers(String theFilePath)
+    public ArrayStore<Player> loadPlayers(String theFilePath)
             throws IOException, IllegalArgumentException{
-        this.playerData = loadData(Player.class,theFilePath);
+        return loadData(Player.class,theFilePath);
     }
 
     @Override
-    public void loadDrills(String theFilePath)
+    public ArrayStore<Drill> loadDrills(String theFilePath)
             throws IOException, IllegalArgumentException {
-        this.drillData = loadData(Drill.class, theFilePath);
+        return loadData(Drill.class, theFilePath);
     }
 
     @Override
-    public void loadTransactions(String theFilePath)
+    public ArrayStore<Transaction> loadTransactions(String theFilePath)
             throws IOException, IllegalArgumentException {
-        this.transactionData = loadData(Transaction.class, theFilePath);
+        return loadData(Transaction.class, theFilePath);
     }
 
     /**
@@ -84,26 +70,21 @@ public class DataLoader implements Loader {
         try {
             if (dataClass == Player.class) {
 
-                result = new Player(Integer.parseInt(row[0]),row[1],row[2],row[3], Integer.parseInt(row[4]));
-                myCounter.increment("assignments",4);
+                result = new Player(Integer.parseInt(row[0]),row[1],row[2],Integer.parseInt(row[3]), Integer.parseInt(row[4]));
             }else
             if(dataClass == Drill.class) {
 
                 result = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
-                myCounter.increment("assignments",3);
 
             }else
             if (dataClass == Transaction.class) {
 
                 result = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
-                myCounter.increment("assignments",4);
 
             }else {
 
                 throw new IllegalArgumentException(dataClass.getName() + " is not a supported data type");
             }
-
-            myCounter.increment("lines read");
 
         }catch(IndexOutOfBoundsException e) {
 
@@ -121,11 +102,12 @@ public class DataLoader implements Loader {
      * @param <T> the data type to load: Can either be Player, Drill, Transaction.
      * @return an array list of data objects.
      */
-    private <T extends DataType>
-    List<T> loadData(Class<T> theDataType,String theFilePath)
+    public <T extends DataType>
+    ArrayStore<T> loadData(Class<T> theDataType,String theFilePath)
             throws IllegalArgumentException, IOException{
 
-        List<T> dataArray = new ArrayList<>();
+        ArrayStore<T> dataArray = new ArrayStore<>(theDataType, 16);
+
         try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
 
             // see if csv is empty
