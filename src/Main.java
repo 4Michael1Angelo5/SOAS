@@ -81,7 +81,7 @@ public class Main {
                     try {
 
                         rosterManager.updateStats(101, 109);
-                        logger.info("Succesfully updated player stats");
+                        logger.info("Successfully updated player stats");
 
                     }catch(RuntimeException e) {
                         logger.warning(
