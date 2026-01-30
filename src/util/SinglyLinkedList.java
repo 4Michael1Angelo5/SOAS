@@ -222,7 +222,7 @@ public class SinglyLinkedList<T> implements Iterable<T>{
 
         // 2) check if we are removing the head
         Node<T> walker = head;
-        if (item.equals(walker.val)) {
+        if (Objects.equals(item,walker.val)) {
             return this.remove();
         }
 
