@@ -79,7 +79,6 @@ public class Main {
                 }
                 case "4" -> {
                     try {
-
                         rosterManager.updateStats(101, 109);
                         logger.info("Successfully updated player stats");
 
