@@ -42,7 +42,7 @@ So the bigger the roster, the more time it will take.
 ### Search Operation
 Searching gets slower as the roster size increases. This is because the search
 has to go through more players when the list gets bigger, especially when the
-player isn’t found.
+ player isn’t found.
 
 ## Conclusion
 In conclusion, adding and searching work pretty well even with large rosters. However, removing
