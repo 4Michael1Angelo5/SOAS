@@ -146,9 +146,6 @@ public class TransactionManager extends DataManager<Transaction> {
         System.out.println("========================\n");
     }
 
-    /**
-     * Prints all transactions
-     */
     public void printTransactions() {
         displayFeed();
     }
