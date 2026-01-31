@@ -1,7 +1,7 @@
 package manager;
 
 import types.Transaction;
-import util.ArrayStore;
+import util.SinglyLinkedList;
 
 import java.io.IOException;
 
@@ -18,21 +18,21 @@ import java.io.IOException;
  */
 public class TransactionManager extends DataManager<Transaction> {
 
-    // TODO: add LinkedListStore field when its ready
-    // private LinkedListStore<Transaction> myTransactions;
+    private SinglyLinkedList<Transaction> myTransactions;
 
     public TransactionManager() {
         super(Transaction.class);
+        myTransactions = new SinglyLinkedList<>();
     }
 
     //================================= getting =================================
 
     /**
      * getter
-     * @return an ArrayStore of the transactions (will change to LinkedList)
+     * @return the SinglyLinkedList of transactions
      */
-    public ArrayStore<Transaction> getTransactionData() {
-        return this.getData();
+    public SinglyLinkedList<Transaction> getTransactionData() {
+        return myTransactions;
     }
 
     // ================================= loading =================================
@@ -44,7 +44,12 @@ public class TransactionManager extends DataManager<Transaction> {
      */
     public void loadTransactionData(String theFilePath) throws IOException {
         this.addCsvData(theFilePath);
-        // TODO: convert to LinkedList when its added
+
+        // convert to linked list
+        myTransactions = new SinglyLinkedList<>();
+        for (int i = 0; i < this.getData().size(); i++) {
+            myTransactions.addRear(this.getData().get(i));
+        }
     }
 
     // ================================= adding =================================
@@ -54,8 +59,7 @@ public class TransactionManager extends DataManager<Transaction> {
      * @param theTransaction the transaction to insert
      */
     public void insertTransaction(Transaction theTransaction) {
-        // TODO: myTransactions.addFront(theTransaction);
-        this.addData(theTransaction); // temporary
+        myTransactions.addFront(theTransaction);
     }
 
     /**
@@ -63,15 +67,25 @@ public class TransactionManager extends DataManager<Transaction> {
      * @param theTransaction the transaction to add
      */
     public void addTransaction(Transaction theTransaction) {
-        this.addData(theTransaction);
+        myTransactions.addRear(theTransaction);
+    }
+
+    // ================================= removing =================================
+
+    /**
+     * Removes transaction from the front
+     * @return the removed transaction
+     */
+    public Transaction removeFront() {
+        return myTransactions.remove();
     }
 
     // ================================= searching =================================
 
     /**
-     * Finds transaction by player name
-     * @param thePlayerName name of the player
-     * @return index if found, -1 otherwise
+     * Finds the first index of the transaction with the matching player name and -1 otherwise.
+     * @param thePlayerName name of the player to find.
+     * @return the first index of the transaction with the matching player name and -1 otherwise
      */
     public int findByPlayer(String thePlayerName) {
         int index = -1;
@@ -86,15 +100,15 @@ public class TransactionManager extends DataManager<Transaction> {
     }
 
     /**
-     * Finds transaction by type
-     * @param theType the type of transaction
-     * @return index if found, -1 otherwise
+     * Finds the first index of the transaction with the matching type and -1 otherwise.
+     * @param theType the type of transaction (Injury, Trade, etc.)
+     * @return returns the first index of the transaction with the matching type, and -1 otherwise.
      */
     public int findByType(String theType) {
         int index = -1;
 
-        for (int i = 0; i < getData().size(); i++) {
-            if (getData().get(i).type().equals(theType)) {
+        for (int i = 0; i < myTransactions.size(); i++) {
+            if (myTransactions.get(i).type().equals(theType)) {
                 index = i;
                 break;
             }
@@ -103,15 +117,15 @@ public class TransactionManager extends DataManager<Transaction> {
     }
 
     /**
-     * Finds transaction by timestamp
-     * @param theTimestamp the timestamp
-     * @return index if found, -1 otherwise
+     * Finds the first index of the transaction with the matching timestamp and -1 otherwise.
+     * @param theTimestamp the timestamp of the transaction
+     * @return returns the first index of the transaction with the matching timestamp, and -1 otherwise.
      */
     public int findByTimestamp(String theTimestamp) {
         int index = -1;
 
-        for (int i = 0; i < getData().size(); i++) {
-            if (getData().get(i).timestamp().equals(theTimestamp)) {
+        for (int i = 0; i < myTransactions.size(); i++) {
+            if (myTransactions.get(i).timestamp().equals(theTimestamp)) {
                 index = i;
                 break;
             }
@@ -122,10 +136,14 @@ public class TransactionManager extends DataManager<Transaction> {
     //================================= printing =================================
 
     /**
-     * Displays the transaction feed
+     * Displays My Transaction
      */
     public void displayFeed() {
-        this.printData(this.getTransactionData());
+        System.out.println("\n=== My Transaction  ===");
+        for (int i = 0; i < myTransactions.size(); i++) {
+            System.out.println(myTransactions.get(i).toString());
+        }
+        System.out.println("========================\n");
     }
 
     /**
