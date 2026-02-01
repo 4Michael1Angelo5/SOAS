@@ -89,12 +89,13 @@ public class TransactionFeed extends DataManager<Transaction> {
      */
     public int findByPlayer(String thePlayerName) {
         int index = -1;
-
-        for (int i = 0; i < this.getTransactionData().size(); i++) {
-            if (getTransactionData().get(i).player().equals(thePlayerName)) {
+        int i = 0;
+        for (Transaction transaction:myTransactions) {
+            if (transaction.player().equals(thePlayerName)) {
                 index = i;
                 break;
             }
+            i++;
         }
         return index;
     }
@@ -106,12 +107,13 @@ public class TransactionFeed extends DataManager<Transaction> {
      */
     public int findByType(String theType) {
         int index = -1;
-
-        for (int i = 0; i < myTransactions.size(); i++) {
-            if (myTransactions.get(i).type().equals(theType)) {
+        int i = 0;
+        for (Transaction transaction:myTransactions) {
+            if (transaction.type().equals(theType)) {
                 index = i;
                 break;
             }
+            i++;
         }
         return index;
     }
@@ -123,12 +125,13 @@ public class TransactionFeed extends DataManager<Transaction> {
      */
     public int findByTimestamp(String theTimestamp) {
         int index = -1;
-
-        for (int i = 0; i < myTransactions.size(); i++) {
-            if (myTransactions.get(i).timestamp().equals(theTimestamp)) {
+        int i = 0;
+        for (Transaction transaction:myTransactions) {
+            if (transaction.timestamp().equals(theTimestamp)) {
                 index = i;
                 break;
             }
+            i++;
         }
         return index;
     }

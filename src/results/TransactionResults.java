@@ -12,62 +12,120 @@ import java.io.IOException;
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-public class TransactionFeedresult {
+public class TransactionResults {
 
     final private static int runTrials = 30;
 
+    /**
+     * The file path for the small transaction dataset (50 records).
+     */
     final static String trans50 = "data/seahawks_transactions_50.csv";
+
+    /**
+     * The file path for the medium transaction dataset (500 records).
+     */
     final static String trans500 = "data/seahawks_transactions_500.csv";
+
+    /**
+     * The file path for the large transaction dataset (5000 records).
+     */
     final static String trans5000 = "data/seahawks_transactions_5000.csv";
 
+    /**
+     * The timing engine used to execute speed tests and calculate averages.
+     */
     BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
+
+    /**
+     * The manager responsible for high-level transaction logic and search operations.
+     */
     TransactionFeed transactionManager = new TransactionFeed();
 
-    SinglyLinkedList<Transaction> transactions = new SinglyLinkedList<>();
+    /**
+     * The primary list used to store loaded transactions for the "Add" and "Search" experiments.
+     */
+    SinglyLinkedList<Transaction> myTransactions = new SinglyLinkedList<>();
+
+    /**
+     * A temporary list used specifically for the "Remove" experiment to prevent
+     * the destruction of the primary dataset.
+     */
     SinglyLinkedList<Transaction> transactionsForRemove = new SinglyLinkedList<>();
 
-    public TransactionFeedresult() {
+    public TransactionResults() {
         super();
     }
 
+    /**
+     Loads transaction data from a CSV file into the transaction manager
+     * and local list for benchmarking.
+     * @param theFilePath The path to the source CSV file.
+     * @throws IOException If the file cannot be found or read.
+     */
     public void loadTransactions(String theFilePath) throws IOException {
         transactionManager.loadTransactionData(theFilePath);
-        transactions = transactionManager.getTransactionData();
+        myTransactions = transactionManager.getTransactionData();
     }
 
+    /**
+     * Benchmarks the addition of transactions to the front of a new list.
+     * This method utilizes an iterator to maintain O(n) efficiency.
+     */
     public void addFrontNTimes() {
         SinglyLinkedList<Transaction> temp = new SinglyLinkedList<>();
-        for (int i = 0; i < transactions.size(); i++) {
-            temp.addFront(transactions.get(i));
+        for (Transaction transaction:myTransactions) {
+            temp.addFront(transaction);
         }
     }
 
+    /**
+     * Benchmarks the addition of transactions to the rear of a new list.
+     * This method utilizes an iterator to maintain O(n) efficiency.
+     */
     public void addRearNTimes() {
         SinglyLinkedList<Transaction> temp = new SinglyLinkedList<>();
-        for (int i = 0; i < transactions.size(); i++) {
-            temp.addRear(transactions.get(i));
+        for (Transaction transaction:myTransactions) {
+            temp.addRear(transaction);
         }
     }
 
-    // Setup method - NOT timed
+    /**
+     * Prepares a temporary list for the removal benchmark by copying
+     * the current transaction data. This setup is not included in the timed test.
+     */
     public void setupRemoveTest() {
         transactionsForRemove = new SinglyLinkedList<>();
-        for (int i = 0; i < transactions.size(); i++) {
-            transactionsForRemove.addRear(transactions.get(i));
+        for (Transaction transaction:myTransactions) {
+            transactionsForRemove.addRear(transaction);
         }
     }
 
-    // Only the remove operation - this is timed
+    /**
+     * Benchmarks the removal of all elements from the front of the list.
+     * This is a destructive operation that empties the target list.
+     */
     public void removeFromFrontNTimes() {
         while (transactionsForRemove.size() > 0) {
             transactionsForRemove.remove();
         }
     }
 
+    /**
+     * Clears the current transaction list to prepare for the next
+     * experimental data set.
+     */
     public void resetTransactions() {
-        transactions = new SinglyLinkedList<>();
+        myTransactions = new SinglyLinkedList<>();
     }
 
+    /**
+     * Orchestrates the full benchmarking suite across multiple data sizes (50, 500, 5000).
+     * Measures performance for adding to front/rear, removal, and searching,
+     * then outputs results in a formatted table.
+     * * @implNote For the removal test, the list is re-populated via
+     * {@link #setupRemoveTest()} before each trial to ensure accurate measurement.
+     * * @throws IOException If the data files cannot be loaded during experimentation.
+     */
     public void runAllExperiments() throws IOException {
         System.out.println("\n============= My Transaction Feed =============\n");
         System.out.printf("%-10s %-15s %-20s%n", "Size", "Operation", "LinkedList Time (ms)");
@@ -143,7 +201,7 @@ public class TransactionFeedresult {
     }
 
     public static void main(String[] args) throws IOException {
-        TransactionFeedresult results = new TransactionFeedresult();
+        TransactionResults results = new TransactionResults();
         results.runAllExperiments();
     }
 }
