@@ -2,6 +2,9 @@ import manager.TransactionFeed;
 import types.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import util.SinglyLinkedList;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,6 +25,24 @@ class TransactionFeedTest {
         t2 = new Transaction(102, "Trade", "Brown", "2025-01-05");
         t3 = new Transaction(103, "Activation", "Jones", "2025-01-08");
         t4 = new Transaction(104, "Suspension", "Garcia", "2025-01-10");
+    }
+
+    // ============= loading data =============
+    @Test
+    public void testLoadTransactions() throws IOException {
+        TransactionFeed tFeed = new TransactionFeed();
+        tFeed.loadTransactionData("data/seahawks_transactions_50.csv");
+        assertAll("Test Transaction Loading",
+                () -> assertEquals(50, tFeed.getTransactionData().size()),
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_500.csv");
+                    assertEquals(500, tFeed.getTransactionData().size());
+                },
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_5000.csv");
+                    assertEquals(5000, tFeed.getTransactionData().size());
+                }
+        );
     }
 
     // ============= Correctness =============
@@ -223,5 +244,37 @@ class TransactionFeedTest {
 
         assertEquals(expected, count,
                 "Traversal count should match size (no cycles)");
+    }
+
+    @Test
+    void testFindBy() throws IOException{
+        TransactionFeed tFeed = new TransactionFeed();
+        tFeed.loadTransactionData("data/seahawks_transactions_50.csv");
+        assertAll("Test Transaction Loading",
+                () -> assertEquals(-1, tFeed.findByPlayer("Not a findable player")),
+                () -> {
+                    // algorithm correctness.
+                    int numComparisons = 0;
+                    int n = tFeed.getTransactionData().size();
+                    SinglyLinkedList<Transaction> data = tFeed.getTransactionData();
+                    for (Transaction transaction: data) {
+                        if (transaction.player().equals("Not Findable")) {
+                            break;
+                        }
+                        numComparisons++;
+                    }
+
+                    assertEquals(n,numComparisons);
+
+                },
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_500.csv");
+                    assertEquals(-1, tFeed.findByTimestamp("Not a findable player"));
+                },
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_5000.csv");
+                    assertEquals(-1, tFeed.findById(-1010101010));
+                }
+        );
     }
 }

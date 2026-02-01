@@ -6,6 +6,7 @@ import types.Transaction;
 import util.SinglyLinkedList;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Benchmark experiments for Transaction operations
@@ -14,7 +15,7 @@ import java.io.IOException;
  */
 public class TransactionResults {
 
-    final private static int runTrials = 30;
+    final private static int runTrials = 100;
 
     /**
      * The file path for the small transaction dataset (50 records).
@@ -192,7 +193,13 @@ public class TransactionResults {
         double remove5000avg = remove5000 / runTrials;
         System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Remove", remove5000avg);
 
-        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, () -> transactionManager.findByPlayer("NOT FOUND"));
+        AtomicInteger sum = new AtomicInteger();
+
+        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials,
+                () -> {
+                    sum.addAndGet(transactionManager.findByPlayer("NOT FOUND"));
+                }
+        );
         System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Search", search5000);
 
         System.out.println("===============================================\n");

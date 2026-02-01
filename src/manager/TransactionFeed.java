@@ -149,15 +149,12 @@ public class TransactionFeed extends DataManager<Transaction> {
     /**
      * Displays My Transaction
      */
-    public void displayFeed() {
-        System.out.println("\n=== My Transaction  ===");
-        for (int i = 0; i < myTransactions.size(); i++) {
-            System.out.println(myTransactions.get(i).toString());
-        }
-        System.out.println("========================\n");
-    }
 
     public void printTransactions() {
-        displayFeed();
+        System.out.println("\n=== My Transaction  ===");
+        for (Transaction transaction: myTransactions) {
+            System.out.println(transaction);
+        }
+        System.out.println("========================\n");
     }
 }
