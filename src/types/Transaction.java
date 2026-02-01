@@ -17,4 +17,32 @@ public record Transaction(
     public int id() {
         return trans_id;
     }
+
+    /**
+     * Custom toString
+     * @return formatted string
+     */
+    @Override
+    public String toString() {
+        return "Transaction[id=" + trans_id +
+                ", type=" + type +
+                ", player=" + player +
+                ", timestamp=" + timestamp + "]";
+    }
+
+    /**
+     * Custom equals
+     * @param obj object to compare
+     * @return true if equal
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Transaction t = (Transaction) obj;
+        return trans_id == t.trans_id &&
+                type.equals(t.type) &&
+                player.equals(t.player) &&
+                timestamp.equals(t.timestamp);
+    }
 }
