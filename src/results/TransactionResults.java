@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TransactionResults {
 
-    final private static int runTrials = 100;
+    final private static int runTrials = 30;
 
     /**
      * The file path for the small transaction dataset (50 records).
