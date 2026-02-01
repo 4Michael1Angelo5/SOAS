@@ -14,7 +14,6 @@ import java.io.IOException;
 public class Results {
 
     public static int initCapacity = 16;
-    public static int runs = 25;
     public static int removeRuns = 1;  // Remove can only run once
 
     final private static int runTrials = 30;
@@ -71,6 +70,11 @@ public class Results {
         roster = new ArrayStore<>(Player.class, initCapacity);
     }
 
+    /**
+     * @implNote Removal is a destructive operation. To ensure accurate averaging,
+     * the list is refilled via {@link #setupRemoveTest()} before each trial
+     * to prevent timing the removal of elements from an already empty list.
+     */
     public void runAllExperiments() throws IOException {
         System.out.println("\n========== Benchmark Results ==========\n");
         System.out.printf("%-10s %-15s %-15s%n", "Size", "Operation", "Avg Time (ms)");
@@ -85,7 +89,9 @@ public class Results {
         double remove50 = 0;
 
         for (int i =0; i < runTrials ;i++) {
+            // add 50 players to roster.
             setupRemoveTest();
+            // remove 50 players from roster.
             remove50 += benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
         }
         double remove50avg = remove50/runTrials;
