@@ -132,6 +132,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @return returns the first index of the transaction with the matching timestamp, and -1 otherwise.
      */
     public int findByTimestamp(String theTimestamp) {
+
         int index = -1;
         int i = 0;
         for (Transaction transaction:myTransactions) {
