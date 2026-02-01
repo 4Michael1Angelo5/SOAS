@@ -58,16 +58,24 @@ public class TransactionFeed extends DataManager<Transaction> {
      * Inserts a new transaction at the front of the feed
      * @param theTransaction the transaction to insert
      */
-    public void insertTransaction(Transaction theTransaction) {
-        myTransactions.addFront(theTransaction);
+    public void insertTransaction(int theIndex,Transaction theTransaction) {
+
+        myTransactions.addAtIndex(theIndex, theTransaction);
     }
+    // API DOCS
+    // semantically this does not read well. insertTransaction should mean addAtIndex,
+    // but it is being used as addFront;
 
     /**
      * Adds a transaction to the rear of the feed
      * @param theTransaction the transaction to add
      */
-    public void addTransaction(Transaction theTransaction) {
+    public void addTransactionRear(Transaction theTransaction) {
         myTransactions.addRear(theTransaction);
+    }
+
+    public void addTransactionFront(Transaction theTransaction) {
+        myTransactions.addFront(theTransaction);
     }
 
     // ================================= removing =================================
@@ -141,15 +149,12 @@ public class TransactionFeed extends DataManager<Transaction> {
     /**
      * Displays My Transaction
      */
-    public void displayFeed() {
-        System.out.println("\n=== My Transaction  ===");
-        for (int i = 0; i < myTransactions.size(); i++) {
-            System.out.println(myTransactions.get(i).toString());
-        }
-        System.out.println("========================\n");
-    }
 
     public void printTransactions() {
-        displayFeed();
+        System.out.println("\n=== My Transaction  ===");
+        for (Transaction transaction: myTransactions) {
+            System.out.println(transaction);
+        }
+        System.out.println("========================\n");
     }
 }

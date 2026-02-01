@@ -2,6 +2,9 @@ import manager.TransactionFeed;
 import types.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import util.SinglyLinkedList;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,13 +27,31 @@ class TransactionFeedTest {
         t4 = new Transaction(104, "Suspension", "Garcia", "2025-01-10");
     }
 
+    // ============= loading data =============
+    @Test
+    public void testLoadTransactions() throws IOException {
+        TransactionFeed tFeed = new TransactionFeed();
+        tFeed.loadTransactionData("data/seahawks_transactions_50.csv");
+        assertAll("Test Transaction Loading",
+                () -> assertEquals(50, tFeed.getTransactionData().size()),
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_500.csv");
+                    assertEquals(500, tFeed.getTransactionData().size());
+                },
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_5000.csv");
+                    assertEquals(5000, tFeed.getTransactionData().size());
+                }
+        );
+    }
+
     // ============= Correctness =============
 
     @Test
     void testAddFront() {
-        manager.insertTransaction(t1);
-        manager.insertTransaction(t2);
-        manager.insertTransaction(t3);
+        manager.addTransactionFront(t1);
+        manager.addTransactionFront(t2);
+        manager.addTransactionFront(t3);
 
         var transactions = manager.getTransactionData();
 
@@ -49,9 +70,9 @@ class TransactionFeedTest {
 
     @Test
     void testAddRear() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         var transactions = manager.getTransactionData();
 
@@ -70,9 +91,9 @@ class TransactionFeedTest {
 
     @Test
     void testAddAtIndex() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t4);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t4);
 
         manager.getTransactionData().remove(2);
         manager.getTransactionData().addAtIndex(2, t3);
@@ -88,9 +109,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemove() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         Transaction removed = manager.removeFront();
 
@@ -112,9 +133,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemoveHead() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         Transaction removed = manager.getTransactionData().remove(0);
 
@@ -127,9 +148,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemoveTail() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         int last = manager.getTransactionData().size() - 1;
         Transaction removed = manager.getTransactionData().remove(last);
@@ -143,9 +164,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemoveMiddle() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         Transaction removed = manager.getTransactionData().remove(1);
 
@@ -161,8 +182,8 @@ class TransactionFeedTest {
 
     @Test
     void testIndexOutOfBounds() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
 
         assertThrows(Exception.class,
                 () -> manager.getTransactionData().get(5),
@@ -177,10 +198,10 @@ class TransactionFeedTest {
 
     @Test
     void testNoSkippedNodes() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
-        manager.addTransaction(t4);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
+        manager.addTransactionRear(t4);
 
         var transactions = manager.getTransactionData();
 
@@ -195,9 +216,9 @@ class TransactionFeedTest {
         assertEquals(0, manager.getTransactionData().size(),
                 "New manager should start empty");
 
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.insertTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionFront(t3);
         manager.removeFront();
         manager.getTransactionData().remove(0);
 
@@ -207,9 +228,9 @@ class TransactionFeedTest {
 
     @Test
     void testNoCycles() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         var transactions = manager.getTransactionData();
         int expected = transactions.size();
@@ -223,5 +244,37 @@ class TransactionFeedTest {
 
         assertEquals(expected, count,
                 "Traversal count should match size (no cycles)");
+    }
+
+    @Test
+    void testFindBy() throws IOException{
+        TransactionFeed tFeed = new TransactionFeed();
+        tFeed.loadTransactionData("data/seahawks_transactions_50.csv");
+        assertAll("Test Transaction Loading",
+                () -> assertEquals(-1, tFeed.findByPlayer("Not a findable player")),
+                () -> {
+                    // algorithm correctness.
+                    int numComparisons = 0;
+                    int n = tFeed.getTransactionData().size();
+                    SinglyLinkedList<Transaction> data = tFeed.getTransactionData();
+                    for (Transaction transaction: data) {
+                        if (transaction.player().equals("Not Findable")) {
+                            break;
+                        }
+                        numComparisons++;
+                    }
+
+                    assertEquals(n,numComparisons);
+
+                },
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_500.csv");
+                    assertEquals(-1, tFeed.findByTimestamp("Not a findable player"));
+                },
+                () -> {
+                    tFeed.loadTransactionData("data/seahawks_transactions_5000.csv");
+                    assertEquals(-1, tFeed.findById(-1010101010));
+                }
+        );
     }
 }
