@@ -27,15 +27,15 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Analysis Section
 1. Why does addFront differ drastically between arrays and linked lists?
-    - Adding to the front of a linked list is more efficent then adding to the front of an array. This is because
+    - Adding to the front of a linked list is more efficient than adding to the front of an array. This is because
       adding to the front of the array requires shifting all the elements in the array one index position to the right.
       Singly linked lists, on the other hand, only require two pointer reassignments: the new head becomes the element we are adding to the list,
       and the new node's next points to the rest of the list. Because each node in the list contains information about which node
       comes after it, we do not need to iterate through each node to maintain contiguous memory, whereas with arrays, contiguous memory
       is maintained by simple arithmetic, by array addressing each element based on where it is located from the front of the list.
 2. When does a linked list outperform an array?
-    - A linked list outperforms an array when needing to frequently add or remove elements from the front of the list. The time complexity
-      for adding or removing from the front in a linked list is $O(1)$, whereas with an array it is $O(n)$. If, for example, we needed to
+    - A linked list outperforms an array when needing to frequently add or remove elements to the front of the list. The time complexity
+      for adding or removing from the front of a linked list is $O(1)$, whereas with an array it is $O(n)$. If, for example, we needed to
       implement a First In First Out (FIFO) data structure like a Queue to manage user requests, an array would be a poor choice because each update
       of adding and removing from the array would result in constant shifting of the data elements in the list.
 3. When is an array better?
@@ -58,24 +58,43 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
       an immutable history of all transactions that have taken place.
 
 ## Reflection & Team Process
+Ayush and Chris worked more efficiently this sprint. Last week, Chris and Ayush felt overwhelmed because they didn't dedicate enough time during the week 
+to finish sprint deliverables for PA1, resulting in them having to spend all day Sunday and Sunday night to meet project deadlines. This week, Chris worked 
+ahead of schedule, and as soon as PA1 was finished, Chris designed the `SinglyLinkedList` class for PA2. Ayush commited working extra time to work on Friday 
+and quickly implemented the `TransactionFeed` class utilizing the `SinglyLinkedList` class Chris designed. This made Friday's work meeting more productive 
+because the lowest-level data structure was already complete, so the team could work on introducing the core project features.
 
-Chris spent a lot of time thinking deeply about the project structure and architecture. He embraced abstraction and
-designed an Abstract DataManager class to implement the shared functionality he saw all future Manager classes would
-have. Regardless if the manager was a DrillsManager, RosterManager, or TransactionManager, there were certain
-behaviors and methods each concrete child class would need, such as searching for a data entry by its ID, or fetching
-and loading data from a csv. By utilizing inheritance and abstraction, it made it so that adding different types of
-data managers becomes trivial, and then they only need to worry about the logic for their specific class.
+Both Chris and Ayush realized that there was some growing inefficiency in the code base, but the team decided to defer dealing with it until after the completion of 
+The sprint deliverables for PA2. Currently, the `BenchmarkRunner` class is not designed to be flexible. Additionally, while the team made a good 
+effort at designing a flexible abstract `DataLoader` class and an abstract `DataManager` class, there is still room for improvement. For example, the `DataLoader` is 
+data-type agnostic. It does not care if it has loading `Player` data, `Drills` data, or `Transaction` data. It knows how to gracefully handle each data type and parse
+CSV data into the correct `Player`, `Drills`, or `Transaction` data object. All the `DataLoader` cares about is that whoever is the caller of the `DataLoader` specifies 
+up front which type of data it needs to load. However, the `DataLoader` and `DataManager` are not **data container agnostic**. Each one of those classes can only manage
+and load data using an array-based data structure. 
 
-Chris went the extra length of creating a sealed interface DataType to ensure only permitted data types were allowed,
-such as Player, Transaction, or Drills. Doing this allowed the design of the DataLoader to also be generic so that
-it does not know ahead of time which type of data it will be loading; it only cares that whoever is calling its methods
-is using one of the permitted data types. This made the DataLoader very flexible and made it so that each manager can
-get the data they need without having to worry about the implementation details of how the data is parsed from a csv.
+This is where the problem is. With every new sprint, we will be tasked with adding functionality for a new type of data structure to act as our "data container". 
+This means our `DataLoader` and `DataManager` will always create an array list of the CSV data objects, and creation of the proper data structure to contain and manipulate
+those objects will be left as a chore to its children. This design is inefficient. No matter what data structure acts as our container, we have certain guarantees upfront about
+what the container should be able to do. It should be able to modify the contents inside the container via `add()`, `remove()`, and `update()`, 
+and it should expose an easy way to iterate over those objects. The better design would be create a sealed interface for all the supported data structures 
+that will act as storage containers for `Player`, `Drills`, and `Transaction` data. Then it becomes the responsibility of the caller to specify what data objects we are
+dealing with, `Player`, `Drills`, or `Transaction`, and which type of storage container they want to use to manage that data: `ArrayList`, `SinglyLinkedList`, `HashMap`, `Stack`,
+`Queue` etc. This design is superior because then the concrete child classes that extend `DataManager` only need to connsern them selves with methods that are specific to managing
+`Player`, `Drills`, or `Transaction` objects.
 
-Reflecting on the assignment, Chris and Ayush feel like they might have overengineered the project. The project seemed
-to only really require a piston, but Chris and Ayush built an engine. Although Chris and Ayush are proud of their work,
-it was more time consuming then it needed to be, and highlights the tension between building something that works because
-I need it now, and building something that will scale with future demands.
+Similarly, the `Results` class that utilizes the `Benchmarkrunner` is not flexible enough. To complete this sprint deliverable of displaying the benchmark 
+results of adding, removing, and updating with the new `SinglyLinkedList` data structure, we duplicated the same logic as the `Results` class for PA1, but swapped
+the data structure to a `SinglyLinkedList` and used the new `TransactionFeed` instead of `RosterManager` to gather the test results. This is an inefficient design.
+The `Results` class's job is to display results. It should not be opinionated about displaying results for a `TransactionFeed`, or a `RosterManager`, or a `DrillsManager`;
+It should just be to format and gather results from the `BenchMarkrunner` - that's it! 
+
+Unfortunately, although the team realized there was some inefficiency, we ultimately decided to move forward with the current design in favor of meeting project deadlines. 
+We weighed out the pros and cons of introducing these changes into PA2. Although implementing the changes would result in a more robust, flexible, and scalable application, 
+doing so would mean introducing breaking changes to the current code base and result in a substantial code refactor, which would take more time than simply duplicating the logic.
+The team decided that for PA3, these features would be introduced. 
+
+
+
 
 ---
 
