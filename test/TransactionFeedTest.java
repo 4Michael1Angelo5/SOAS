@@ -28,9 +28,9 @@ class TransactionFeedTest {
 
     @Test
     void testAddFront() {
-        manager.insertTransaction(t1);
-        manager.insertTransaction(t2);
-        manager.insertTransaction(t3);
+        manager.addTransactionFront(t1);
+        manager.addTransactionFront(t2);
+        manager.addTransactionFront(t3);
 
         var transactions = manager.getTransactionData();
 
@@ -49,9 +49,9 @@ class TransactionFeedTest {
 
     @Test
     void testAddRear() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         var transactions = manager.getTransactionData();
 
@@ -70,9 +70,9 @@ class TransactionFeedTest {
 
     @Test
     void testAddAtIndex() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t4);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t4);
 
         manager.getTransactionData().remove(2);
         manager.getTransactionData().addAtIndex(2, t3);
@@ -88,9 +88,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemove() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         Transaction removed = manager.removeFront();
 
@@ -112,9 +112,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemoveHead() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         Transaction removed = manager.getTransactionData().remove(0);
 
@@ -127,9 +127,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemoveTail() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         int last = manager.getTransactionData().size() - 1;
         Transaction removed = manager.getTransactionData().remove(last);
@@ -143,9 +143,9 @@ class TransactionFeedTest {
 
     @Test
     void testRemoveMiddle() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         Transaction removed = manager.getTransactionData().remove(1);
 
@@ -161,8 +161,8 @@ class TransactionFeedTest {
 
     @Test
     void testIndexOutOfBounds() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
 
         assertThrows(Exception.class,
                 () -> manager.getTransactionData().get(5),
@@ -177,10 +177,10 @@ class TransactionFeedTest {
 
     @Test
     void testNoSkippedNodes() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
-        manager.addTransaction(t4);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
+        manager.addTransactionRear(t4);
 
         var transactions = manager.getTransactionData();
 
@@ -195,9 +195,9 @@ class TransactionFeedTest {
         assertEquals(0, manager.getTransactionData().size(),
                 "New manager should start empty");
 
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.insertTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionFront(t3);
         manager.removeFront();
         manager.getTransactionData().remove(0);
 
@@ -207,9 +207,9 @@ class TransactionFeedTest {
 
     @Test
     void testNoCycles() {
-        manager.addTransaction(t1);
-        manager.addTransaction(t2);
-        manager.addTransaction(t3);
+        manager.addTransactionRear(t1);
+        manager.addTransactionRear(t2);
+        manager.addTransactionRear(t3);
 
         var transactions = manager.getTransactionData();
         int expected = transactions.size();

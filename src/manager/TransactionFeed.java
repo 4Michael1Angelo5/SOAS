@@ -58,16 +58,24 @@ public class TransactionFeed extends DataManager<Transaction> {
      * Inserts a new transaction at the front of the feed
      * @param theTransaction the transaction to insert
      */
-    public void insertTransaction(Transaction theTransaction) {
-        myTransactions.addFront(theTransaction);
+    public void insertTransaction(int theIndex,Transaction theTransaction) {
+
+        myTransactions.addAtIndex(theIndex, theTransaction);
     }
+    // API DOCS
+    // semantically this does not read well. insertTransaction should mean addAtIndex,
+    // but it is being used as addFront;
 
     /**
      * Adds a transaction to the rear of the feed
      * @param theTransaction the transaction to add
      */
-    public void addTransaction(Transaction theTransaction) {
+    public void addTransactionRear(Transaction theTransaction) {
         myTransactions.addRear(theTransaction);
+    }
+
+    public void addTransactionFront(Transaction theTransaction) {
+        myTransactions.addFront(theTransaction);
     }
 
     // ================================= removing =================================
