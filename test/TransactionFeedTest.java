@@ -1,6 +1,5 @@
-import manager.TransactionManager;
+import manager.TransactionFeed;
 import types.Transaction;
-import util.SinglyLinkedList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-class TransactionManagerTest {
+class TransactionFeedTest {
 
-    private TransactionManager manager;
+    private TransactionFeed manager;
     private Transaction t1, t2, t3, t4;
 
     @BeforeEach
     void setUp() {
-        manager = new TransactionManager();
+        manager = new TransactionFeed();
         t1 = new Transaction(101, "Injury", "Smith", "2025-01-03");
         t2 = new Transaction(102, "Trade", "Brown", "2025-01-05");
         t3 = new Transaction(103, "Activation", "Jones", "2025-01-08");

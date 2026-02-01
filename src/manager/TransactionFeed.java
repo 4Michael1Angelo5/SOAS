@@ -16,11 +16,11 @@ import java.io.IOException;
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-public class TransactionManager extends DataManager<Transaction> {
+public class TransactionFeed extends DataManager<Transaction> {
 
     private SinglyLinkedList<Transaction> myTransactions;
 
-    public TransactionManager() {
+    public TransactionFeed() {
         super(Transaction.class);
         myTransactions = new SinglyLinkedList<>();
     }
