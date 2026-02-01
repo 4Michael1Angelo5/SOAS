@@ -27,35 +27,35 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Analysis Section
 1. Why does addFront differ drastically between arrays and linked lists?
-    - Adding to the front of a linked list is more efficient than adding to the front of an array. This is because
-      adding to the front of the array requires shifting all the elements in the array one index position to the right.
-      Singly linked lists, on the other hand, only require two pointer reassignments: the new head becomes the element we are adding to the list,
-      and the new node's next points to the rest of the list. Because each node in the list contains information about which node
-      comes after it, we do not need to iterate through each node to maintain contiguous memory, whereas with arrays, contiguous memory
-      is maintained by simple arithmetic, by array addressing each element based on where it is located from the front of the list.
+   - Adding to the front of a linked list is more efficent then adding to the front of an array. This is because
+     adding to the front of the array requires shifting all the elements in the array one index position to the right.
+     Singly linked lists, on the other hand, only require two pointer reassignments: the new head becomes the element we are adding to the list,
+     and the new node's next points to the rest of the list. Because each node in the list contains information about which node
+     comes after it, we do not need to iterate through each node to maintain contiguous memory, whereas with arrays, contiguous memory
+     is maintained by simple arithmetic, by array addressing each element based on where it is located from the front of the list.  
 2. When does a linked list outperform an array?
-    - A linked list outperforms an array when needing to frequently add or remove elements to the front of the list. The time complexity
-      for adding or removing from the front of a linked list is $O(1)$, whereas with an array it is $O(n)$. If, for example, we needed to
-      implement a First In First Out (FIFO) data structure like a Queue to manage user requests, an array would be a poor choice because each update
-      of adding and removing from the array would result in constant shifting of the data elements in the list.
+   - A linked list outperforms an array when needing to frequently add or remove elements from the front of the list. The time complexity
+     for adding or removing from the front in a linked list is $O(1)$, whereas with an array it is $O(n)$. If, for example, we needed to
+     implement a First In First Out (FIFO) data structure like a Queue to manage user requests, an array would be a poor choice because each update
+     of adding and removing from the array would result in constant shifting of the data elements in the list.  
 3. When is an array better?
-    - An array is superior to a linked list when needing frequent access to the contents of the list, not contained in the front or the end of the list.
-      An array's main advantage over a linked list is that it can retrieve information about the contents anywhere in the list in $O(1)$ constant time, whereas
-      with a singly linked list, it takes $O(n)$ time because each node only knows about what its immediate neighbor's value is. This means that to find the value
-      of a specific indexed position node, we need to iterate over the list until we reach that specific node to figure out what its value is.
+   - An array is superior to a linked list when needing frequent access to the contents of the list, not contained in the front or the end of the list.
+     An array's main advantage over a linked list is that it can retrieve information about the contents anywhere in the list in $O(1)$ constant time, whereas
+     with a singly linked list, it takes $O(n)$ time because each node only knows about what its immediate neighbor's value is. This means that to find the value
+     of a specific indexed position node, we need to iterate over the list until we reach that specific node to figure out what its value is. 
 4. What is the cost of pointer traversal?
-    - The cost of pointer traversal is $O(n)$. If the linked list has 100 elements, and we want to get what is at index position 49.
-      We would need to create a dummy pointer node, `walker`. We set `walker` to point to the head of the linked list, and keep track of how many
-      steps `walker` has taken. We enter a loop and advance `walker` by setting `walker = walker.next`, and increment the step count. Once the step
-      count equals index 49 `walker` is standing on the node, whose value we are interested in retrieving.
+   - The cost of pointer traversal is $O(n)$. If the linked list has 100 elements, and we want to get what is at index position 49.
+     We would need to create a dummy pointer node, `walker`. We set `walker` to point to the head of the linked list, and keep track of how many
+     steps `walker` has taken. We enter a loop and advance `walker` by setting `walker = walker.next`, and increment the step count. Once the step
+     count equals index 49 `walker` is standing on the node, whose value we are interested in retrieving.  
 5. Would this scale to 100,000 transactions?
-    - A linked list data structure would be a good choice if we did not need to frequently retrieve transaction data that was not at the front or end of the list.
-      If managing transaction data requires processing requests in FIFO order, then this data structure is suitable for 100,000 transactions.
-      On the other hand, if the transaction data needs to be updated frequently or modified, the performance will deteriorate. However, in real-world applications
-      "Transactions" are generally considered immutable. If an error occurs with a transaction, a new transaction is appended or enqueued to correct the error. Example:
-      User A pays user B $50. Error: user A should have paid user B $60. Result new transaction: user A pays user B $10 - Not lets go back and change the ledger of the transaction
-      histories. So in my opinion, a singly linked list is acceptable for managing transactions, provided a transaction for the domain business logic is expected to be
-      an immutable history of all transactions that have taken place.
+   - A linked list data structure would be a good choice if we did not need to frequently retrieve transaction data that was not at the front or end of the list.
+     If managing transaction data requires processing requests in FIFO order, then this data structure is suitable for 100,000 transactions.
+     On the other hand, if the transaction data needs to be updated frequently or modified, the performance will deteriorate. However, in real-world applications
+     "Transactions" are generally considered immutable. If an error occurs with a transaction, a new transaction is appended or enqueued to correct the error. Example:
+     User A pays user B $50. Error: user A should have paid user B $60. Result new transaction: user A pays user B $10 - Not lets go back and change the ledger of the transaction
+     histories. So in my opinion, a singly linked list is acceptable for managing transactions, provided a transaction for the domain business logic is expected to be
+     an immutable history of all transactions that have taken place.   
 
 ## Reflection & Team Process
 Ayush and Chris worked more efficiently this sprint. Last week, Chris and Ayush felt overwhelmed because they didn't dedicate enough time during the week 
@@ -95,7 +95,6 @@ The team decided that for PA3, these features would be introduced.
 
 
 
-
 ---
 
 ## Project Structure
@@ -112,10 +111,10 @@ The project is organized with separate source and test roots to maintain clean c
         * `Loader` interface for defining `DataLoader` contract
         * `DataLoader.java`: Core logic for file reading and generic data parsing.
     * manager/
-        * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction
-          Manager/ TransactionFeed, etc.
-        * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
-        * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
+      * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction 
+            Manager/ TransactionFeed, etc.
+      * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
+      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions. 
     * results/
         * `Results.java`: The benchmarking suite. It automates experiments across 50, 500, and 5000 records,
           calculating the average execution time (ms) for Add, Remove, and Search operations.
@@ -123,15 +122,15 @@ The project is organized with separate source and test roots to maintain clean c
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
         * `Player.java`, `Drill.java`, `Transaction.java`: Data models.
     * util/
-        * `SinglyLinkedList.java`: A generic, low-level utility class that manages a raw Singly Linked List (`SinglyLinkedList<T>`).
-        * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`).
-          It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
+      * `SinglyLinkedList.java`: A generic, low-level utility class that manages a raw Singly Linked List (`SinglyLinkedList<T>`). 
+      * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`). 
+      It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
     * `Main` - CLI-driven menu interface for interacting with the SOASS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
     * `badFormatPlayers.csv`: Resource for testing error handling.
 * **data/**: Contains the primary CSV datasets (players, drills, and transactions).
-* **resources/**: Contains a `results.txt` file displaying the results of the benchmark testing of the `TransactionFeed`.
+* **resources/**: Contains a `results.txt` file displaying the results of the benchmark testing of the `TransactionFeed`. 
 
 ---
 
