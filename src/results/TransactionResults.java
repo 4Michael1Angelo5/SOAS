@@ -83,6 +83,13 @@ public class TransactionResults {
         }
     }
 
+    public void searchListNTime() {
+        int N = transactionManager.getTransactionData().size();
+        for (int i = 0; i < N; i++) {
+            transactionManager.findByPlayer("NOT FINDABLE");
+        }
+    }
+
     /**
      * Benchmarks the addition of transactions to the rear of a new list.
      * This method utilizes an iterator to maintain O(n) efficiency.
@@ -110,7 +117,7 @@ public class TransactionResults {
      * This is a destructive operation that empties the target list.
      */
     public void removeFromFrontNTimes() {
-        while (transactionsForRemove.size() > 0) {
+        while (!transactionsForRemove.isEmpty()) {
             transactionsForRemove.remove();
         }
     }
@@ -153,7 +160,7 @@ public class TransactionResults {
         double remove50avg = remove50 / runTrials;
         System.out.printf("%-10s %-15s %-20.1f%n", "50", "Remove", remove50avg);
 
-        double search50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, () -> transactionManager.findByPlayer("NOT FOUND"));
+        double search50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchListNTime);
         System.out.printf("%-10s %-15s %-20.1f%n", "50", "Search", search50);
 
         resetTransactions();
@@ -175,7 +182,7 @@ public class TransactionResults {
         double remove500avg = remove500 / runTrials;
         System.out.printf("%-10s %-15s %-20.1f%n", "500", "Remove", remove500avg);
 
-        double search500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, () -> transactionManager.findByPlayer("NOT FOUND"));
+        double search500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials,this::searchListNTime);
         System.out.printf("%-10s %-15s %-20.1f%n", "500", "Search", search500);
 
         resetTransactions();
@@ -197,13 +204,8 @@ public class TransactionResults {
         double remove5000avg = remove5000 / runTrials;
         System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Remove", remove5000avg);
 
-        AtomicInteger sum = new AtomicInteger();
+        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchListNTime);
 
-        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials,
-                () -> {
-                    sum.addAndGet(transactionManager.findByPlayer("NOT FOUND"));
-                }
-        );
         System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Search", search5000);
 
         System.out.println("===============================================\n");
