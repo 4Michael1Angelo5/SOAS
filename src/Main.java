@@ -37,7 +37,6 @@ public class Main {
         }
     }
 
-
     /**
      * Reader to read user inputs from the command line.
      */

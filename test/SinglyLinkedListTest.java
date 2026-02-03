@@ -10,10 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tester for the RosterManager
- * @version 1.1
+ * @version 1.2
  * @author Chris Chun, Ayush
  */
-
 public class SinglyLinkedListTest {
 
     private static final int THE_NUM_ADDS = 100;
@@ -33,8 +32,6 @@ public class SinglyLinkedListTest {
 
         return list;
     }
-
-
 
     @Test
     public void testConstructor() {
@@ -103,15 +100,15 @@ public class SinglyLinkedListTest {
         ArrayList<Integer> randomArray = createRandomArray();
         int i = 0;
         for (Integer integer : randomArray) {
-            list.addAtIndex(i,integer);
+            list.add(i,integer);
             i++;
         }
 
         assertAll("Test Insert At Index",
                 () -> assertEquals(THE_NUM_ADDS, list.size()," the list size should be " + THE_NUM_ADDS ),
-                () -> assertThrows(Exception.class, ()->list.addAtIndex(THE_NUM_ADDS + 1, 0),
+                () -> assertThrows(Exception.class, ()->list.add(THE_NUM_ADDS + 1, 0),
                         "addAtIndex should only allow adding at valid index positon"),
-                () -> assertThrows(Exception.class, () -> list.addAtIndex(-1, 0),
+                () -> assertThrows(Exception.class, () -> list.add(-1, 0),
                         "addAtIndex should only allow adding at valid index positon"),
                 () -> {
                     for (int idx = 0; idx < THE_NUM_ADDS; idx++) {
@@ -141,7 +138,7 @@ public class SinglyLinkedListTest {
                         assertEquals(THE_NUM_ADDS - i - 1, list.size());
                     }
                 }
-            );
+        );
 
     }
 
@@ -192,8 +189,8 @@ public class SinglyLinkedListTest {
                     for (int i = 0; i < 26; i++) {
                         String nextChar = array.get(i);
                         assertEquals(i, list.indexOf(nextChar),
-                            "should have returned " + i + ", but returned "
-                                    +list.indexOf(nextChar));
+                                "should have returned " + i + ", but returned "
+                                        +list.indexOf(nextChar));
                     }
                 },
                 () -> assertEquals(-1, list.indexOf("NOT IN LIST"),
@@ -204,7 +201,7 @@ public class SinglyLinkedListTest {
                             "Should return the first index of the found object");
                 }
 
-            );
+        );
 
     }
 
@@ -214,7 +211,7 @@ public class SinglyLinkedListTest {
                 () -> assertDoesNotThrow(list::reset),
                 () -> assertEquals(0, list.size()),
                 () -> assertThrows(Exception.class, () -> list.get(0))
-            );
+        );
     }
 
     @Test void testToArrayStore() {
@@ -243,6 +240,4 @@ public class SinglyLinkedListTest {
         assertNull(list.remove(null));
         assertEquals("a", list.get(0));
     }
-
-
 }
