@@ -1,28 +1,25 @@
 package manager;
 
+import util.DataContainer;
 import types.Transaction;
 import util.SinglyLinkedList;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
- * Responsible for
- * Storing transactions using a linked list
- * Adding transactions
- * Removing transactions
- * Searching
- * Printing
- * Uses Linked List internally
- * @author Chris Chun, Ayush
- * @version 1.1
+ * TransactionFeed manages Seahawks transaction records.
+ * <p>While optimized for sequential data (like feeds), this manager is
+ * container-agnostic. It supports high-level operations such as front/rear
+ * insertion and searching by player, type, or timestamp.</p>
+ * * @author Chris Chun, Ayush
+ * @version 1.2
  */
 public class TransactionFeed extends DataManager<Transaction> {
 
-    private SinglyLinkedList<Transaction> myTransactions;
 
-    public TransactionFeed() {
-        super(Transaction.class);
-        myTransactions = new SinglyLinkedList<>();
+    public TransactionFeed(Supplier<DataContainer<Transaction>> theSupplier) {
+        super(Transaction.class,  theSupplier);
     }
 
     //================================= getting =================================
@@ -31,8 +28,8 @@ public class TransactionFeed extends DataManager<Transaction> {
      * getter
      * @return the SinglyLinkedList of transactions
      */
-    public SinglyLinkedList<Transaction> getTransactionData() {
-        return myTransactions;
+    public DataContainer<Transaction> getTransactionData() {
+        return getData();
     }
 
     // ================================= loading =================================
@@ -43,13 +40,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @throws IOException if file not found
      */
     public void loadTransactionData(String theFilePath) throws IOException {
-        this.addCsvData(theFilePath);
-
-        // convert to linked list
-        myTransactions = new SinglyLinkedList<>();
-        for (int i = 0; i < this.getData().size(); i++) {
-            myTransactions.addRear(this.getData().get(i));
-        }
+        this.loadCsvData(theFilePath);
     }
 
     // ================================= adding =================================
@@ -59,23 +50,24 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @param theTransaction the transaction to insert
      */
     public void insertTransaction(int theIndex,Transaction theTransaction) {
+        if (!myData.supportsIndexedAccess()) {
 
-        myTransactions.addAtIndex(theIndex, theTransaction);
+        }
+        this.getData().add(theIndex, theTransaction);
     }
-    // API DOCS
-    // semantically this does not read well. insertTransaction should mean addAtIndex,
-    // but it is being used as addFront;
 
     /**
      * Adds a transaction to the rear of the feed
      * @param theTransaction the transaction to add
      */
     public void addTransactionRear(Transaction theTransaction) {
-        myTransactions.addRear(theTransaction);
+
+        myData.add(myData.size(), theTransaction);
     }
 
     public void addTransactionFront(Transaction theTransaction) {
-        myTransactions.addFront(theTransaction);
+
+        myData.add(0,theTransaction);
     }
 
     // ================================= removing =================================
@@ -85,7 +77,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @return the removed transaction
      */
     public Transaction removeFront() {
-        return myTransactions.remove();
+        return myData.remove();
     }
 
     // ================================= searching =================================
@@ -96,16 +88,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @return the first index of the transaction with the matching player name and -1 otherwise
      */
     public int findByPlayer(String thePlayerName) {
-        int index = -1;
-        int i = 0;
-        for (Transaction transaction:myTransactions) {
-            if (transaction.player().equals(thePlayerName)) {
-                index = i;
-                break;
-            }
-            i++;
-        }
-        return index;
+        return myData.findBy((t)-> t.player().equals(thePlayerName));
     }
 
     /**
@@ -114,16 +97,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @return returns the first index of the transaction with the matching type, and -1 otherwise.
      */
     public int findByType(String theType) {
-        int index = -1;
-        int i = 0;
-        for (Transaction transaction:myTransactions) {
-            if (transaction.type().equals(theType)) {
-                index = i;
-                break;
-            }
-            i++;
-        }
-        return index;
+        return myData.findBy((t)-> t.type().equals(theType));
     }
 
     /**
@@ -133,16 +107,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      */
     public int findByTimestamp(String theTimestamp) {
 
-        int index = -1;
-        int i = 0;
-        for (Transaction transaction:myTransactions) {
-            if (transaction.timestamp().equals(theTimestamp)) {
-                index = i;
-                break;
-            }
-            i++;
-        }
-        return index;
+        return myData.findBy((t)-> t.timestamp().equals(theTimestamp));
     }
 
     //================================= printing =================================
@@ -150,12 +115,16 @@ public class TransactionFeed extends DataManager<Transaction> {
     /**
      * Displays My Transaction
      */
-
     public void printTransactions() {
-        System.out.println("\n=== My Transaction  ===");
-        for (Transaction transaction: myTransactions) {
-            System.out.println(transaction);
-        }
-        System.out.println("========================\n");
+        printData();
+    }
+
+    public static void main(String[] args) throws IOException {
+        Supplier<DataContainer<Transaction>> sup = SinglyLinkedList::new;
+        TransactionFeed feed = new TransactionFeed(sup);
+
+        feed.loadCsvData("data/seahawks_transactions.csv");
+
+        System.out.println(feed.getData().size());
     }
 }

@@ -1,11 +1,14 @@
 import manager.TransactionFeed;
 import results.TransactionResults;
 import types.Transaction;
+import util.DataContainer;
+import util.SinglyLinkedList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 
@@ -49,7 +52,8 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         TransactionResults tests = new TransactionResults();
-        TransactionFeed transactionFeed = new TransactionFeed();
+        Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+        TransactionFeed transactionFeed = new TransactionFeed(supplier);
 
         boolean running = true;
 

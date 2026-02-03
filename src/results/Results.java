@@ -2,10 +2,12 @@ package results;
 
 import benchmark.BenchmarkRunner;
 import manager.RosterManager;
+import util.DataContainer;
 import types.Player;
 import util.ArrayStore;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * @author Chris Chun, Ayush
@@ -23,10 +25,12 @@ public class Results {
     final static String roster5000 = "data/seahawks_roster_5000.csv";
 
     BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
-    RosterManager rosterManager = new RosterManager();
 
-    ArrayStore<Player> roster = new ArrayStore<>(Player.class,16);
-    ArrayStore<Player> rosterForRemove = new ArrayStore<>(Player.class, 16);  // Class-level variable
+    final Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+    RosterManager rosterManager = new RosterManager(supplier);
+
+    DataContainer<Player> roster = new ArrayStore<>(Player.class,16);
+    DataContainer<Player> rosterForRemove = new ArrayStore<>(Player.class, 16);  // Class-level variable
 
     public Results(){
         super();
@@ -56,7 +60,7 @@ public class Results {
     // Only the remove operation - this is timed
     public void removeFromFrontNTimes() {
         while (rosterForRemove.size() > 0) {
-            rosterForRemove.removeAtIndex(0);
+            rosterForRemove.removeAt(0);
         }
     }
 

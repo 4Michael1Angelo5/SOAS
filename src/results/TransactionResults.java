@@ -3,10 +3,12 @@ package results;
 import benchmark.BenchmarkRunner;
 import manager.TransactionFeed;
 import types.Transaction;
+import util.DataContainer;
 import util.SinglyLinkedList;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 /**
  * Benchmark experiments for Transaction operations
@@ -37,15 +39,17 @@ public class TransactionResults {
      */
     BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
 
+    Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+
     /**
      * The manager responsible for high-level transaction logic and search operations.
      */
-    TransactionFeed transactionManager = new TransactionFeed();
+    TransactionFeed transactionManager = new TransactionFeed(supplier);
 
     /**
      * The primary list used to store loaded transactions for the "Add" and "Search" experiments.
      */
-    SinglyLinkedList<Transaction> myTransactions = new SinglyLinkedList<>();
+    DataContainer<Transaction> myTransactions = new SinglyLinkedList<>();
 
     /**
      * A temporary list used specifically for the "Remove" experiment to prevent

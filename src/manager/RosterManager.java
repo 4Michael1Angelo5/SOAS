@@ -1,9 +1,10 @@
 package manager;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
+import util.DataContainer;
 import types.Player;
-import util.ArrayStore;
 
 /**
  * Responsible for
@@ -18,8 +19,12 @@ import util.ArrayStore;
  */
 final public class RosterManager extends DataManager<Player> {
 
-    public RosterManager(){
-        super(Player.class);
+
+    public <T>RosterManager(Supplier<DataContainer<Player>> theSupplier){
+        super(
+                Player.class,
+                theSupplier
+        );
     }
 
 
@@ -29,7 +34,7 @@ final public class RosterManager extends DataManager<Player> {
      * getter
      * @return an ArrayStore of the player roster.
      */
-    public ArrayStore<Player> getPlayerData() {
+    public DataContainer<Player> getPlayerData() {
         return this.getData();
     }
 
@@ -44,7 +49,7 @@ final public class RosterManager extends DataManager<Player> {
     }
 
     public void loadPlayerData(String theFilePath) throws IOException {
-        this.addCsvData(theFilePath);
+        this.loadCsvData(theFilePath);
     }
 
     // ================================= searching =================================
@@ -118,7 +123,7 @@ final public class RosterManager extends DataManager<Player> {
 
         Player prev = getData().get(index);
         Player newPlayer = new Player(prev.id(), prev.name(), prev.position(), prev.jersey(),theNewYards);
-        getPlayerData().setData(index, newPlayer);
+        myData.set(index, newPlayer);
     }
 
     //================================= printing =================================
@@ -127,7 +132,7 @@ final public class RosterManager extends DataManager<Player> {
      * Prints the roster
      */
     public void printRoster() {
-        this.printData(this.getPlayerData());
+        this.printData();
     }
 
 
