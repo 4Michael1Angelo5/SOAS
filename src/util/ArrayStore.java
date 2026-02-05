@@ -41,14 +41,14 @@ public final class ArrayStore<T> implements DataContainer<T> {
         return true;
     }
 
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
 
 
     // ================== adding ========================
 
+    /**
+     * Adds an element to the end of the ArrayStore.
+     * @param theData the object to add to the list.
+     */
     public void add(T theData) {
         if (size == myData.length){
             resize();
@@ -104,9 +104,14 @@ public final class ArrayStore<T> implements DataContainer<T> {
 
     // ================== removing ========================
 
+    /**
+     * Removes the last item in the ArrayStore.
+     * @return the last item removed from the ArrayStore.
+     * @throws NoSuchElementException if the ArrayStore is empty
+     */
     @Override
     public T remove() throws NoSuchElementException {
-        if (size == 0) {
+        if (isEmpty()) {
             throw new NoSuchElementException("No such element");
         }
         T removed = myData[size -1];
@@ -169,6 +174,11 @@ public final class ArrayStore<T> implements DataContainer<T> {
         }
 
         return idx;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
     }
 
     @SuppressWarnings("unchecked")

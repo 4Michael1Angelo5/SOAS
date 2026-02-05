@@ -208,7 +208,7 @@ public class SinglyLinkedListTest {
     @Test void testReset() {
         final SinglyLinkedList<Integer> list = createRandomSLL();
         assertAll("Test Reset",
-                () -> assertDoesNotThrow(list::reset),
+                () -> assertDoesNotThrow(list::clear),
                 () -> assertEquals(0, list.size()),
                 () -> assertThrows(Exception.class, () -> list.get(0))
         );

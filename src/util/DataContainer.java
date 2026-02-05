@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * @param <T> Specifies the type of objects this data container will hold
  */
 public sealed interface DataContainer<T> extends Iterable<T>
-        permits ArrayStore, SinglyLinkedList {
+        permits ArrayStore, SinglyLinkedList, ArrayStack {
 
     // ================== getting ========================
 
@@ -46,7 +46,16 @@ public sealed interface DataContainer<T> extends Iterable<T>
     // ================== adding ========================
 
     /**
-     * Adds an element to the collection/ list.
+     * <p>
+     * Adds an element to the DataContainer using the <u>most efficient
+     * method</u> for the underlying data structure.
+     * </P>
+     * <ul>
+     * <li>ArrayStore  -> adds at end</li>
+     * <li>SinglyLinkedList ->  adds at tail (end)</li>
+     * <li>Stack  ->  adds at end (push)</li>
+     * <li>Queue -> adds at front (enqueue)</li>
+     * </ul>
      * @param val the object to add to the list.
      */
     void add(T val);
@@ -72,6 +81,16 @@ public sealed interface DataContainer<T> extends Iterable<T>
     T remove(T theVal) throws NoSuchElementException, IllegalArgumentException;
 
     /**
+     * <p>
+     * Removes an element from the DataContainer using the <u>most efficient
+     * method</u> for the underlying data structure.
+     * </P>
+     * <ul>
+     * <li>ArrayStore  -> removes from end</li>
+     * <li>SinglyLinkedList ->  removes head (front)</li>
+     * <li>Stack  ->  removes from end (pop)</li>
+     * <li>Queue -> removes from front (dequeue)</li>
+     * </ul>
      * @return the removed object from the Data Storage Container.
      * @throws NoSuchElementException if the object is not present
      * in the container or the DataContainer is empty.

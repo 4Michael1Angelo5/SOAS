@@ -51,15 +51,24 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
         myDataLoader = new DataLoader<>(theDataClass, theSupplier);
     }
 
+    // ======================= error handling and validation ==================
+
+    public boolean isValidContainer(DataContainer<?> theOtherContainer) {
+        if (theOtherContainer == null) {
+            return false;
+        }
+        return myData.getClass().equals(theOtherContainer.getClass());
+    }
+
     // =======================  getting and setting ===========================
     /**
      * gets the data array.
      * @return the data array
      */
     @Override
-    public DataContainer<T> getData() {
-        return myData;
-    }
+    public DataContainer<T> getData() {return myData;}
+
+    public Class<T> getDataClass() {return myDataClass;}
 
     // =======================  loading ===========================
 
@@ -72,7 +81,7 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     public void loadCsvData(String theFilePath) throws IOException {
         DataContainer<T> loaderResults = myDataLoader.loadData(theFilePath);
 
-        if (!loaderResults.getClass().getSimpleName().equals(myData.getClass().getSimpleName())) {
+        if (!isValidContainer(loaderResults)) {
             throw new RuntimeException("poop");
         }
         myData = loaderResults;

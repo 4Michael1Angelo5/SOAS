@@ -38,6 +38,7 @@ final public class RosterManager extends DataManager<Player> {
         return this.getData();
     }
 
+
     // ================================= adding =================================
 
     /**
