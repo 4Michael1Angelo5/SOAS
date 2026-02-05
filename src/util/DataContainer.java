@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * @param <T> Specifies the type of objects this data container will hold
  */
 public sealed interface DataContainer<T> extends Iterable<T>
-        permits ArrayStore, SinglyLinkedList, ArrayStack {
+        permits ArrayStore, SinglyLinkedList, ArrayStack , LinkedQueue {
 
     // ================== getting ========================
 
@@ -54,7 +54,7 @@ public sealed interface DataContainer<T> extends Iterable<T>
      * <li>ArrayStore  -> adds at end</li>
      * <li>SinglyLinkedList ->  adds at tail (end)</li>
      * <li>Stack  ->  adds at end (push)</li>
-     * <li>Queue -> adds at front (enqueue)</li>
+     * <li>Queue -> adds at end (enqueue)</li>
      * </ul>
      * @param val the object to add to the list.
      */
