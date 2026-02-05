@@ -1,86 +1,104 @@
 package manager;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import loader.DataLoader;
+import util.DataContainer;
 import types.DataType;
-import util.ArrayStore;
 
 /**
+ * DataManager provides a high-level abstraction for managing collections of {@link DataType}
+ * objects.
+ * * <p>This class is container-agnostic; it does not dictate how data is stored
+ * (e.g., Array, Linked List, Stack, or Queue). Instead, the storage strategy is
+ * injected via a {@link java.util.function.Supplier} during instantiation,
+ * allowing for runtime flexibility and performance optimization based on the
+ * specific needs of the data type.</p>
  *
- * @author Chris Chun, Ayush
- * @version 1.1
- * The Data Manager abstracts how data is managed in an array based
- * utility class, DataStore<T>. The data manager implements shared
- * functionality between the concrete child classes, RoasterManager,
- * DrillsManager, and TransactionManager.
- * @param <T> permits Player, Transaction, and Drill classes
+ * <p>Shared functionality provided by this manager includes:</p>
+ * <ul>
+ * <li>Generic CSV loading via {@link DataLoader}</li>
+ * <li>Identity-based searching and removal</li>
+ * <li>Iterable data access for reporting and logging</li>
+ * </ul>
+ * * @author Chris Chun, Ayush
+ * @version 1.2
+ * @param <T> The specific {@link DataType} managed (e.g., Player, Transaction, or Drill).
  */
-public abstract class DataManager <T extends DataType> {
+public abstract class DataManager <T extends DataType> implements Manager<T>{
 
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
     private static final Logger logger = Logger.getLogger(DataManager.class.getName());
 
-    private final DataLoader myDataLoader = new DataLoader();
+    private final DataLoader<T> myDataLoader;
 
     /**
      * An array based data structure holding data:
      * ie Players, Transactions, or Drills
      */
-    private ArrayStore<T> myData;
+    protected DataContainer<T> myData;
 
     private final Class<T> myDataClass;
 
-    public DataManager(Class<T> theDataClass){
-        myData = new ArrayStore<>(theDataClass,16);
+    public DataManager(Class<T> theDataClass, Supplier<DataContainer<T>> theSupplier){
+        myData = theSupplier.get();
         myDataClass = theDataClass;
+        myDataLoader = new DataLoader<>(theDataClass, theSupplier);
     }
+
+    // ======================= error handling and validation ==================
+
+    public boolean isValidContainer(DataContainer<?> theOtherContainer) {
+        if (theOtherContainer == null) {
+            return false;
+        }
+        return myData.getClass().equals(theOtherContainer.getClass());
+    }
+
+    // =======================  getting and setting ===========================
+    /**
+     * gets the data array.
+     * @return the data array
+     */
+    @Override
+    public DataContainer<T> getData() {return myData;}
+
+    public Class<T> getDataClass() {return myDataClass;}
+
+    // =======================  loading ===========================
 
     /**
      * Resets data to the loaded csv.
      * @param theFilePath the file path to the data you want to load.
      * @throws IOException if file not found.
      */
-    public void addCsvData(String theFilePath) throws IOException {
-        myData = myDataLoader.loadData(myDataClass, theFilePath);
+    @Override
+    public void loadCsvData(String theFilePath) throws IOException {
+        DataContainer<T> loaderResults = myDataLoader.loadData(theFilePath);
+
+        if (!isValidContainer(loaderResults)) {
+            throw new RuntimeException("poop");
+        }
+        myData = loaderResults;
     }
+
+    // =======================  adding ===========================
 
     /**
      * Add data to the array.
      * @param theData the data to add to the array.
      */
+    @Override
     public void addData(T theData) {
         myData.add(theData);
     }
 
-    /**
-     *
-     * @param theId theId of the data entry (Player, Drills, Transaction)
-     * @return the index of the data if present, -1 otherwise.
-     */
-    public int findById(int theId) {
-        int index = -1;
-
-        for (int i = 0; i < myData.size(); i++) {
-            if (myData.get(i).id() == theId){
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    }
-
-    /**
-     * gets the data array.
-     * @return the data array
-     */
-    protected ArrayStore<T> getData() {
-        return myData;
-    }
+    // ======================= removing  ===========================
 
     /**
      *
@@ -88,35 +106,61 @@ public abstract class DataManager <T extends DataType> {
      *              you wish to delete.
      * @return the removed data.
      */
+    @Override
     public T removeById(int theId) {
 
-        // find the index;
-        int index = findById(theId);
+        int index = myData.findBy((T theDataObject) -> theDataObject.id() == theId);
 
         // throw exception if not found
         if (index == -1) {
-            throw new RuntimeException("id not found");
+            throw new NoSuchElementException("id not found");
         }
 
         // store it
         T theRemovedData =  myData.get(index);
 
         // remove it, and shift everything
-        myData.removeAtIndex(index);
+        myData.remove(theRemovedData);
 
         return theRemovedData;
     }
 
+    // =======================  updating ===========================
+
+    protected void setData(int theIndex, T theData) {
+        myData.set(theIndex,theData);
+    }
+
+
+    // =======================  searching ===========================
+
+
+    /**
+     *
+     * @param theId theId of the data entry (Player, Drills, Transaction)
+     * @return the index of the data if present, -1 otherwise.
+     */
+    @Override
+    public int findById(int theId) {
+
+        return myData.findBy( (T theDataObject) -> theDataObject.id() == theId);
+    }
+
+    // =======================  utility ===========================
+
+
     /**
      * Prints data parsed from a csv file.
-     * @param theData An ArrayStore of DataType objects,
-     *                either Players, Transactions, or Drills
      */
-    public void printData(ArrayStore<T> theData){
-
-        for (int i = 0; i < theData.size(); i++) {
-            logger.info(ANSI_GREEN + theData.get(i).toString() + ANSI_RESET);
+    public void printData(){
+        for (T data: myData) {
+            logger.info(ANSI_GREEN + data.toString() + ANSI_RESET);
         }
+    }
+
+    @Override
+    public void clearData() {
+        myData.clear();
     }
 
 }

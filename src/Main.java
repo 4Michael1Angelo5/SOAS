@@ -1,11 +1,14 @@
-import benchmark.BenchmarkRunner;
-import manager.RosterManager;
-import types.Player;
-import results.Results;
+import manager.TransactionFeed;
+import results.TransactionResults;
+import types.Transaction;
+import util.DataContainer;
+import util.SinglyLinkedList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 
@@ -14,10 +17,11 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.2
+ * @version 1.3
  */
 public class Main {
-
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     static {
         // attempt to use logging properties file
@@ -33,7 +37,6 @@ public class Main {
         }
     }
 
-
     /**
      * Reader to read user inputs from the command line.
      */
@@ -47,63 +50,70 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) throws IOException {
+        Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+        TransactionFeed transactionFeed = new TransactionFeed(supplier);
+        TransactionResults tests = new TransactionResults(transactionFeed, supplier);
 
-        BenchmarkRunner benchmark = new BenchmarkRunner();
-        Results tests = new Results();
-        RosterManager rosterManager = new RosterManager();
 
         boolean running = true;
+
         while (running) {
             printMenu();
             String choice = reader.readLine().trim();
 
             switch (choice) {
                 case "1" -> {
-                    rosterManager.loadPlayerData("data/seahawks_players.csv");
+                    // resets the data back to original csv.
+                    transactionFeed.loadTransactionData("data/seahawks_transactions.csv");
+                    logger.info(ANSI_GREEN+ "Successfully loaded transactions" + ANSI_RESET);
                 }
                 case "2" -> {
-                    Player newPlayer = new Player(101,
-                            "Ayush",
-                            "qb",
-                            91,
-                            199);
-                    rosterManager.addPlayer(newPlayer);
+                    Transaction breakingNews =
+                            new Transaction(1271, "Injury", "Chris C.", "2026-01-14");
+                    // add transaction to the front
+                    transactionFeed.addTransactionFront(breakingNews);
+                    logger.info(ANSI_GREEN+ "Successfully added "
+                            +  breakingNews + " to the front of the transaction feed" + ANSI_RESET);
                 }
                 case "3" -> {
-                    try {
-                        Player p = rosterManager.removeById(10);
-                        logger.info("Removed: " + p.toString() + "From the roster.");
-                    } catch (RuntimeException e) {
-                        logger.warning("could not remove the player with id: " + 10 + ",id not found");
-                    }
+                    Transaction olderNews =
+                            new Transaction(111, "Trade", "Jerry Rice", "2026-01-10");
+                    // add transaction to the end
+                    transactionFeed.addTransactionRear(olderNews);
+                    logger.info(ANSI_GREEN+ "Successfully added "
+                            +  olderNews + " to the end of the transaction feed" + ANSI_RESET);
                 }
                 case "4" -> {
+                    Transaction transaction =
+                            new Transaction(89, "Injury", "Ayush", "2025-01-10");
                     try {
 
-                        rosterManager.updateStats(101, 109);
-                        logger.info("Successfully updated player stats");
+                        transactionFeed.insertTransaction(3, transaction);
+                        logger.info(ANSI_GREEN+ "Successfully added "
+                                +  transaction + " at index 3 to the transaction feed" + ANSI_RESET);
 
-                    }catch(RuntimeException e) {
-                        logger.warning(
-                                "could not update player with id, "
-                                + 101
-                                + ", because the player is not in the roster");
+                    } catch(IllegalArgumentException e) {
+                        logger.warning(e.toString());
+                        logger.warning("Cannot insert at index 3 because the transaction feed only has, "
+                                +  transactionFeed.getTransactionData().size() + " transactions");
                     }
+
                 }
                 case "5" -> {
-                    int index = rosterManager.findByName("Ayush");
-                    if (index == -1) {
-                        logger.warning("could not find Ayush in roster");
-                    } else {
-                        logger.info("found Ayush in the roster");
+                    try {
+                        Transaction removed  = transactionFeed.removeFront();
+                        logger.info(ANSI_GREEN+ "Successfully removed "
+                                +  removed + " to the end of the transaction feed" + ANSI_RESET);
+                    } catch (NoSuchElementException e) {
+                        logger.warning(e.toString());
+                        logger.warning(" Cannot remove transaction from the feed because it is empty");
                     }
                 }
                 case "6" -> {
-                    rosterManager.printRoster();
+                    transactionFeed.printTransactions();
                 }
                 case "7" -> {
                     tests.runAllExperiments();
-
                 }
                 case "0" -> running = false;
                 default -> {
@@ -111,7 +121,6 @@ public class Main {
                             Unsupported Option
                             Options are:
                             """);
-                    printMenu();
                 }
             }
         }
@@ -121,12 +130,12 @@ public class Main {
         logger.info("""
                 Seahawks Data Options
                 =====================
-                1. Load roster
-                2. Add player
-                3. Remove player
-                4. Update stats
-                5. Search
-                6. Print roster
+                1. Load transaction feed
+                2. Add breaking news (front)
+                3. Add older update (rear)
+                4. Insert at position
+                5. Remove transaction
+                6. Print first N
                 7. Run benchmark
                 0. Exit
                 """);

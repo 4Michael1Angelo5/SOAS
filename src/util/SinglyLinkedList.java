@@ -3,8 +3,9 @@ package util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Predicate;
 
-public class SinglyLinkedList<T> implements Iterable<T>{
+public final class SinglyLinkedList<T> implements DataContainer<T> {
 
     /**
      * No Such Element Exception error.
@@ -35,12 +36,28 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         head = tail = null;
     }
 
+    // ================== getting & setting ========================
+    /**
+     * reset the list to empty.
+     */
+    @Override
+    public void clear() {
+        head = tail = null;
+        size = 0;
+    }
+
     /**
      * Gets the number of nodes currently in the list.
      * @return the number of nodes in the list.
      */
+    @Override
     public int size() {
         return this.size;
+    }
+
+    @Override
+    public boolean supportsIndexedAccess() {
+        return true;
     }
 
     /**
@@ -64,20 +81,16 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         return walker.val;
     }
 
-    /**
-     * Add a new Node to the list at the front.
-     * @param item the item you want to add to the list.
-     */
-    public void addFront(T item) {
-        Node<T> newNode = new Node<>(item);
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
-        if (size == 0) {
-            head = tail = newNode;
-        }else {
-            newNode.next = head;
-            head = newNode;
-        }
-        size++;
+    // ================== adding ========================
+
+    @Override
+    public void add(T item) {
+        addRear(item);
     }
 
     /**
@@ -96,11 +109,28 @@ public class SinglyLinkedList<T> implements Iterable<T>{
     }
 
     /**
+     * Add a new Node to the list at the front.
+     * @param item the item you want to add to the list.
+     */
+    public void addFront(T item) {
+        Node<T> newNode = new Node<>(item);
+
+        if (size == 0) {
+            head = tail = newNode;
+        }else {
+            newNode.next = head;
+            head = newNode;
+        }
+        size++;
+    }
+
+    /**
      *
      * @param theIndex the index of node after insertion.
      * @param theVal the value of the node you want to add into the list.
      */
-    public void addAtIndex(int theIndex, T theVal) {
+    @Override
+    public void add(int theIndex, T theVal) {
 
         Node<T> newNode = new Node<>(theVal);
 
@@ -108,35 +138,37 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         if (theIndex > size || theIndex < 0) {
             throw new IllegalArgumentException(ILLEGAL_ARG_ERR + size);
         } else
-        // 2) Inserting at the end
-        if (theIndex == size) {
-            this.addRear(theVal);
-            return;
-        } else
-        // 3) inserting in the front
-        if (theIndex == 0) {
-            this.addFront(theVal);
-            return;
-        } else {
-            // 4) Inserting somewhere in between head and tail
+            // 2) Inserting at the end
+            if (theIndex == size) {
+                this.addRear(theVal);
+                return;
+            } else
+                // 3) inserting in the front
+                if (theIndex == 0) {
+                    this.addFront(theVal);
+                    return;
+                } else {
+                    // 4) Inserting somewhere in between head and tail
 
-            Node<T> walker = head;
-            int steps = 0;
-            while( steps < theIndex - 1) {
-                walker = walker.next;
-                steps++;
-            }
-            // now prev sits on the node right before the one where we need to place
-            // the new node
+                    Node<T> walker = head;
+                    int steps = 0;
+                    while( steps < theIndex - 1) {
+                        walker = walker.next;
+                        steps++;
+                    }
+                    // now prev sits on the node right before the one where we need to place
+                    // the new node
 
-            // 5) addAtIndex the node and update pointers
-            newNode.next = walker.next;
-            walker.next = newNode;
-        }
+                    // 5) addAtIndex the node and update pointers
+                    newNode.next = walker.next;
+                    walker.next = newNode;
+                }
 
         // 6) update the size
         size++;
     }
+
+    // ================== removing ========================
 
     /**
      * Removes a node from the front of the list.
@@ -156,7 +188,8 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         return theNodeValueRemoved;
     }
 
-    public T remove(int theIndex){
+    @Override
+    public T removeAt(int theIndex){
 
         T theRemovedVal;
 
@@ -251,6 +284,30 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         throw new NoSuchElementException("Can't find item");
     }
 
+    // ================== updating ========================
+
+    @Override
+    public void set(int theIndex, T theVal){
+        if (theIndex >= size || theIndex < 0) {
+            throw new IndexOutOfBoundsException(
+                    "Cannot insert at index "
+                            + theIndex
+                            + " because the list has size "
+                            + size
+            );
+        }
+        int steps = 0;
+        Node<T> walker = head;
+        while(steps < theIndex) {
+            walker = walker.next;
+            steps++;
+        }
+        walker.val = theVal;
+    }
+
+
+    // ================== searching ========================
+
     /**
      * Searches a linked list for the item and if it is present
      * returns it's index position or returns -1 otherwise.
@@ -270,15 +327,23 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         return -1;
     }
 
-    /**
-     * reset the list to empty.
-     */
-    public void reset() {
-        head = tail = null;
-        size = 0;
+    @Override
+    public int findBy(Predicate<T> thePredicate) {
+        Node<T> walker = head;
+        int i = 0;
+
+        while(walker != null) {
+            if (thePredicate.test(walker.val)) {
+                return i;
+            }
+            i++;
+            walker = walker.next;
+        }
+
+        return -1;
     }
 
-
+    // ================== utility ========================
 
     /**
      * Converts a linked list into an array list.
@@ -336,6 +401,8 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         };
     }
 
+    // ================== utility class ========================
+
     /**
      * Node class for singly linked list.
      * @param <T> the type of data the node will store.
@@ -361,34 +428,5 @@ public class SinglyLinkedList<T> implements Iterable<T>{
         }
 
     }
-
-public static void main(String[] args) {
-    SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
-    list.addRear(0);
-    list.addRear(1);
-    list.addRear(2);
-    list.addRear(3);
-    list.addRear(4);
-    System.out.println(list);
-    System.out.println("expected size: 5, Actual size:" + list.size);
-    list.addAtIndex(2, 100);
-    System.out.println("expected: 0 -> 1 -> 100 -> 2 -> 3 -> 4 -> null");
-    System.out.println(("actual : " + list));
-    list.remove(2);
-    System.out.println("expected: 0 -> 1 -> 2 -> 3 -> 4 -> null");
-    System.out.println(("actual : " + list));
-
-    SinglyLinkedList<String> list2 = new SinglyLinkedList<>();
-    list2.addRear("A");
-    list2.addRear("B");
-    list2.addRear("C");
-    list2.addRear("D");
-    list2.addAtIndex(4, "E");
-
-    System.out.println("Expected: " + 5);
-    System.out.println("Actual: " + list2.size);
-
-    System.out.println(list2);
-}
 }
 

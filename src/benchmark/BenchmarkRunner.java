@@ -1,6 +1,11 @@
 package benchmark;
 
 
+import types.DataType;
+import util.DataContainer;
+
+import java.util.function.Supplier;
+
 /**
  * @author Chris Chun, Ayush
  * @version 1.1
@@ -62,6 +67,24 @@ public class BenchmarkRunner implements Benchmark {
         System.out.println("Total time: " + totalTime + " ms");
         System.out.println("Average time per run: " + avgTime + " ms");
         System.out.println("==========================\n");
+    }
+
+    public double
+    runSpeedTestWithSetup(
+            int theTimesToRun,
+            Runnable theSetupTask,
+            Runnable theTask) {
+
+        double totalTime = 0.0;
+
+        for (int i = 0; i < theTimesToRun; i++) {
+
+            theSetupTask.run();
+
+            totalTime += runSpeedTestAndGetAvg(1, theTask);
+        }
+
+        return totalTime/theTimesToRun;
     }
 
     public double runSpeedTestAndGetAvg(int theTimesToRun, Runnable theTask) {
