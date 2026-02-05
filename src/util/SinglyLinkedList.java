@@ -40,7 +40,8 @@ public final class SinglyLinkedList<T> implements DataContainer<T> {
     /**
      * reset the list to empty.
      */
-    public void reset() {
+    @Override
+    public void clear() {
         head = tail = null;
         size = 0;
     }

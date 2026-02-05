@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.2
+ * @version 1.3
  */
 public class Main {
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -50,9 +50,10 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) throws IOException {
-        TransactionResults tests = new TransactionResults();
         Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
         TransactionFeed transactionFeed = new TransactionFeed(supplier);
+        TransactionResults tests = new TransactionResults(transactionFeed, supplier);
+
 
         boolean running = true;
 

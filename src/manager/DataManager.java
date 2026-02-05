@@ -28,7 +28,7 @@ import types.DataType;
  * @version 1.2
  * @param <T> The specific {@link DataType} managed (e.g., Player, Transaction, or Drill).
  */
-public abstract class DataManager <T extends DataType> {
+public abstract class DataManager <T extends DataType> implements Manager<T>{
 
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
@@ -51,14 +51,24 @@ public abstract class DataManager <T extends DataType> {
         myDataLoader = new DataLoader<>(theDataClass, theSupplier);
     }
 
+    // ======================= error handling and validation ==================
+
+    public boolean isValidContainer(DataContainer<?> theOtherContainer) {
+        if (theOtherContainer == null) {
+            return false;
+        }
+        return myData.getClass().equals(theOtherContainer.getClass());
+    }
+
     // =======================  getting and setting ===========================
     /**
      * gets the data array.
      * @return the data array
      */
-    protected DataContainer<T> getData() {
-        return myData;
-    }
+    @Override
+    public DataContainer<T> getData() {return myData;}
+
+    public Class<T> getDataClass() {return myDataClass;}
 
     // =======================  loading ===========================
 
@@ -67,8 +77,14 @@ public abstract class DataManager <T extends DataType> {
      * @param theFilePath the file path to the data you want to load.
      * @throws IOException if file not found.
      */
+    @Override
     public void loadCsvData(String theFilePath) throws IOException {
-        myData = myDataLoader.loadData(theFilePath);
+        DataContainer<T> loaderResults = myDataLoader.loadData(theFilePath);
+
+        if (!isValidContainer(loaderResults)) {
+            throw new RuntimeException("poop");
+        }
+        myData = loaderResults;
     }
 
     // =======================  adding ===========================
@@ -77,6 +93,7 @@ public abstract class DataManager <T extends DataType> {
      * Add data to the array.
      * @param theData the data to add to the array.
      */
+    @Override
     public void addData(T theData) {
         myData.add(theData);
     }
@@ -89,6 +106,7 @@ public abstract class DataManager <T extends DataType> {
      *              you wish to delete.
      * @return the removed data.
      */
+    @Override
     public T removeById(int theId) {
 
         int index = myData.findBy((T theDataObject) -> theDataObject.id() == theId);
@@ -122,7 +140,9 @@ public abstract class DataManager <T extends DataType> {
      * @param theId theId of the data entry (Player, Drills, Transaction)
      * @return the index of the data if present, -1 otherwise.
      */
+    @Override
     public int findById(int theId) {
+
         return myData.findBy( (T theDataObject) -> theDataObject.id() == theId);
     }
 
@@ -136,6 +156,11 @@ public abstract class DataManager <T extends DataType> {
         for (T data: myData) {
             logger.info(ANSI_GREEN + data.toString() + ANSI_RESET);
         }
+    }
+
+    @Override
+    public void clearData() {
+        myData.clear();
     }
 
 }
