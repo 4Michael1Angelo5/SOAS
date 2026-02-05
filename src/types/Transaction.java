@@ -24,10 +24,10 @@ public record Transaction(
      */
     @Override
     public String toString() {
-        return "Transaction[id=" + trans_id +
-                ", type=" + type +
-                ", player=" + player +
-                ", timestamp=" + timestamp + "]";
+        return "Transaction[id =" + trans_id +
+                ", type =" + type +
+                ", player =" + player +
+                ", timestamp =" + timestamp + "]";
     }
 
     /**
