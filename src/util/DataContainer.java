@@ -110,4 +110,10 @@ public sealed interface DataContainer<T> extends Iterable<T>
      */
     int findBy(Predicate<T> thePredicate) throws IllegalArgumentException;
 
+
+    /**
+     * clears the all the data from the container.
+     */
+    void clear();
+
 }

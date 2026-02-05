@@ -8,14 +8,14 @@ import types.Player;
 
 /**
  * Responsible for
- * Storing players using an array
+ * Storing players in a DataContainer.
  * Adding players
  * Removing players
  * Updating stats
  * Searching
  * Printing
  * @author Chris Chun, Ayush
- * @version 1.1
+ * @version 1.2
  */
 final public class RosterManager extends DataManager<Player> {
 
@@ -60,15 +60,7 @@ final public class RosterManager extends DataManager<Player> {
      * @return the first index of the player with the matching name and -1 otherwise
      */
     public int findByName(String theName) {
-        int index = -1;
-
-        for (int i = 0; i < this.getPlayerData().size(); i++) {
-            if (getPlayerData().get(i).name().equals(theName)) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+        return myData.findBy((player)-> player.name().equals(theName));
     }
 
     /**
@@ -77,15 +69,7 @@ final public class RosterManager extends DataManager<Player> {
      * @return returns the first index of the player with the matching position, and -1 otherwise.
      */
     public int findByPosition(String thePos) {
-        int index = -1;
-
-        for (int i = 0; i < getData().size(); i++) {
-            if (getData().get(i).position().equals(thePos)) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+        return myData.findBy(player-> player.position().equals(thePos));
     }
 
     /**
@@ -94,16 +78,7 @@ final public class RosterManager extends DataManager<Player> {
      * @return returns the first index of the player with the matching jersey, and -1 otherwise.
      */
     public int findByJersey(int theJerseyNumber) {
-        int index = -1;
-
-        for (int i = 0; i < getData().size(); i++) {
-            if (getData().get(i).jersey() == theJerseyNumber) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-
+        return myData.findBy(player-> player.jersey() == theJerseyNumber);
     }
 
     // ================================= updating =================================
@@ -134,6 +109,5 @@ final public class RosterManager extends DataManager<Player> {
     public void printRoster() {
         this.printData();
     }
-
 
 }

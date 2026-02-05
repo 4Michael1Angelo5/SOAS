@@ -1,13 +1,11 @@
 package results;
 
-import benchmark.BenchmarkRunner;
 import manager.TransactionFeed;
 import types.Transaction;
 import util.DataContainer;
 import util.SinglyLinkedList;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -15,51 +13,22 @@ import java.util.function.Supplier;
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-public class TransactionResults {
+public class TransactionResults extends Results<Transaction, TransactionFeed> {
 
-    final private static int runTrials = 30;
-
-    /**
-     * The file path for the small transaction dataset (50 records).
-     */
+    // file paths to csv data
     final static String trans50 = "data/seahawks_transactions_50.csv";
-
-    /**
-     * The file path for the medium transaction dataset (500 records).
-     */
     final static String trans500 = "data/seahawks_transactions_500.csv";
-
-    /**
-     * The file path for the large transaction dataset (5000 records).
-     */
     final static String trans5000 = "data/seahawks_transactions_5000.csv";
 
-    /**
-     * The timing engine used to execute speed tests and calculate averages.
-     */
-    BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
 
-    Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+    public TransactionResults(
+            TransactionFeed theManger,
+            Supplier<DataContainer<Transaction>> theSupplier) {
 
-    /**
-     * The manager responsible for high-level transaction logic and search operations.
-     */
-    TransactionFeed transactionManager = new TransactionFeed(supplier);
-
-    /**
-     * The primary list used to store loaded transactions for the "Add" and "Search" experiments.
-     */
-    DataContainer<Transaction> myTransactions = new SinglyLinkedList<>();
-
-    /**
-     * A temporary list used specifically for the "Remove" experiment to prevent
-     * the destruction of the primary dataset.
-     */
-    SinglyLinkedList<Transaction> transactionsForRemove = new SinglyLinkedList<>();
-
-    public TransactionResults() {
-        super();
+        super(Transaction.class, theManger, theSupplier);
     }
+
+    // =======================   loading ================================
 
     /**
      Loads transaction data from a CSV file into the transaction manager
@@ -68,153 +37,150 @@ public class TransactionResults {
      * @throws IOException If the file cannot be found or read.
      */
     public void loadTransactions(String theFilePath) throws IOException {
-        transactionManager.loadTransactionData(theFilePath);
-        myTransactions = transactionManager.getTransactionData();
+        this.loadData(theFilePath);
     }
+
+    // =======================   adding ================================
 
     /**
      * Benchmarks the addition of transactions to the front of a new list.
      * This method utilizes an iterator to maintain O(n) efficiency.
      */
+    // runnable
     public void addFrontNTimes() {
-        SinglyLinkedList<Transaction> temp = new SinglyLinkedList<>();
-        for (Transaction transaction:myTransactions) {
-            temp.addFront(transaction);
+        if (myManager.getData().isEmpty()) {
+            throw new RuntimeException(
+                    "Misconfigured ExperimentResult, please ensure " +
+                            "to loadData before running this experiment"
+            );
+        }
+        DataContainer<Transaction> temp = mySupplier.get();
+        for (Transaction theTransction: myManager.getData()) {
+            temp.add(0, theTransction);
         }
     }
 
-    public void searchListNTime() {
-        int N = transactionManager.getTransactionData().size();
-        for (int i = 0; i < N; i++) {
-            transactionManager.findByPlayer("NOT FINDABLE");
-        }
+    // gather results
+    public ExperimentResult testAddFrontNTimes() {
+        double avgTime = myBenchmarkRunner.runSpeedTestAndGetAvg(
+                TRIAL_RUNS,
+                this::addFrontNTimes);
+        String operationName = "add front";
+        int inputSize = myManager.getTransactionData().size();
+
+        return new ExperimentResult(inputSize, operationName, avgTime);
     }
 
     /**
      * Benchmarks the addition of transactions to the rear of a new list.
      * This method utilizes an iterator to maintain O(n) efficiency.
      */
+    // runnable
     public void addRearNTimes() {
-        SinglyLinkedList<Transaction> temp = new SinglyLinkedList<>();
-        for (Transaction transaction:myTransactions) {
-            temp.addRear(transaction);
+        if (myManager.getData().isEmpty()) {
+            throw new RuntimeException(
+                    "Misconfigured ExperimentResult, please ensure " +
+                            "to loadData before running this experiment"
+            );
+        }
+        DataContainer<Transaction> temp = mySupplier.get();
+        for (Transaction transaction:myManager.getTransactionData()) {
+            temp.add(temp.size(),transaction);
         }
     }
 
-    /**
-     * Prepares a temporary list for the removal benchmark by copying
-     * the current transaction data. This setup is not included in the timed test.
-     */
-    public void setupRemoveTest() {
-        transactionsForRemove = new SinglyLinkedList<>();
-        for (Transaction transaction:myTransactions) {
-            transactionsForRemove.addRear(transaction);
-        }
+    // gather results
+    public ExperimentResult testAddRearNTimes() {
+        int inputSize = myManager.getTransactionData().size();
+        String operation = "add rear";
+        double avgTime =
+                myBenchmarkRunner.runSpeedTestAndGetAvg(TRIAL_RUNS, this::addRearNTimes);
+
+        return new ExperimentResult(inputSize, operation, avgTime);
+
     }
+
+    // =======================   removing  ================================
 
     /**
      * Benchmarks the removal of all elements from the front of the list.
      * This is a destructive operation that empties the target list.
      */
+    // runnable
     public void removeFromFrontNTimes() {
-        while (!transactionsForRemove.isEmpty()) {
-            transactionsForRemove.remove();
+        if (myManager.getData().isEmpty()) {
+            throw new RuntimeException(
+                    "Misconfigured ExperimentResult, please ensure " +
+                            "to loadData before running this experiment"
+            );
+        }
+
+        while (!containerForRemove.isEmpty()) {
+            containerForRemove.removeAt(0);
         }
     }
 
-    /**
-     * Clears the current transaction list to prepare for the next
-     * experimental data set.
-     */
-    public void resetTransactions() {
-        myTransactions = new SinglyLinkedList<>();
+    // gather results
+    public ExperimentResult testRemoveFrontNTimes() {
+        final int inputSize = myManager.getTransactionData().size();
+        final String operationName = "remove front";
+        final double avgTime =
+                myBenchmarkRunner.runSpeedTestWithSetup(
+                        TRIAL_RUNS,
+                        this::setUpForRemove,
+                        this::removeFromFrontNTimes);
+        return new ExperimentResult(inputSize, operationName, avgTime);
     }
 
-    /**
-     * Orchestrates the full benchmarking suite across multiple data sizes (50, 500, 5000).
-     * Measures performance for adding to front/rear, removal, and searching,
-     * then outputs results in a formatted table.
-     * * @implNote For the removal test, the list is re-populated via
-     * {@link #setupRemoveTest()} before each trial to ensure accurate measurement.
-     * * @throws IOException If the data files cannot be loaded during experimentation.
-     */
+    // =======================   searching ================================
+
+    public void searchListNTimes() {
+        int N = myManager.getTransactionData().size();
+        for (int i = 0; i < N; i++) {
+            myManager.findByTimestamp("NOT FINDABLE");
+        }
+    }
+
+    // gather results
+    public ExperimentResult testSearchNTimes() {
+        int inputSize = myManager.getTransactionData().size();
+        String operationName = "search";
+        final double avgTime =
+                myBenchmarkRunner.runSpeedTestAndGetAvg(
+                        TRIAL_RUNS,
+                        this::searchListNTimes);
+        return new ExperimentResult(inputSize, operationName, avgTime);
+    }
+
+
     public void runAllExperiments() throws IOException {
-        System.out.println("\n============= My Transaction Feed =============\n");
-        System.out.printf("%-10s %-15s %-20s%n", "Size", "Operation", "LinkedList Time (ms)");
-        System.out.println("-----------------------------------------------");
 
-        // Test with 50 transactions
+        //=================  Test with 50 transactions ====================
         loadTransactions(trans50);
+        addExperimentResult(testAddFrontNTimes());
+        addExperimentResult(testRemoveFrontNTimes());
+        addExperimentResult(testSearchNTimes());
 
-        double addFront50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::addFrontNTimes);
-        System.out.printf("%-10s %-15s %-20.1f%n", "50", "Add Front", addFront50);
-
-        double addRear50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::addRearNTimes);
-        System.out.printf("%-10s %-15s %-20.1f%n", "50", "Add Rear", addRear50);
-
-        double remove50 = 0;
-        for (int i = 0; i < runTrials; i++) {
-            setupRemoveTest();
-            remove50 += benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
-        }
-        double remove50avg = remove50 / runTrials;
-        System.out.printf("%-10s %-15s %-20.1f%n", "50", "Remove", remove50avg);
-
-        double search50 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchListNTime);
-        System.out.printf("%-10s %-15s %-20.1f%n", "50", "Search", search50);
-
-        resetTransactions();
-
-        // Test with 500 transactions
+        //=================  Test with 500 transactions ===================
         loadTransactions(trans500);
+        addExperimentResult(testAddFrontNTimes());
+        addExperimentResult(testRemoveFrontNTimes());
+        addExperimentResult(testSearchNTimes());
 
-        double addFront500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::addFrontNTimes);
-        System.out.printf("%-10s %-15s %-20.1f%n", "500", "Add Front", addFront500);
-
-        double addRear500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::addRearNTimes);
-        System.out.printf("%-10s %-15s %-20.1f%n", "500", "Add Rear", addRear500);
-
-        double remove500 = 0;
-        for (int i = 0; i < runTrials; i++) {
-            setupRemoveTest();
-            remove500 += benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
-        }
-        double remove500avg = remove500 / runTrials;
-        System.out.printf("%-10s %-15s %-20.1f%n", "500", "Remove", remove500avg);
-
-        double search500 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials,this::searchListNTime);
-        System.out.printf("%-10s %-15s %-20.1f%n", "500", "Search", search500);
-
-        resetTransactions();
-
-        // Test with 5000 transactions
+        // ================ Test with 5000 transactions ====================
         loadTransactions(trans5000);
+        addExperimentResult(testAddFrontNTimes());
+        addExperimentResult(testRemoveFrontNTimes());
+        addExperimentResult(testSearchNTimes());
 
-        double addFront5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::addFrontNTimes);
-        System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Add Front", addFront5000);
+        printResults();
 
-        double addRear5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::addRearNTimes);
-        System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Add Rear", addRear5000);
-
-        double remove5000 = 0;
-        for (int i = 0; i < runTrials; i++) {
-            setupRemoveTest();
-            remove5000 += benchmarkRunner.runSpeedTestAndGetAvg(1, this::removeFromFrontNTimes);
-        }
-        double remove5000avg = remove5000 / runTrials;
-        System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Remove", remove5000avg);
-
-        double search5000 = benchmarkRunner.runSpeedTestAndGetAvg(runTrials, this::searchListNTime);
-
-        System.out.printf("%-10s %-15s %-20.1f%n", "5000", "Search", search5000);
-
-        System.out.println("===============================================\n");
-
-        resetTransactions();
     }
 
     public static void main(String[] args) throws IOException {
-        TransactionResults results = new TransactionResults();
+        Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+        TransactionFeed transactionManager = new TransactionFeed(supplier);
+        TransactionResults results = new TransactionResults(transactionManager, supplier);
         results.runAllExperiments();
     }
 }
