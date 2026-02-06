@@ -2,12 +2,15 @@ package manager;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import loader.DataLoader;
 import util.DataContainer;
 import types.DataType;
+import util.ManagerConfigException;
+import util.MismatchedContainerFromLoaderException;
 
 /**
  * DataManager provides a high-level abstraction for managing collections of {@link DataType}
@@ -49,6 +52,7 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
         myData = theSupplier.get();
         myDataClass = theDataClass;
         myDataLoader = new DataLoader<>(theDataClass, theSupplier);
+        validateManagerConfig();
     }
 
     // ======================= error handling and validation ==================
@@ -58,6 +62,13 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
             return false;
         }
         return myData.getClass().equals(theOtherContainer.getClass());
+    }
+
+    public void validateManagerConfig() {
+        if (this.needsIndexedAccess() && !myData.supportsIndexedAccess()) {
+            throw new ManagerConfigException(getManagerClass(), myData.getClass());
+
+        };
     }
 
     // =======================  getting and setting ===========================
@@ -82,7 +93,10 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
         DataContainer<T> loaderResults = myDataLoader.loadData(theFilePath);
 
         if (!isValidContainer(loaderResults)) {
-            throw new RuntimeException("poop");
+            // error example:
+            // if the DataLoader returns an ArrayStore
+            // but the manager was configured to use a SinglyLinkedList
+            throw new MismatchedContainerFromLoaderException(myData.getClass(), loaderResults.getClass());
         }
         myData = loaderResults;
     }
@@ -106,7 +120,6 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
      *              you wish to delete.
      * @return the removed data.
      */
-    @Override
     public T removeById(int theId) {
 
         int index = myData.findBy((T theDataObject) -> theDataObject.id() == theId);
@@ -119,8 +132,8 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
         // store it
         T theRemovedData =  myData.get(index);
 
-        // remove it, and shift everything
-        myData.remove(theRemovedData);
+      // remove it, and shift everything
+        myData.removeAt(theId);
 
         return theRemovedData;
     }
@@ -128,6 +141,7 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     // =======================  updating ===========================
 
     protected void setData(int theIndex, T theData) {
+
         myData.set(theIndex,theData);
     }
 

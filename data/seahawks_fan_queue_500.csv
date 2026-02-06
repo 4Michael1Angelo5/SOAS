@@ -1,0 +1,501 @@
+fan_id,name,service_type,arrival_time
+1,Fan1,Info Desk,09:00:15
+2,Fan2,Merchandise,09:00:30
+3,Fan3,Ticket Purchase,09:00:45
+4,Fan4,Will Call,09:01:00
+5,Fan5,Merchandise,09:01:15
+6,Fan6,Info Desk,09:01:30
+7,Fan7,Will Call,09:01:45
+8,Fan8,Will Call,09:02:00
+9,Fan9,Info Desk,09:02:15
+10,Fan10,Will Call,09:02:30
+11,Fan11,Ticket Purchase,09:02:45
+12,Fan12,Merchandise,09:03:00
+13,Fan13,Will Call,09:03:15
+14,Fan14,Ticket Purchase,09:03:30
+15,Fan15,Merchandise,09:03:45
+16,Fan16,Ticket Purchase,09:04:00
+17,Fan17,Merchandise,09:04:15
+18,Fan18,Ticket Purchase,09:04:30
+19,Fan19,Will Call,09:04:45
+20,Fan20,Ticket Purchase,09:05:00
+21,Fan21,Merchandise,09:05:15
+22,Fan22,Merchandise,09:05:30
+23,Fan23,Merchandise,09:05:45
+24,Fan24,Ticket Purchase,09:06:00
+25,Fan25,Merchandise,09:06:15
+26,Fan26,Ticket Purchase,09:06:30
+27,Fan27,Info Desk,09:06:45
+28,Fan28,Ticket Purchase,09:07:00
+29,Fan29,Will Call,09:07:15
+30,Fan30,Will Call,09:07:30
+31,Fan31,Will Call,09:07:45
+32,Fan32,Will Call,09:08:00
+33,Fan33,Will Call,09:08:15
+34,Fan34,Merchandise,09:08:30
+35,Fan35,Merchandise,09:08:45
+36,Fan36,Info Desk,09:09:00
+37,Fan37,Info Desk,09:09:15
+38,Fan38,Will Call,09:09:30
+39,Fan39,Ticket Purchase,09:09:45
+40,Fan40,Info Desk,09:10:00
+41,Fan41,Will Call,09:10:15
+42,Fan42,Will Call,09:10:30
+43,Fan43,Merchandise,09:10:45
+44,Fan44,Merchandise,09:11:00
+45,Fan45,Ticket Purchase,09:11:15
+46,Fan46,Ticket Purchase,09:11:30
+47,Fan47,Will Call,09:11:45
+48,Fan48,Will Call,09:12:00
+49,Fan49,Ticket Purchase,09:12:15
+50,Fan50,Will Call,09:12:30
+51,Fan51,Ticket Purchase,09:12:45
+52,Fan52,Info Desk,09:13:00
+53,Fan53,Info Desk,09:13:15
+54,Fan54,Merchandise,09:13:30
+55,Fan55,Merchandise,09:13:45
+56,Fan56,Will Call,09:14:00
+57,Fan57,Merchandise,09:14:15
+58,Fan58,Merchandise,09:14:30
+59,Fan59,Will Call,09:14:45
+60,Fan60,Ticket Purchase,09:15:00
+61,Fan61,Info Desk,09:15:15
+62,Fan62,Will Call,09:15:30
+63,Fan63,Info Desk,09:15:45
+64,Fan64,Merchandise,09:16:00
+65,Fan65,Ticket Purchase,09:16:15
+66,Fan66,Info Desk,09:16:30
+67,Fan67,Ticket Purchase,09:16:45
+68,Fan68,Merchandise,09:17:00
+69,Fan69,Merchandise,09:17:15
+70,Fan70,Info Desk,09:17:30
+71,Fan71,Will Call,09:17:45
+72,Fan72,Info Desk,09:18:00
+73,Fan73,Ticket Purchase,09:18:15
+74,Fan74,Info Desk,09:18:30
+75,Fan75,Ticket Purchase,09:18:45
+76,Fan76,Info Desk,09:19:00
+77,Fan77,Info Desk,09:19:15
+78,Fan78,Ticket Purchase,09:19:30
+79,Fan79,Will Call,09:19:45
+80,Fan80,Merchandise,09:20:00
+81,Fan81,Merchandise,09:20:15
+82,Fan82,Will Call,09:20:30
+83,Fan83,Ticket Purchase,09:20:45
+84,Fan84,Merchandise,09:21:00
+85,Fan85,Ticket Purchase,09:21:15
+86,Fan86,Info Desk,09:21:30
+87,Fan87,Will Call,09:21:45
+88,Fan88,Merchandise,09:22:00
+89,Fan89,Merchandise,09:22:15
+90,Fan90,Merchandise,09:22:30
+91,Fan91,Ticket Purchase,09:22:45
+92,Fan92,Info Desk,09:23:00
+93,Fan93,Ticket Purchase,09:23:15
+94,Fan94,Will Call,09:23:30
+95,Fan95,Will Call,09:23:45
+96,Fan96,Will Call,09:24:00
+97,Fan97,Will Call,09:24:15
+98,Fan98,Ticket Purchase,09:24:30
+99,Fan99,Ticket Purchase,09:24:45
+100,Fan100,Ticket Purchase,09:25:00
+101,Fan101,Info Desk,09:25:15
+102,Fan102,Will Call,09:25:30
+103,Fan103,Will Call,09:25:45
+104,Fan104,Ticket Purchase,09:26:00
+105,Fan105,Will Call,09:26:15
+106,Fan106,Will Call,09:26:30
+107,Fan107,Ticket Purchase,09:26:45
+108,Fan108,Info Desk,09:27:00
+109,Fan109,Info Desk,09:27:15
+110,Fan110,Will Call,09:27:30
+111,Fan111,Will Call,09:27:45
+112,Fan112,Ticket Purchase,09:28:00
+113,Fan113,Will Call,09:28:15
+114,Fan114,Merchandise,09:28:30
+115,Fan115,Merchandise,09:28:45
+116,Fan116,Ticket Purchase,09:29:00
+117,Fan117,Will Call,09:29:15
+118,Fan118,Ticket Purchase,09:29:30
+119,Fan119,Will Call,09:29:45
+120,Fan120,Merchandise,09:30:00
+121,Fan121,Info Desk,09:30:15
+122,Fan122,Info Desk,09:30:30
+123,Fan123,Ticket Purchase,09:30:45
+124,Fan124,Merchandise,09:31:00
+125,Fan125,Will Call,09:31:15
+126,Fan126,Will Call,09:31:30
+127,Fan127,Merchandise,09:31:45
+128,Fan128,Info Desk,09:32:00
+129,Fan129,Ticket Purchase,09:32:15
+130,Fan130,Ticket Purchase,09:32:30
+131,Fan131,Info Desk,09:32:45
+132,Fan132,Ticket Purchase,09:33:00
+133,Fan133,Will Call,09:33:15
+134,Fan134,Will Call,09:33:30
+135,Fan135,Ticket Purchase,09:33:45
+136,Fan136,Merchandise,09:34:00
+137,Fan137,Ticket Purchase,09:34:15
+138,Fan138,Ticket Purchase,09:34:30
+139,Fan139,Will Call,09:34:45
+140,Fan140,Info Desk,09:35:00
+141,Fan141,Merchandise,09:35:15
+142,Fan142,Info Desk,09:35:30
+143,Fan143,Ticket Purchase,09:35:45
+144,Fan144,Info Desk,09:36:00
+145,Fan145,Info Desk,09:36:15
+146,Fan146,Merchandise,09:36:30
+147,Fan147,Info Desk,09:36:45
+148,Fan148,Info Desk,09:37:00
+149,Fan149,Info Desk,09:37:15
+150,Fan150,Ticket Purchase,09:37:30
+151,Fan151,Merchandise,09:37:45
+152,Fan152,Will Call,09:38:00
+153,Fan153,Merchandise,09:38:15
+154,Fan154,Will Call,09:38:30
+155,Fan155,Will Call,09:38:45
+156,Fan156,Merchandise,09:39:00
+157,Fan157,Will Call,09:39:15
+158,Fan158,Info Desk,09:39:30
+159,Fan159,Info Desk,09:39:45
+160,Fan160,Will Call,09:40:00
+161,Fan161,Ticket Purchase,09:40:15
+162,Fan162,Info Desk,09:40:30
+163,Fan163,Ticket Purchase,09:40:45
+164,Fan164,Info Desk,09:41:00
+165,Fan165,Merchandise,09:41:15
+166,Fan166,Info Desk,09:41:30
+167,Fan167,Will Call,09:41:45
+168,Fan168,Ticket Purchase,09:42:00
+169,Fan169,Merchandise,09:42:15
+170,Fan170,Ticket Purchase,09:42:30
+171,Fan171,Merchandise,09:42:45
+172,Fan172,Info Desk,09:43:00
+173,Fan173,Info Desk,09:43:15
+174,Fan174,Ticket Purchase,09:43:30
+175,Fan175,Ticket Purchase,09:43:45
+176,Fan176,Will Call,09:44:00
+177,Fan177,Ticket Purchase,09:44:15
+178,Fan178,Info Desk,09:44:30
+179,Fan179,Will Call,09:44:45
+180,Fan180,Ticket Purchase,09:45:00
+181,Fan181,Merchandise,09:45:15
+182,Fan182,Will Call,09:45:30
+183,Fan183,Merchandise,09:45:45
+184,Fan184,Ticket Purchase,09:46:00
+185,Fan185,Ticket Purchase,09:46:15
+186,Fan186,Will Call,09:46:30
+187,Fan187,Merchandise,09:46:45
+188,Fan188,Merchandise,09:47:00
+189,Fan189,Info Desk,09:47:15
+190,Fan190,Merchandise,09:47:30
+191,Fan191,Merchandise,09:47:45
+192,Fan192,Merchandise,09:48:00
+193,Fan193,Will Call,09:48:15
+194,Fan194,Will Call,09:48:30
+195,Fan195,Ticket Purchase,09:48:45
+196,Fan196,Will Call,09:49:00
+197,Fan197,Will Call,09:49:15
+198,Fan198,Will Call,09:49:30
+199,Fan199,Ticket Purchase,09:49:45
+200,Fan200,Ticket Purchase,09:50:00
+201,Fan201,Will Call,09:50:15
+202,Fan202,Merchandise,09:50:30
+203,Fan203,Will Call,09:50:45
+204,Fan204,Will Call,09:51:00
+205,Fan205,Will Call,09:51:15
+206,Fan206,Ticket Purchase,09:51:30
+207,Fan207,Ticket Purchase,09:51:45
+208,Fan208,Info Desk,09:52:00
+209,Fan209,Merchandise,09:52:15
+210,Fan210,Info Desk,09:52:30
+211,Fan211,Ticket Purchase,09:52:45
+212,Fan212,Merchandise,09:53:00
+213,Fan213,Merchandise,09:53:15
+214,Fan214,Merchandise,09:53:30
+215,Fan215,Ticket Purchase,09:53:45
+216,Fan216,Ticket Purchase,09:54:00
+217,Fan217,Will Call,09:54:15
+218,Fan218,Will Call,09:54:30
+219,Fan219,Will Call,09:54:45
+220,Fan220,Merchandise,09:55:00
+221,Fan221,Ticket Purchase,09:55:15
+222,Fan222,Merchandise,09:55:30
+223,Fan223,Merchandise,09:55:45
+224,Fan224,Info Desk,09:56:00
+225,Fan225,Info Desk,09:56:15
+226,Fan226,Ticket Purchase,09:56:30
+227,Fan227,Will Call,09:56:45
+228,Fan228,Will Call,09:57:00
+229,Fan229,Merchandise,09:57:15
+230,Fan230,Will Call,09:57:30
+231,Fan231,Merchandise,09:57:45
+232,Fan232,Ticket Purchase,09:58:00
+233,Fan233,Info Desk,09:58:15
+234,Fan234,Ticket Purchase,09:58:30
+235,Fan235,Ticket Purchase,09:58:45
+236,Fan236,Merchandise,09:59:00
+237,Fan237,Ticket Purchase,09:59:15
+238,Fan238,Will Call,09:59:30
+239,Fan239,Info Desk,09:59:45
+240,Fan240,Will Call,10:00:00
+241,Fan241,Merchandise,10:00:15
+242,Fan242,Merchandise,10:00:30
+243,Fan243,Ticket Purchase,10:00:45
+244,Fan244,Will Call,10:01:00
+245,Fan245,Info Desk,10:01:15
+246,Fan246,Will Call,10:01:30
+247,Fan247,Ticket Purchase,10:01:45
+248,Fan248,Ticket Purchase,10:02:00
+249,Fan249,Info Desk,10:02:15
+250,Fan250,Info Desk,10:02:30
+251,Fan251,Info Desk,10:02:45
+252,Fan252,Info Desk,10:03:00
+253,Fan253,Ticket Purchase,10:03:15
+254,Fan254,Info Desk,10:03:30
+255,Fan255,Ticket Purchase,10:03:45
+256,Fan256,Info Desk,10:04:00
+257,Fan257,Will Call,10:04:15
+258,Fan258,Will Call,10:04:30
+259,Fan259,Ticket Purchase,10:04:45
+260,Fan260,Merchandise,10:05:00
+261,Fan261,Info Desk,10:05:15
+262,Fan262,Merchandise,10:05:30
+263,Fan263,Merchandise,10:05:45
+264,Fan264,Will Call,10:06:00
+265,Fan265,Info Desk,10:06:15
+266,Fan266,Will Call,10:06:30
+267,Fan267,Ticket Purchase,10:06:45
+268,Fan268,Info Desk,10:07:00
+269,Fan269,Ticket Purchase,10:07:15
+270,Fan270,Merchandise,10:07:30
+271,Fan271,Merchandise,10:07:45
+272,Fan272,Info Desk,10:08:00
+273,Fan273,Will Call,10:08:15
+274,Fan274,Will Call,10:08:30
+275,Fan275,Merchandise,10:08:45
+276,Fan276,Ticket Purchase,10:09:00
+277,Fan277,Ticket Purchase,10:09:15
+278,Fan278,Will Call,10:09:30
+279,Fan279,Ticket Purchase,10:09:45
+280,Fan280,Info Desk,10:10:00
+281,Fan281,Merchandise,10:10:15
+282,Fan282,Will Call,10:10:30
+283,Fan283,Merchandise,10:10:45
+284,Fan284,Info Desk,10:11:00
+285,Fan285,Will Call,10:11:15
+286,Fan286,Will Call,10:11:30
+287,Fan287,Will Call,10:11:45
+288,Fan288,Info Desk,10:12:00
+289,Fan289,Ticket Purchase,10:12:15
+290,Fan290,Merchandise,10:12:30
+291,Fan291,Info Desk,10:12:45
+292,Fan292,Ticket Purchase,10:13:00
+293,Fan293,Info Desk,10:13:15
+294,Fan294,Ticket Purchase,10:13:30
+295,Fan295,Will Call,10:13:45
+296,Fan296,Merchandise,10:14:00
+297,Fan297,Merchandise,10:14:15
+298,Fan298,Merchandise,10:14:30
+299,Fan299,Will Call,10:14:45
+300,Fan300,Merchandise,10:15:00
+301,Fan301,Merchandise,10:15:15
+302,Fan302,Info Desk,10:15:30
+303,Fan303,Ticket Purchase,10:15:45
+304,Fan304,Info Desk,10:16:00
+305,Fan305,Info Desk,10:16:15
+306,Fan306,Merchandise,10:16:30
+307,Fan307,Merchandise,10:16:45
+308,Fan308,Merchandise,10:17:00
+309,Fan309,Will Call,10:17:15
+310,Fan310,Info Desk,10:17:30
+311,Fan311,Merchandise,10:17:45
+312,Fan312,Ticket Purchase,10:18:00
+313,Fan313,Ticket Purchase,10:18:15
+314,Fan314,Info Desk,10:18:30
+315,Fan315,Ticket Purchase,10:18:45
+316,Fan316,Merchandise,10:19:00
+317,Fan317,Merchandise,10:19:15
+318,Fan318,Will Call,10:19:30
+319,Fan319,Ticket Purchase,10:19:45
+320,Fan320,Will Call,10:20:00
+321,Fan321,Will Call,10:20:15
+322,Fan322,Info Desk,10:20:30
+323,Fan323,Merchandise,10:20:45
+324,Fan324,Will Call,10:21:00
+325,Fan325,Info Desk,10:21:15
+326,Fan326,Info Desk,10:21:30
+327,Fan327,Merchandise,10:21:45
+328,Fan328,Ticket Purchase,10:22:00
+329,Fan329,Merchandise,10:22:15
+330,Fan330,Will Call,10:22:30
+331,Fan331,Ticket Purchase,10:22:45
+332,Fan332,Merchandise,10:23:00
+333,Fan333,Ticket Purchase,10:23:15
+334,Fan334,Info Desk,10:23:30
+335,Fan335,Will Call,10:23:45
+336,Fan336,Ticket Purchase,10:24:00
+337,Fan337,Will Call,10:24:15
+338,Fan338,Merchandise,10:24:30
+339,Fan339,Will Call,10:24:45
+340,Fan340,Ticket Purchase,10:25:00
+341,Fan341,Ticket Purchase,10:25:15
+342,Fan342,Ticket Purchase,10:25:30
+343,Fan343,Merchandise,10:25:45
+344,Fan344,Info Desk,10:26:00
+345,Fan345,Merchandise,10:26:15
+346,Fan346,Info Desk,10:26:30
+347,Fan347,Ticket Purchase,10:26:45
+348,Fan348,Info Desk,10:27:00
+349,Fan349,Ticket Purchase,10:27:15
+350,Fan350,Ticket Purchase,10:27:30
+351,Fan351,Will Call,10:27:45
+352,Fan352,Info Desk,10:28:00
+353,Fan353,Will Call,10:28:15
+354,Fan354,Info Desk,10:28:30
+355,Fan355,Ticket Purchase,10:28:45
+356,Fan356,Ticket Purchase,10:29:00
+357,Fan357,Ticket Purchase,10:29:15
+358,Fan358,Info Desk,10:29:30
+359,Fan359,Info Desk,10:29:45
+360,Fan360,Merchandise,10:30:00
+361,Fan361,Info Desk,10:30:15
+362,Fan362,Merchandise,10:30:30
+363,Fan363,Ticket Purchase,10:30:45
+364,Fan364,Merchandise,10:31:00
+365,Fan365,Ticket Purchase,10:31:15
+366,Fan366,Merchandise,10:31:30
+367,Fan367,Will Call,10:31:45
+368,Fan368,Merchandise,10:32:00
+369,Fan369,Ticket Purchase,10:32:15
+370,Fan370,Will Call,10:32:30
+371,Fan371,Ticket Purchase,10:32:45
+372,Fan372,Info Desk,10:33:00
+373,Fan373,Ticket Purchase,10:33:15
+374,Fan374,Info Desk,10:33:30
+375,Fan375,Info Desk,10:33:45
+376,Fan376,Ticket Purchase,10:34:00
+377,Fan377,Ticket Purchase,10:34:15
+378,Fan378,Info Desk,10:34:30
+379,Fan379,Merchandise,10:34:45
+380,Fan380,Ticket Purchase,10:35:00
+381,Fan381,Ticket Purchase,10:35:15
+382,Fan382,Will Call,10:35:30
+383,Fan383,Ticket Purchase,10:35:45
+384,Fan384,Info Desk,10:36:00
+385,Fan385,Will Call,10:36:15
+386,Fan386,Ticket Purchase,10:36:30
+387,Fan387,Ticket Purchase,10:36:45
+388,Fan388,Merchandise,10:37:00
+389,Fan389,Ticket Purchase,10:37:15
+390,Fan390,Will Call,10:37:30
+391,Fan391,Info Desk,10:37:45
+392,Fan392,Merchandise,10:38:00
+393,Fan393,Ticket Purchase,10:38:15
+394,Fan394,Will Call,10:38:30
+395,Fan395,Ticket Purchase,10:38:45
+396,Fan396,Will Call,10:39:00
+397,Fan397,Will Call,10:39:15
+398,Fan398,Merchandise,10:39:30
+399,Fan399,Will Call,10:39:45
+400,Fan400,Ticket Purchase,10:40:00
+401,Fan401,Merchandise,10:40:15
+402,Fan402,Merchandise,10:40:30
+403,Fan403,Ticket Purchase,10:40:45
+404,Fan404,Ticket Purchase,10:41:00
+405,Fan405,Ticket Purchase,10:41:15
+406,Fan406,Ticket Purchase,10:41:30
+407,Fan407,Info Desk,10:41:45
+408,Fan408,Info Desk,10:42:00
+409,Fan409,Info Desk,10:42:15
+410,Fan410,Ticket Purchase,10:42:30
+411,Fan411,Will Call,10:42:45
+412,Fan412,Merchandise,10:43:00
+413,Fan413,Info Desk,10:43:15
+414,Fan414,Ticket Purchase,10:43:30
+415,Fan415,Info Desk,10:43:45
+416,Fan416,Info Desk,10:44:00
+417,Fan417,Merchandise,10:44:15
+418,Fan418,Merchandise,10:44:30
+419,Fan419,Ticket Purchase,10:44:45
+420,Fan420,Ticket Purchase,10:45:00
+421,Fan421,Ticket Purchase,10:45:15
+422,Fan422,Merchandise,10:45:30
+423,Fan423,Info Desk,10:45:45
+424,Fan424,Ticket Purchase,10:46:00
+425,Fan425,Ticket Purchase,10:46:15
+426,Fan426,Will Call,10:46:30
+427,Fan427,Will Call,10:46:45
+428,Fan428,Info Desk,10:47:00
+429,Fan429,Ticket Purchase,10:47:15
+430,Fan430,Merchandise,10:47:30
+431,Fan431,Ticket Purchase,10:47:45
+432,Fan432,Will Call,10:48:00
+433,Fan433,Merchandise,10:48:15
+434,Fan434,Ticket Purchase,10:48:30
+435,Fan435,Ticket Purchase,10:48:45
+436,Fan436,Info Desk,10:49:00
+437,Fan437,Will Call,10:49:15
+438,Fan438,Merchandise,10:49:30
+439,Fan439,Ticket Purchase,10:49:45
+440,Fan440,Merchandise,10:50:00
+441,Fan441,Merchandise,10:50:15
+442,Fan442,Will Call,10:50:30
+443,Fan443,Will Call,10:50:45
+444,Fan444,Ticket Purchase,10:51:00
+445,Fan445,Merchandise,10:51:15
+446,Fan446,Merchandise,10:51:30
+447,Fan447,Will Call,10:51:45
+448,Fan448,Merchandise,10:52:00
+449,Fan449,Merchandise,10:52:15
+450,Fan450,Ticket Purchase,10:52:30
+451,Fan451,Merchandise,10:52:45
+452,Fan452,Info Desk,10:53:00
+453,Fan453,Ticket Purchase,10:53:15
+454,Fan454,Merchandise,10:53:30
+455,Fan455,Will Call,10:53:45
+456,Fan456,Info Desk,10:54:00
+457,Fan457,Merchandise,10:54:15
+458,Fan458,Will Call,10:54:30
+459,Fan459,Merchandise,10:54:45
+460,Fan460,Will Call,10:55:00
+461,Fan461,Merchandise,10:55:15
+462,Fan462,Will Call,10:55:30
+463,Fan463,Merchandise,10:55:45
+464,Fan464,Ticket Purchase,10:56:00
+465,Fan465,Info Desk,10:56:15
+466,Fan466,Will Call,10:56:30
+467,Fan467,Info Desk,10:56:45
+468,Fan468,Info Desk,10:57:00
+469,Fan469,Ticket Purchase,10:57:15
+470,Fan470,Merchandise,10:57:30
+471,Fan471,Merchandise,10:57:45
+472,Fan472,Ticket Purchase,10:58:00
+473,Fan473,Will Call,10:58:15
+474,Fan474,Ticket Purchase,10:58:30
+475,Fan475,Ticket Purchase,10:58:45
+476,Fan476,Will Call,10:59:00
+477,Fan477,Info Desk,10:59:15
+478,Fan478,Will Call,10:59:30
+479,Fan479,Will Call,10:59:45
+480,Fan480,Merchandise,11:00:00
+481,Fan481,Ticket Purchase,11:00:15
+482,Fan482,Will Call,11:00:30
+483,Fan483,Will Call,11:00:45
+484,Fan484,Ticket Purchase,11:01:00
+485,Fan485,Info Desk,11:01:15
+486,Fan486,Info Desk,11:01:30
+487,Fan487,Ticket Purchase,11:01:45
+488,Fan488,Info Desk,11:02:00
+489,Fan489,Will Call,11:02:15
+490,Fan490,Merchandise,11:02:30
+491,Fan491,Info Desk,11:02:45
+492,Fan492,Merchandise,11:03:00
+493,Fan493,Will Call,11:03:15
+494,Fan494,Merchandise,11:03:30
+495,Fan495,Will Call,11:03:45
+496,Fan496,Merchandise,11:04:00
+497,Fan497,Merchandise,11:04:15
+498,Fan498,Info Desk,11:04:30
+499,Fan499,Will Call,11:04:45
+500,Fan500,Info Desk,11:05:00
