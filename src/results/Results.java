@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import util.ResultsConfigException;
 
-
 public abstract class Results<T extends DataType, M extends Manager<T>>
         implements Experiment{
 

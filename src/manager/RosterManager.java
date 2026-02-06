@@ -19,12 +19,15 @@ import types.Player;
  */
 final public class RosterManager extends DataManager<Player> {
 
-
     public <T>RosterManager(Supplier<DataContainer<Player>> theSupplier){
-        super(
-                Player.class,
-                theSupplier
-        );
+
+        super(Player.class, theSupplier);
+    }
+
+    // ================================= flags =================================
+    @Override
+    public boolean needsIndexedAccess() {
+        return true;
     }
 
 
@@ -32,10 +35,15 @@ final public class RosterManager extends DataManager<Player> {
 
     /**
      * getter
-     * @return an ArrayStore of the player roster.
+     * @return a DataContainer of the player roster.
      */
     public DataContainer<Player> getPlayerData() {
         return this.getData();
+    }
+
+    @Override
+    public Class<RosterManager> getManagerClass(){
+        return RosterManager.class;
     }
 
 
@@ -83,6 +91,7 @@ final public class RosterManager extends DataManager<Player> {
     }
 
     // ================================= updating =================================
+
 
     /**
      * Updates the yards of the player with the matching id provided

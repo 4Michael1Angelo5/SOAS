@@ -22,14 +22,26 @@ public class TransactionFeed extends DataManager<Transaction> {
         super(Transaction.class,  theSupplier);
     }
 
+    // ================================= flags =================================
+
+    @Override
+    public boolean needsIndexedAccess() {
+        return true;
+    }
+
     //================================= getting =================================
 
     /**
      * getter
-     * @return the SinglyLinkedList of transactions
+     * @return the DataContainer of transactions
      */
     public DataContainer<Transaction> getTransactionData() {
         return getData();
+    }
+
+    @Override
+    public Class<TransactionFeed> getManagerClass(){
+        return TransactionFeed.class;
     }
 
     // ================================= loading =================================

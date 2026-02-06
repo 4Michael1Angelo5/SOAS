@@ -215,4 +215,14 @@ public final class ArrayStore<T> implements DataContainer<T> {
             }
         };
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            sb.append(myData[i]);
+        }
+
+        return sb.toString();
+    }
 }

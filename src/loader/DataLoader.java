@@ -1,15 +1,17 @@
 package loader;
 
 import java.io.*;
-import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import manager.Manager;
+import manager.RosterManager;
 import types.*;
+import util.ArrayStack;
 import util.ArrayStore;
 import util.DataContainer;
-
-import javax.xml.crypto.Data;
+import util.SinglyLinkedList;
 
 /**
  * DataLoader is a universal, type-agnostic engine responsible for parsing
@@ -38,9 +40,20 @@ public class DataLoader <T extends DataType> {
         super();
         myContainerSupplier = theSupplier;
         myDataClass = theDataClass;
+        validateConstructor(theDataClass, theSupplier);
     }
 
     private static final Logger logger = Logger.getLogger(DataLoader.class.getName());
+
+    private void validateConstructor(Class<T> theDataClass, Supplier<DataContainer<T>> theSupplier) {
+        if (theSupplier == null){
+            throw new IllegalArgumentException("Supplier cannot be null");
+        }
+        if (!theSupplier.get().isEmpty()){
+            throw new IllegalArgumentException("Supplier returned a non empty container");
+        }
+
+    }
 
     /**
      * Parses Data from a csv row into its corresponding data type.
@@ -57,18 +70,43 @@ public class DataLoader <T extends DataType> {
         try {
             if (myDataClass == Player.class) {
 
-                result = new Player(Integer.parseInt(row[0]),row[1],row[2],Integer.parseInt(row[3]), Integer.parseInt(row[4]));
+                result = new Player(
+                        Integer.parseInt(row[0]),
+                        row[1],
+                        row[2],
+                        Integer.parseInt(row[3]),
+                        Integer.parseInt(row[4]));
             }else
             if(myDataClass == Drill.class) {
 
-                result = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
+                result = new Drill(
+                        Integer.parseInt(row[0]),
+                        row[1],
+                        Integer.parseInt(row[2]));
 
             }else
             if (myDataClass == Transaction.class) {
 
-                result = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+                result = new Transaction(
+                        Integer.parseInt(row[0]),
+                        row[1],
+                        row[2],
+                        row[3]);
 
-            }else {
+            }else
+            if (myDataClass == UndoAction.class){
+
+                result = new UndoAction(
+                        Integer.parseInt(row[0]),
+                        ActionType.valueOf(row[1]),
+                        row[2],
+                        row[3]);
+
+            }else
+            if (myDataClass == FanRequest.class) {
+                result = new FanRequest(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+            }
+            else {
 
                 throw new IllegalArgumentException(myDataClass.getName() + " is not a supported data type");
             }
@@ -90,7 +128,7 @@ public class DataLoader <T extends DataType> {
     loadData(String theFilePath)
             throws IllegalArgumentException, IOException{
 
-        DataContainer<T> dataArray = myContainerSupplier.get();
+        DataContainer<T> dataContainer = myContainerSupplier.get();
 
         try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
 
@@ -98,24 +136,15 @@ public class DataLoader <T extends DataType> {
             String headerColumns = br.readLine();
             if (headerColumns == null) {
                 throw new IllegalArgumentException("the CSV is empty");
-            };
-
-            // mark current position (second row)
-            br.mark(1024);
-            String secondLine = br.readLine();
-            // rewind back to second row where data should be
-            br.reset();
-
-            // check if second row is empty
-            if (secondLine == null || secondLine.isBlank()) {
-                throw new IllegalArgumentException("CSV has no data rows");
             }
+
+            validateHeaders(headerColumns, theFilePath);
 
             String nextLine;
             while ( (nextLine = br.readLine()) != null) {
                 try {
 
-                    dataArray.add(parseData(nextLine));
+                    dataContainer.add(parseData(nextLine));
 
                 } catch (IllegalArgumentException e) {
                     // Catch errors from parseData (bad columns, bad numbers)
@@ -129,6 +158,34 @@ public class DataLoader <T extends DataType> {
             throw new FileNotFoundException("");
         }
 
-        return dataArray;
+        return dataContainer;
+    }
+
+    private void validateHeaders(String theHeaderRow, String theFilePath){
+        boolean isValid = false;
+        theHeaderRow = theHeaderRow.trim();
+
+        switch (myDataClass.getSimpleName()) {
+            case "Player" -> isValid = theHeaderRow.equals("player_id,name,position,jersey,yards");
+            case "Transaction" -> isValid = theHeaderRow.equals("trans_id,type,player,timestamp");
+            case "Drill" -> isValid = theHeaderRow.equals("drill_id,name,urgency");
+            case "UndoAction" -> isValid = theHeaderRow.equals("action_id,action_type,target,timestamp");
+            case "FanRequest" -> isValid = theHeaderRow.equals("fan_id,name,service_type,arrival_time");
+            default -> throw new RuntimeException("Unsupported DataType for loader");
+        }
+
+        if (!isValid) {
+            throw new IllegalArgumentException(
+                    "\nThe CSV data does match the expected header for " +
+                            myDataClass.getSimpleName() + " please check the " +
+                            "file path: " + theFilePath
+            );
+        }
+    }
+
+    public static void main(String args[]) throws IOException{
+        Supplier<DataContainer<UndoAction>> undoArraySup = ()-> new ArrayStore<>(UndoAction.class, 16);
+        Supplier<DataContainer<FanRequest>> fanSllSup = SinglyLinkedList::new;
+
     }
 }
