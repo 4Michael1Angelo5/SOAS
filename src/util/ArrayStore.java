@@ -115,7 +115,8 @@ public final class ArrayStore<T> implements DataContainer<T> {
             throw new NoSuchElementException("No such element");
         }
         T removed = myData[size -1];
-        myData[size -1] = null;
+        myData[size-1] = null;
+        size--;
         return removed;
     }
 
