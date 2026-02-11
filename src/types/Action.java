@@ -1,6 +1,6 @@
 package types;
 
-public record UndoAction(
+public record Action(
         int action_id,
         ActionType action_type,
         String target,
