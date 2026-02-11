@@ -5,7 +5,7 @@ package types;
  * the csv data loader, and Data Manager
  */
 public sealed interface DataType
-        permits Player, Drill, Transaction, FanRequest, UndoAction {
+        permits Player, Drill, Transaction, FanRequest, Action {
     /**
      *
      * @return the id of Data

@@ -1,4 +1,7 @@
 package types;
 
-public record UndoRecord() {
-}
+public record UndoRecord(
+        Action action, // enum
+        DataType previousState,
+        Integer index
+) implements Undoable {}

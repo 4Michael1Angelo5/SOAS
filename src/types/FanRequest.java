@@ -10,5 +10,4 @@ public record FanRequest(
     public int id() {
         return fan_id;
     }
-
 }

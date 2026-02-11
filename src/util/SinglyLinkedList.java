@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public final class SinglyLinkedList<T> implements DataContainer<T> {
+public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T> {
 
     /**
      * No Such Element Exception error.

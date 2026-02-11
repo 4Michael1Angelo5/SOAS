@@ -1,14 +1,10 @@
 package loader;
 
 import java.io.*;
-import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import manager.Manager;
-import manager.RosterManager;
 import types.*;
-import util.ArrayStack;
 import util.ArrayStore;
 import util.DataContainer;
 import util.SinglyLinkedList;
@@ -94,9 +90,9 @@ public class DataLoader <T extends DataType> {
                         row[3]);
 
             }else
-            if (myDataClass == UndoAction.class){
+            if (myDataClass == Action.class){
 
-                result = new UndoAction(
+                result = new Action(
                         Integer.parseInt(row[0]),
                         ActionType.valueOf(row[1]),
                         row[2],
@@ -169,7 +165,7 @@ public class DataLoader <T extends DataType> {
             case "Player" -> isValid = theHeaderRow.equals("player_id,name,position,jersey,yards");
             case "Transaction" -> isValid = theHeaderRow.equals("trans_id,type,player,timestamp");
             case "Drill" -> isValid = theHeaderRow.equals("drill_id,name,urgency");
-            case "UndoAction" -> isValid = theHeaderRow.equals("action_id,action_type,target,timestamp");
+            case "Action" -> isValid = theHeaderRow.equals("action_id,action_type,target,timestamp");
             case "FanRequest" -> isValid = theHeaderRow.equals("fan_id,name,service_type,arrival_time");
             default -> throw new RuntimeException("Unsupported DataType for loader");
         }
@@ -184,7 +180,7 @@ public class DataLoader <T extends DataType> {
     }
 
     public static void main(String args[]) throws IOException{
-        Supplier<DataContainer<UndoAction>> undoArraySup = ()-> new ArrayStore<>(UndoAction.class, 16);
+        Supplier<DataContainer<Action>> undoArraySup = ()-> new ArrayStore<>(Action.class, 16);
         Supplier<DataContainer<FanRequest>> fanSllSup = SinglyLinkedList::new;
 
     }

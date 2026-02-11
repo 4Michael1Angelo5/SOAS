@@ -127,18 +127,18 @@ public class LoaderTest {
                             "the transaction data should not be null");
                 },
                 () -> {
-                    DataLoader<UndoAction> loader =
-                            new DataLoader<>(UndoAction.class, getSupplier(UndoAction.class, "stack"));
+                    DataLoader<Action> loader =
+                            new DataLoader<>(Action.class, getSupplier(Action.class, "stack"));
                             assertDoesNotThrow(()-> loader.loadData(undo50));
                 },
                 () -> {
-                    DataLoader<UndoAction> loader =
-                            new DataLoader<>(UndoAction.class, getSupplier(UndoAction.class, "array"));
+                    DataLoader<Action> loader =
+                            new DataLoader<>(Action.class, getSupplier(Action.class, "array"));
                     assertDoesNotThrow(()-> loader.loadData(undo500));
                 },
                 () -> {
-                    DataLoader<UndoAction> loader =
-                            new DataLoader<>(UndoAction.class, getSupplier(UndoAction.class, "sll"));
+                    DataLoader<Action> loader =
+                            new DataLoader<>(Action.class, getSupplier(Action.class, "sll"));
                     assertDoesNotThrow(()->loader.loadData(undo5000));
                 },
                 () -> {
@@ -226,7 +226,7 @@ public class LoaderTest {
     private Class<? extends DataType> determineClassFromPath(String path) {
         if (path.contains("roster")) return Player.class;
         if (path.contains("transaction")) return Transaction.class;
-        if (path.contains("undo")) return UndoAction.class;
+        if (path.contains("undo")) return Action.class;
         if (path.contains("fan")) return FanRequest.class;
         throw new IllegalArgumentException("Unknown file type: " + path);
     }
