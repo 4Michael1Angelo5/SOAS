@@ -3,7 +3,11 @@ package results;
 import benchmark.BenchmarkRunner;
 import manager.RosterManager;
 import manager.TransactionFeed;
+import manager.UndoManager;
+import types.Action;
 import types.Transaction;
+import types.UndoRecord;
+import util.ArrayStack;
 import util.DataContainer;
 import types.Player;
 import util.ArrayStore;
@@ -152,6 +156,15 @@ public class RosterResults extends Results<Player, RosterManager> {
         // transaction results (array/sll)
         trResults.runAllExperiments();
         trResultsSLL.runAllExperiments();
+
+
+        Supplier<DataContainer<Action>> undoStack = ()-> new ArrayStack<>(Action.class);
+        UndoManager undoManager = new UndoManager(undoStack);
+
+        UndoResults undoResultsStack = new UndoResults(undoManager, undoStack);
+        undoResultsStack.runAllExperiments();
+
+
     }
 
 }

@@ -8,19 +8,21 @@ import java.io.IOException;
 
 public interface Manager<T extends DataType> {
 
-    public void addData(T theData) throws ManagerConfigException;
+    void addData(T theData) throws ManagerConfigException;
 
-    public DataContainer<T> getData();
+    DataContainer<T> getData();
 
-    public T removeById(int theId);
+    T removeById(int theId);
 
-    public int findById( int theId);
+    T remove();
 
-    public void printData();
+    int findById( int theId);
 
-    public void loadCsvData(String theFilePath) throws IOException;
+    void printData();
 
-    public void clearData();
+    void loadCsvData(String theFilePath) throws IOException;
+
+    void clearData();
 
     boolean needsIndexedAccess();
 

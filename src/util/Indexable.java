@@ -1,4 +1,4 @@
-package manager;
+package util;
 
-public interface Indexable {
+public sealed interface Indexable<T> permits ArrayStore, SinglyLinkedList {
 }
