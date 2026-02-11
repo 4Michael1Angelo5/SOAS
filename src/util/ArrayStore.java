@@ -9,7 +9,7 @@ import java.util.function.Predicate;
  * ArrayStore is a low-level array based implementation of an ArrayList.
  * @param <T> Defines the type of Objects this ArrayStore will contain.
  */
-public final class ArrayStore<T> implements DataContainer<T> {
+public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     private T[] myData;
     final private Class<T> dataClass;
@@ -28,6 +28,9 @@ public final class ArrayStore<T> implements DataContainer<T> {
     // ================== getting & setting ======================
     @Override
     public void set(int theIndex, T theData) {
+        if (theIndex < 0 || theIndex >= size){
+            throw new IndexOutOfBoundsException("Index out of bounds");
+        }
         myData[theIndex] = theData;
     }
 
@@ -116,6 +119,7 @@ public final class ArrayStore<T> implements DataContainer<T> {
         }
         T removed = myData[size -1];
         myData[size -1] = null;
+        size--;
         return removed;
     }
 
@@ -128,8 +132,7 @@ public final class ArrayStore<T> implements DataContainer<T> {
         if (index == -1) {
             throw new NoSuchElementException("Not found");
         }
-        removed = removeAt(index);
-        return removed;
+        return removeAt(index);
     }
 
     @Override
@@ -183,7 +186,7 @@ public final class ArrayStore<T> implements DataContainer<T> {
 
     @SuppressWarnings("unchecked")
     public void clear() {
-        myData = (T[]) java.lang.reflect.Array.newInstance(dataClass,size);
+        myData = (T[]) java.lang.reflect.Array.newInstance(dataClass,16);
         size = 0;
     }
 

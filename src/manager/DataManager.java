@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import loader.DataLoader;
+import types.Player;
 import util.DataContainer;
 import types.DataType;
 import util.ManagerConfigException;
@@ -113,6 +114,23 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     }
 
     // ======================= removing  ===========================
+    @Override
+    public T remove(){
+        return myData.remove();
+    }
+
+    /**
+     * remove element by index
+     * This operation can only be performed by roster managers that require indexed access.
+     * @param theIndex the index of the element to remove.
+     * @return the removed element.
+     */
+    public T removeAt(int theIndex) {
+        if (!this.needsIndexedAccess()) {
+            throw new IllegalArgumentException("Stacks and Queues do not support indexed access");
+        }
+        return myData.removeAt(theIndex);
+    }
 
     /**
      *
@@ -133,10 +151,11 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
         T theRemovedData =  myData.get(index);
 
       // remove it, and shift everything
-        myData.removeAt(theId);
+        myData.removeAt(index);
 
         return theRemovedData;
     }
+
 
     // =======================  updating ===========================
 

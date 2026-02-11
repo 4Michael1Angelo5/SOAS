@@ -1,15 +1,14 @@
 package manager;
 
-import types.Player;
-import types.UndoAction;
+import types.Action;
 import util.DataContainer;
 
 import java.util.function.Supplier;
 
-public class UndoManager extends DataManager<UndoAction> {
+public class UndoManager extends DataManager<Action> {
 
-    public UndoManager(Supplier<DataContainer<UndoAction>> theSupplier){
-        super(UndoAction.class, theSupplier);
+    public UndoManager(Supplier<DataContainer<Action>> theSupplier){
+        super(Action.class, theSupplier);
     }
 
     // ================================ flags =================================

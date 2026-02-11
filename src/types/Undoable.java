@@ -1,4 +1,5 @@
 package types;
 
-public interface Undoable {
+public sealed interface Undoable permits UndoRecord, Action  {
+
 }
