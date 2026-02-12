@@ -1,8 +1,10 @@
 package manager;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+import types.Transaction;
 import util.DataContainer;
 import types.Player;
 
@@ -61,9 +63,62 @@ final public class RosterManager extends DataManager<Player> {
         this.loadCsvData(theFilePath);
     }
 
+    // ================================= removing =================================
+
+    /**
+     * remove element by index
+     * This operation can only be performed by roster managers that require indexed access.
+     * @param theIndex the index of the element to remove.
+     * @return the removed element.
+     */
+    public Player removeAt(int theIndex) {
+        if (!this.needsIndexedAccess()) {
+            throw new IllegalArgumentException("Stacks and Queues do not support indexed access");
+        }
+        return myData.removeAt(theIndex);
+    }
+
+
+    public Player removeById(int theId) {
+
+        int index = myData.findBy((theDataObject) -> theDataObject.id() == theId);
+
+        // throw exception if not found
+        if (index == -1) {
+            throw new NoSuchElementException("id not found");
+        }
+
+        // store it
+        Player theRemovedData =  myData.get(index);
+
+      // remove it, and shift everything
+        myData.removeAt(index);
+
+        return theRemovedData;
+    }
+
+
+    // ================================== updating ================================
+
+        public void setData(int theIndex, Player theData) {
+
+        myData.set(theIndex,theData);
+    }
+
+
 
     // ================================= searching =================================
 
+
+    /**
+     *
+     * @param theId theId of the data entry (Player, Drills, Transaction)
+     * @return the index of the data if present, -1 otherwise.
+     */
+    public int findById(int theId) {
+
+        return myData.findBy( ( theDataObject) -> theDataObject.id() == theId);
+    }
     /**
      * Finds the first index of the player with the matching name and -1 otherwise.
      * @param theName name of the player to find.
@@ -100,7 +155,7 @@ final public class RosterManager extends DataManager<Player> {
      * @param theNewYards the yards to update
      */
     public void updateStats(int theId, int theNewYards) {
-        int index = findById(theId);
+        int index = myData.findBy(e -> e.player_id() == theId);
 
         // not found
         if (index == -1) {
