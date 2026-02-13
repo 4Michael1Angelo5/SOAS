@@ -81,7 +81,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
 
     /**
      * Constructs a Results controller to manage benchmarks for a specific data type.
-     * * @param theDataClass can be Player, Drills, or Transaction.
+     * @param theDataClass can be Player, Drills, or Transaction, Actions, or FanRequests.
      * @param theManager The data manager instance that performs the actual operations.
      * @param theContainerSupplier A factory to create fresh instances of the DataContainer being tested.
      */
@@ -99,16 +99,16 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
     // error handling
     private void verifyConfiguration() {
         String managerContainer = myManager.getData().getClass().getSimpleName();
-        String containerProved = containerForRemove.getClass().getSimpleName();
+        String containerProvided = containerForRemove.getClass().getSimpleName();
 
-        if (!managerContainer.equals(containerProved)) {
+        if (!managerContainer.equals(containerProvided)) {
             throw new ResultsConfigException(myManager.getData().getClass(), containerForRemove.getClass());
         }
     }
 
     /**
      * Delegates the data loading process to the manager.
-     * * @param theFilePath The path to the CSV source file.
+     * @param theFilePath The path to the CSV source file.
      * @throws IOException If an error occurs during file reading.
      */
     public void loadData(String theFilePath) throws IOException {
@@ -178,7 +178,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * * @return An {@link ExperimentResult} capturing size, operation name, and average time.
      */
     // timed
-    public ExperimentResult testRemove() {
+    public ExperimentResult testRemove(String theOperationName) {
         if (myManager.getData().isEmpty()) {
             throw new RuntimeException(
                     "Misconfigured ExperimentResult, please ensure " +
@@ -187,24 +187,23 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
         }
 
         final int inputSize = myManager.getData().size();
-        final String operation = "remove";
         final double avgTime =
                 myBenchmarkRunner.runSpeedTestWithSetup(TRIAL_RUNS, this::setUpForRemove, this::removeNTimes);
 
-        return new ExperimentResult(inputSize, operation, avgTime);
+        return new ExperimentResult(inputSize, theOperationName, avgTime);
     }
 
     /**
      * Executes the addition benchmark.
      * * @return An {@link ExperimentResult} capturing size, operation name, and average time.
      */
-    public ExperimentResult testAdd() {
+    public ExperimentResult testAdd(String theOperationName) {
 
         int inputSize = myManager.getData().size();
-        String operation = "add";
+
         double avgTime = myBenchmarkRunner.runSpeedTestAndGetAvg(TRIAL_RUNS, this::addNTimes);
 
-        return new ExperimentResult(inputSize, operation, avgTime);
+        return new ExperimentResult(inputSize, theOperationName, avgTime);
     }
 
 
