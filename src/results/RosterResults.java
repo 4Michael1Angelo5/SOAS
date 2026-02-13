@@ -99,7 +99,7 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         // Test with 50 players
         loadRoster(roster50);
-        addExperimentResult(testAdd());
+        addExperimentResult(testAdd("add"));
         addExperimentResult(testRemoveFromFrontNTimes());
         addExperimentResult(testSearchByNameNTimes());
 
@@ -107,7 +107,7 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         // Test with 500 players
         loadRoster(roster500);
-        addExperimentResult(testAdd());
+        addExperimentResult(testAdd("add"));
         addExperimentResult(testRemoveFromFrontNTimes());
         addExperimentResult(testSearchByNameNTimes());
 
@@ -116,7 +116,7 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         // Test with 5000 players
         loadRoster(roster5000);
-        addExperimentResult(testAdd());
+        addExperimentResult(testAdd("add"));
         addExperimentResult(testRemoveFromFrontNTimes());
         addExperimentResult(testSearchByNameNTimes());
 
@@ -141,7 +141,7 @@ public class RosterResults extends Results<Player, RosterManager> {
         TransactionFeed transactionFeedArray = new TransactionFeed(arraySupplierTransaction);
         TransactionFeed transactionFeedSLL = new TransactionFeed(sllListSupplierTransaction);
 
-        // roster results (array/sll)
+        // roster manager results (array/sll)
         RosterResults results = new RosterResults(rosterMangerArray, arraySupplierPlayer);
         RosterResults resultsSLL = new RosterResults(rosterMangerSLL, sllSupplierPlayer);
 
@@ -156,7 +156,6 @@ public class RosterResults extends Results<Player, RosterManager> {
         // transaction results (array/sll)
         trResults.runAllExperiments();
         trResultsSLL.runAllExperiments();
-
 
         Supplier<DataContainer<Action>> undoStack = ()-> new ArrayStack<>(Action.class);
         UndoManager undoManager = new UndoManager(undoStack);

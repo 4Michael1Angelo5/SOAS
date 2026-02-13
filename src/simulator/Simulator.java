@@ -13,7 +13,6 @@ import util.DataContainer;
 import util.LinkedQueue;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -46,13 +45,13 @@ public class Simulator {
     //=============================  CSV Data ==================================
 
     // roster
-    public static final String ROSTER50 = "data/seahawks_roster_5000.csv";
+    public static final String ROSTER5000 = "data/seahawks_roster_5000.csv";
 
     // transaction
-    public static final String TRANS50 = "data/seahawks_transactions_5000.csv";
+    public static final String TRANS5000 = "data/seahawks_transactions_5000.csv";
 
     //undo actions
-    public static final String UNDO50 = "data/seahawks_undo_actions_5000.csv";
+    public static final String UNDO5000 = "data/seahawks_undo_actions_5000.csv";
 
     // Fan Requests
     public static final String FAN50 = "data/seahawks_fan_queue_5000.csv";
@@ -92,10 +91,16 @@ public class Simulator {
     public LinkedQueue<Action> actionsToPerform = new LinkedQueue<>();
     public ArrayStack<UndoRecord> actionsToUndo = new ArrayStack<>(UndoRecord.class);
 
-
     public ArrayStore<Action> actionRequestsUnfulfilled = new ArrayStore<>(Action.class, 64);
 
     private final static int SAMPLE_SIZE = 6000;
+
+    private int numRequests;
+    private int rosterSize;
+    private int transactionSize;
+
+    private int successfulRosterUndos;
+    private int successfulTransactionUndos;
 
     public Simulator() {
         super();
@@ -181,24 +186,23 @@ public class Simulator {
         switch (theActionToUndo.action().action_type()) {
             case ADD_PLAYER -> {
                 RM.removeAt(theActionToUndo.index());
+                successfulRosterUndos++;
             }
             case REMOVE_PLAYER -> {
                 RM.addPlayer((Player) theActionToUndo.previousState());
+                successfulRosterUndos++;
             }
             case ADD_TRANSACTION -> {
                 TM.removeAt(theActionToUndo.index());
+                successfulTransactionUndos++;
             }
             case REMOVE_TRANSACTION -> {
                 TM.addTransactionRear((Transaction) theActionToUndo.previousState());
+                successfulTransactionUndos++;
             }
             case UPDATE_STATS -> {
-//                int idx  = RM.getData().findBy(t->t.id() == theActionToUndo.previousState().id());
-//                if (idx < 0) {
-//                    System.out.println("you fucked up");
-//                    return;
-//                }
-
                 RM.getData().set(theActionToUndo.index(), (Player) theActionToUndo.previousState());
+                successfulRosterUndos++;
             }
         }
 
@@ -208,8 +212,9 @@ public class Simulator {
 
         //1a)
         // load csv data to the managers to initialize them.
-        RM.loadPlayerData(ROSTER50);
-        TM.loadTransactionData(TRANS50);
+        RM.loadPlayerData(ROSTER5000);
+        TM.loadTransactionData(TRANS5000);
+
 
         //1b)
         // keep track of previous state before mutation:
@@ -225,7 +230,9 @@ public class Simulator {
         //2)
         // load csv from undo actions to create a list of actions to perform
         // that will eventually be undone by the UndoManager
-        actionsToPerform = (LinkedQueue<Action>) actionsLoader.loadData(UNDO50);
+        actionsToPerform = (LinkedQueue<Action>) actionsLoader.loadData(UNDO5000);
+
+        numRequests = actionsToPerform.size();
 
 
         //3)
@@ -235,9 +242,6 @@ public class Simulator {
             Action actionToPerform = actionsToPerform.dequeue();
             dispatchAction(actionToPerform);
         }
-
-        System.out.println(actionRequestsUnfulfilled.size());
-
 
         //4)
         // undo the actions performed
@@ -249,11 +253,23 @@ public class Simulator {
         //5)
         // validate current state of roster manager and transaction manager
         // matches initial state.
-        validateRosterState();
+        if (isValidateRosterState()) {
+            logger.info(
+                    "The simulation processed " + numRequests + " requests.\n" +
+                            "The simulation was able to carry out " +
+                            (numRequests - actionRequestsUnfulfilled.size()) +
+                            " actions and their corresponding inverse operation.\n" +
+                            "The simulation successfully undid " +
+                            successfulRosterUndos + " roster actions and " +
+                            successfulTransactionUndos + " transactions."
+            );
+        }else {
+            logger.warning("The simulation encountered an error.");
+        }
 
     }
 
-    private void validateRosterState() {
+    private boolean isValidateRosterState() {
 
         DataContainer<Player> rosterAfter = RM.getPlayerData();
         DataContainer<Transaction> transactionsAfter = TM.getTransactionData();
@@ -265,8 +281,12 @@ public class Simulator {
         if (transactionsAfter.size() != transactionsBefore.size()) {
             logger.info("Something went wrong the transaction before and the transaction after do not have the same size");
         }
-        // passes
 
+        if (successfulRosterUndos + successfulTransactionUndos + actionRequestsUnfulfilled.size() != numRequests) {
+            return false;
+        }
+
+        // passes
 
         for (Player player : rosterAfter) {
             if (!rosterBefore.contains(player)) {
@@ -279,6 +299,7 @@ public class Simulator {
                 logger.info("Mismatch found for Player ID: " + player.player_id());
                 logger.info("State After Undo:  " + player);
                 logger.info("Original State:    " + original);
+                return false;
             } else {
                 rosterBefore.remove(player);
             }
@@ -287,21 +308,15 @@ public class Simulator {
         for (Transaction trans : transactionsAfter) {
             if (!transactionsBefore.contains(trans)) {
                 logger.info("not found, in transactions");
+                return false;
             }else {
                 transactionsBefore.remove(trans);
+
             }
 
         }
 
-        if (rosterBefore.size() == 0) {
-            logger.info("success!");
-        }
-        if (transactionsBefore.size() ==0) {
-            logger.info("success!");
-        }
-
-
-
+        return rosterBefore.isEmpty() && transactionsBefore.isEmpty();
     }
 
     public static void main(String[] args) throws IOException{
@@ -317,10 +332,7 @@ public class Simulator {
             }
         });
 
-        logger.info(String.valueOf(res));
-
-
-
+        logger.info("The total time taken to run the simulations was: " + String.valueOf(res));
 
     }
 }

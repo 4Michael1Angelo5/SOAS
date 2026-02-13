@@ -1,9 +1,7 @@
 package results;
 
-import manager.Manager;
 import manager.UndoManager;
 import types.Action;
-import util.ArrayStack;
 import util.DataContainer;
 
 import java.io.IOException;
@@ -28,14 +26,34 @@ public class UndoResults extends Results<Action, UndoManager> {
         this.loadData(theFilePath);
     }
 
+    //======================== push/pop ================================
+
+    /**
+     * Returns the Experiment Result of Pushing and Popping
+     * Actions. The average time is calculated by taking the
+     * average time of each operation individually then reporting
+     * their combined average.
+     * @return ExperimentResult of Pushing and Popping N times.
+     */
+    public ExperimentResult testPushPop() {
+
+        ExperimentResult push = this.testAdd("push");
+        ExperimentResult pop = this.testRemove("pop");
+
+        String title = pop.operation() + "/" + push.operation();
+        double avgTime = (push.avgTime() + pop.avgTime() )/ 2.0;
+        int inputSize = myManager.getData().size();
+
+        return new ExperimentResult(inputSize, title, avgTime);
+    }
+
     @Override
     public void runAllExperiments() throws IOException {
 
         // test with 50 undo actions
         // ***************************************************************************
         loadActions(UNDO_50);
-        addExperimentResult(testAdd());
-        addExperimentResult(testRemove());
+        addExperimentResult(testPushPop());
 
         // test with 500 undo actions
         // ***************************************************************************
@@ -43,12 +61,10 @@ public class UndoResults extends Results<Action, UndoManager> {
         loadActions(UNDO_500);
         // test with 5000 undo actions
         // ***************************************************************************
-        addExperimentResult(testAdd());
-        addExperimentResult(testRemove());
+        addExperimentResult(testPushPop());
 
         loadActions(UNDO_5000);
-        addExperimentResult(testAdd());
-        addExperimentResult(testRemove());
+        addExperimentResult(testPushPop());
 
         printResults();
     }

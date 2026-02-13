@@ -2,12 +2,10 @@ package manager;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import loader.DataLoader;
-import types.Player;
 import util.DataContainer;
 import types.DataType;
 import util.ManagerConfigException;
@@ -69,7 +67,7 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
         if (this.needsIndexedAccess() && !myData.supportsIndexedAccess()) {
             throw new ManagerConfigException(getManagerClass(), myData.getClass());
 
-        };
+        }
     }
 
     // =======================  getting and setting ===========================
@@ -104,83 +102,49 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
 
     // =======================  adding ===========================
 
+
     /**
-     * Add data to the array.
-     * @param theData the data to add to the array.
+     * <p>
+     * Adds an element to the DataContainer using the <u>most efficient
+     * method</u> for the underlying data structure.
+     * </P>
+     * <ul>
+     * <li>ArrayStore  -> adds at end</li>
+     * <li>SinglyLinkedList ->  adds at tail (end)</li>
+     * <li>Stack  ->  adds at end (push)</li>
+     * <li>Queue -> adds at end (enqueue)</li>
+     * </ul>
+     * @param theData the object to add to the DataContainer.
      */
     @Override
     public void addData(T theData) {
         myData.add(theData);
     }
 
+
+    /**
+     * <p>
+     * Removes an element from the DataContainer using the <u>most efficient
+     * method</u> for the underlying data structure.
+     * </P>
+     * <ul>
+     * <li>ArrayStore  -> removes from end</li>
+     * <li>SinglyLinkedList ->  removes head (front)</li>
+     * <li>Stack  ->  removes from end (pop)</li>
+     * <li>Queue -> removes from front (dequeue)</li>
+     * </ul>
+     * @return the removed object from the Data Storage Container.
+     * @throws NoSuchElementException if the object is not present
+     * in the container or the DataContainer is empty.
+     */
     // ======================= removing  ===========================
     @Override
     public T remove(){
         return myData.remove();
     }
 
-    /**
-     * remove element by index
-     * This operation can only be performed by roster managers that require indexed access.
-     * @param theIndex the index of the element to remove.
-     * @return the removed element.
-     */
-    public T removeAt(int theIndex) {
-        if (!this.needsIndexedAccess()) {
-            throw new IllegalArgumentException("Stacks and Queues do not support indexed access");
-        }
-        return myData.removeAt(theIndex);
-    }
-
-    /**
-     *
-     * @param theId the ID of the data entry (Player, Drills, Transactions)
-     *              you wish to delete.
-     * @return the removed data.
-     */
-    public T removeById(int theId) {
-
-        int index = myData.findBy((T theDataObject) -> theDataObject.id() == theId);
-
-        // throw exception if not found
-        if (index == -1) {
-            throw new NoSuchElementException("id not found");
-        }
-
-        // store it
-        T theRemovedData =  myData.get(index);
-
-      // remove it, and shift everything
-        myData.removeAt(index);
-
-        return theRemovedData;
-    }
-
-
-    // =======================  updating ===========================
-
-    protected void setData(int theIndex, T theData) {
-
-        myData.set(theIndex,theData);
-    }
-
-
-    // =======================  searching ===========================
-
-
-    /**
-     *
-     * @param theId theId of the data entry (Player, Drills, Transaction)
-     * @return the index of the data if present, -1 otherwise.
-     */
-    @Override
-    public int findById(int theId) {
-
-        return myData.findBy( (T theDataObject) -> theDataObject.id() == theId);
-    }
 
     // =======================  utility ===========================
-
 
     /**
      * Prints data parsed from a csv file.
