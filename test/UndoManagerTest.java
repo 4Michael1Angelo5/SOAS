@@ -1,53 +1,63 @@
 import manager.UndoManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import types.UndoAction;
+import types.Action;
 import util.ArrayStack;
 
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+
+/**
+ * JUnit tests for UndoManagerTest
+ * @author Chris Chun, Ayush
+ * @version 1.1
+ */
 public class UndoManagerTest {
     private UndoManager undoManager;
-    private ArrayStack<UndoAction> stack;
+    private ArrayStack<Action> stack;
 
     @BeforeEach
     void setup() {
-        undoManager = new UndoManager(() -> new ArrayStack<>(UndoAction.class));
-        stack = (ArrayStack<UndoAction>) undoManager.getData();
+        undoManager = new UndoManager(() -> new ArrayStack<>(Action.class));
+        stack = (ArrayStack<Action>) undoManager.getData();
     }
 
     // ========== push / pop / peek ==========
 
     @Test
     void pushPopPeek() {
-        UndoAction a1 = new UndoAction(1, null, "A", "t1");
-        UndoAction a2 = new UndoAction(2, null, "B", "t2");
 
-        stack.push(a1);
-        assertNotNull(stack.peek(), "Peek should not return null after push");
-        assertEquals(a1, stack.peek());
-        assertEquals(1, stack.size());
+        Action a1 = new Action(1, null, "A", "t1");
+        Action a2 = new Action(2, null, "B", "t2");
 
-        stack.push(a2);
-        assertNotNull(stack.peek(), "Peek should not return null after second push");
-        assertEquals(a2, stack.peek());
-        assertEquals(2, stack.size());
+        assertAll("push pop peek",
 
-        // Verify peek doesn't remove
-        assertEquals(a2, stack.peek());
-        assertEquals(2, stack.size());
+                // push first
+                () -> stack.push(a1),
 
-        // Verify pop removes and returns correct value
-        UndoAction popped = stack.pop();
-        assertNotNull(popped, "Pop should not return null");
-        assertEquals(a2, popped);
-        assertEquals(1, stack.size());
+                // peek first
+                () -> assertEquals(a1, stack.peek()),
+                () -> assertEquals(1, stack.size()),
 
-        UndoAction peeked = stack.peek();
-        assertNotNull(peeked, "Peek should not return null after pop");
-        assertEquals(a1, peeked);
+                // push second
+                () -> stack.push(a2),
+
+                // peek second
+                () -> assertEquals(a2, stack.peek()),
+                () -> assertEquals(2, stack.size()),
+
+                // peek does not remove
+                () -> assertEquals(a2, stack.peek()),
+                () -> assertEquals(2, stack.size()),
+
+                // pop removes
+                () -> assertEquals(a2, stack.pop()),
+                () -> assertEquals(1, stack.size()),
+                () -> assertEquals(a1, stack.peek())
+        );
     }
 
     // ========== pop on empty stack ==========
@@ -68,79 +78,76 @@ public class UndoManagerTest {
 
     @Test
     void multipleUndos() {
-        UndoAction a1 = new UndoAction(1, null, "A", "t1");
-        UndoAction a2 = new UndoAction(2, null, "B", "t2");
-        UndoAction a3 = new UndoAction(3, null, "C", "t3");
 
-        stack.push(a1);
-        stack.push(a2);
-        stack.push(a3);
+        assertAll("multiple undos",
+                () -> {
+                    Action a1 = new Action(1, null, "A", "t1");
+                    Action a2 = new Action(2, null, "B", "t2");
+                    Action a3 = new Action(3, null, "C", "t3");
 
-        assertEquals(3, stack.size());
+                    // push
+                    stack.push(a1);
+                    stack.push(a2);
+                    stack.push(a3);
+                },
 
-        UndoAction popped3 = stack.pop();
-        assertNotNull(popped3, "First pop should not return null");
-        assertEquals(a3, popped3);
+                () -> assertEquals(3, stack.size()),
 
-        UndoAction popped2 = stack.pop();
-        assertNotNull(popped2, "Second pop should not return null");
-        assertEquals(a2, popped2);
+                // undo all
+                () -> assertEquals(new Action(3, null, "C", "t3"), stack.pop()),
+                () -> assertEquals(new Action(2, null, "B", "t2"), stack.pop()),
+                () -> assertEquals(new Action(1, null, "A", "t1"), stack.pop()),
 
-        UndoAction popped1 = stack.pop();
-        assertNotNull(popped1, "Third pop should not return null");
-        assertEquals(a1, popped1);
+                // empty
+                () -> assertTrue(stack.isEmpty()),
 
-        assertTrue(stack.isEmpty());
-
-        // shouldn't allow not null to pass (undo manager shouldn't let it happen)
+                // shouldn't allow not null to pass
+                () -> assertThrows(NoSuchElementException.class, () -> stack.pop())
+        );
     }
 
     // ========== LIFO behavior ==========
 
     @Test
     void lifoBehavior() {
-        UndoAction first  = new UndoAction(10, null, "first", "t1");
-        UndoAction second = new UndoAction(20, null, "second", "t2");
 
-        stack.push(first);
-        stack.push(second);
+        Action first  = new Action(10, null, "first", "t1");
+        Action second = new Action(20, null, "second", "t2");
 
-        // Last in, first out
-        UndoAction popped1 = stack.pop();
-        assertNotNull(popped1, "First pop should not return null");
-        assertEquals(second, popped1);
+        assertAll("LIFO behavior",
+                // push
+                () -> stack.push(first),
+                () -> stack.push(second),
 
-        UndoAction popped2 = stack.pop();
-        assertNotNull(popped2, "Second pop should not return null");
-        assertEquals(first, popped2);
+                // last in, first out
+                () -> assertEquals(second, stack.pop()),
+                () -> assertEquals(first, stack.pop()),
 
-        assertTrue(stack.isEmpty());
+                // empty
+                () -> assertTrue(stack.isEmpty())
+        );
     }
 
     // reverse a stack test
+
     @Test
-    public void testReverseStack() {
-        ArrayStack<String> stack = new ArrayStack<>(String.class);
-        ArrayStack<String> stack2 = new ArrayStack<>(String.class);
-        String reveresed = "dcba";
-        stack.push("a");
-        stack.push("b");
-        stack.push("c");
-        stack.push("d");
-
-         StringBuilder sb = new StringBuilder();
-
-        assertAll("Test Reverse",
-                ()-> {
-                    while(!stack.isEmpty()){
-                        sb.append(stack.pop());
+    void reverseStack() {
+        ArrayStack<String> s = new ArrayStack<>(String.class);
+        assertAll("reverse stack",
+                () -> {
+                    s.push("a");
+                    s.push("b");
+                    s.push("c");
+                    s.push("d");
+                },
+                () -> {
+                    StringBuilder result = new StringBuilder();
+                    while (!s.isEmpty()) {
+                        result.append(s.pop());
                     }
-
-                    assertEquals(reveresed, sb.toString());
-
+                    assertEquals("dcba", result.toString());
                 }
-                );
-
-
+        );
     }
+
 }
