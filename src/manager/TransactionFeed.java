@@ -5,6 +5,7 @@ import types.Transaction;
 import util.SinglyLinkedList;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 /**
@@ -62,9 +63,7 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @param theTransaction the transaction to insert
      */
     public void insertTransaction(int theIndex,Transaction theTransaction) {
-        if (!myData.supportsIndexedAccess()) {
 
-        }
         this.getData().add(theIndex, theTransaction);
     }
 
@@ -89,10 +88,61 @@ public class TransactionFeed extends DataManager<Transaction> {
      * @return the removed transaction
      */
     public Transaction removeFront() {
-        return myData.remove();
+        return removeAt(0);
     }
 
+    /**
+          * remove element by index
+          * This operation can only be performed by roster managers that require indexed access.
+          * @param theIndex the index of the element to remove.
+          * @return the removed element.
+          */
+    public Transaction removeAt(int theIndex) {
+        if (!this.needsIndexedAccess()) {
+            throw new IllegalArgumentException("Stacks and Queues do not support indexed access");
+        }
+        return myData.removeAt(theIndex);
+    }
+
+    /**
+     *
+     * @param theId the ID of the data entry (Player, Drills, Transactions)
+     *              you wish to delete.
+     * @return the removed data.
+     */
+    public Transaction removeById(int theId) {
+
+        int index = myData.findBy(( theDataObject) -> theDataObject.id() == theId);
+
+        // throw exception if not found
+        if (index == -1) {
+            throw new NoSuchElementException("id not found");
+        }
+
+        // store it
+        Transaction theRemovedData =  myData.get(index);
+
+      // remove it, and shift everything
+        myData.removeAt(index);
+
+        return theRemovedData;
+    }
+
+
+
     // ================================= searching =================================
+
+
+    /**
+     *
+     * @param theId theId of the data entry (Player, Drills, Transaction)
+     * @return the index of the data if present, -1 otherwise.
+     */
+
+    public int findById(int theId) {
+
+        return myData.findBy( ( theDataObject) -> theDataObject.id() == theId);
+    }
 
     /**
      * Finds the first index of the transaction with the matching player name and -1 otherwise.
