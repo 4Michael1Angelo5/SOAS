@@ -252,5 +252,122 @@ public class RosterManagerTest {
 
     }
 
+    // added more edge cases (remove missing ID, update missing ID, empty roster behavior, Add Remove Add Again, Update Stats Multiple Times).
+
+    @Test
+    void testRemoveMissingId() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player p1 = new Player(1, "Player1", "QB", 1, 100);
+        Player p2 = new Player(2, "Player2", "WR", 2, 200);
+
+        rosterManager.addPlayer(p1);
+        rosterManager.addPlayer(p2);
+
+        assertAll("Remove missing ID",
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.removeById(999),
+                        "Should throw exception when removing non-existent player"),
+                () -> assertEquals(2, rosterManager.getPlayerData().size(),
+                        "Roster size should remain unchanged after failed removal")
+        );
+    }
+
+    @Test
+    void testUpdateMissingId() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player p1 = new Player(1, "Player1", "QB", 1, 100);
+        rosterManager.addPlayer(p1);
+
+        assertAll("Update missing ID",
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.updateStats(999, 500),
+                        "Should throw exception when updating non-existent player"),
+                () -> assertEquals(100, rosterManager.getPlayerData().get(0).yards(),
+                        "Existing player stats should remain unchanged")
+        );
+    }
+
+    @Test
+    void testEmptyRosterBehavior() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        assertAll("Empty roster operations",
+                () -> assertTrue(rosterManager.getPlayerData().isEmpty(),
+                        "New roster should be empty"),
+                () -> assertEquals(0, rosterManager.getPlayerData().size(),
+                        "Empty roster size should be 0"),
+                () -> assertEquals(-1, rosterManager.findById(1),
+                        "Should return -1 when searching empty roster by ID"),
+                () -> assertEquals(-1, rosterManager.findByName("John"),
+                        "Should return -1 when searching empty roster by name"),
+                () -> assertEquals(-1, rosterManager.findByPosition("QB"),
+                        "Should return -1 when searching empty roster by position"),
+                () -> assertEquals(-1, rosterManager.findByJersey(99),
+                        "Should return -1 when searching empty roster by jersey"),
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.removeById(1),
+                        "Should throw exception when removing from empty roster"),
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.updateStats(1, 100),
+                        "Should throw exception when updating in empty roster")
+        );
+    }
+
+    @Test
+    void testAddRemoveAddAgain() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player p1 = new Player(1, "Player1", "QB", 1, 100);
+        Player p2 = new Player(2, "Player2", "WR", 2, 200);
+
+        assertAll("Add, remove, add again",
+                () -> {
+                    rosterManager.addPlayer(p1);
+                    assertEquals(1, rosterManager.getPlayerData().size());
+                },
+                () -> {
+                    rosterManager.removeById(1);
+                    assertEquals(0, rosterManager.getPlayerData().size());
+                },
+                () -> {
+                    rosterManager.addPlayer(p2);
+                    assertEquals(1, rosterManager.getPlayerData().size());
+                },
+                () -> assertEquals(2, rosterManager.getPlayerData().get(0).id(),
+                        "Should be the new player")
+        );
+    }
+
+    @Test
+    void testUpdateStatsMultipleTimes() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player player = new Player(1, "Player1", "QB", 1, 100);
+        rosterManager.addPlayer(player);
+
+        assertAll("Multiple stat updates",
+                () -> {
+                    rosterManager.updateStats(1, 200);
+                    assertEquals(200, rosterManager.getPlayerData().get(0).yards());
+                },
+                () -> {
+                    rosterManager.updateStats(1, 300);
+                    assertEquals(300, rosterManager.getPlayerData().get(0).yards());
+                },
+                () -> {
+                    rosterManager.updateStats(1, 0);
+                    assertEquals(0, rosterManager.getPlayerData().get(0).yards(),
+                            "Should handle zero yards");
+                },
+                () -> {
+                    rosterManager.updateStats(1, -50);
+                    assertEquals(-50, rosterManager.getPlayerData().get(0).yards(),
+                            "Should handle negative yards");
+                }
+        );
+    }
 
 }

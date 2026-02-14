@@ -7,6 +7,10 @@ public record Action(
         String target,
         String timestamp) implements DataType, Undoable {
 
+    public Action {
+        ActionType.validate(action_type);
+    }
+
     @Override
     public int id() {
         return action_id;

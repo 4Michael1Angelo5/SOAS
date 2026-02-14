@@ -20,10 +20,9 @@ public class FanTicketQueueTest {
 
     @BeforeEach
     void setup() {
-        fanTicketQueue = new FanTicketQueue(() -> new LinkedQueue<>());
+        fanTicketQueue = new FanTicketQueue(LinkedQueue::new);
         queue = (LinkedQueue<FanRequest>) fanTicketQueue.getData();
     }
-
     // ========== enqueue / dequeue ==========
 
     @Test
@@ -61,7 +60,6 @@ public class FanTicketQueueTest {
                 () -> assertThrows(NoSuchElementException.class, () -> queue.front())
         );
     }
-
 
     // ========== FIFO behavior ==========
 
@@ -105,8 +103,8 @@ public class FanTicketQueueTest {
     @Test
     void repeatAddRemove() {
         assertAll("repeated add and remove",
-             () -> {
-                  FanRequest f1 = new FanRequest(1, "Fan1", "VIP", "08:00");
+                () -> {
+                    FanRequest f1 = new FanRequest(1, "Fan1", "VIP", "08:00");
                     FanRequest f2 = new FanRequest(2, "Fan2", "General", "08:30");
                     FanRequest f3 = new FanRequest(3, "Fan3", "Premium", "09:00");
                     FanRequest f4 = new FanRequest(4, "Fan4", "VIP", "09:30");
@@ -119,10 +117,9 @@ public class FanTicketQueueTest {
                     queue.enqueue(f3);
                     queue.enqueue(f4);
                 },
-
-             () -> assertEquals(new FanRequest(3, "Fan3", "Premium", "09:00"), queue.dequeue()),
-             () -> assertEquals(new FanRequest(4, "Fan4", "VIP", "09:30"), queue.dequeue()),
-             () -> assertTrue(queue.isEmpty())
+                () -> assertEquals(new FanRequest(3, "Fan3", "Premium", "09:00"), queue.dequeue()),
+                () -> assertEquals(new FanRequest(4, "Fan4", "VIP", "09:30"), queue.dequeue()),
+                () -> assertTrue(queue.isEmpty())
         );
     }
 
@@ -144,6 +141,97 @@ public class FanTicketQueueTest {
                     }
                 },
                 () -> assertTrue(queue.isEmpty())
+        );
+    }
+
+    // ========== edge cases ==========
+
+    @Test
+    void singleElementQueue() {
+        FanRequest single = new FanRequest(1, "Single", "VIP", "10:00");
+
+        assertAll("single element operations",
+                () -> queue.enqueue(single),
+                () -> assertEquals(1, queue.size()),
+                () -> assertEquals(single, queue.front()),
+                () -> assertEquals(single, queue.dequeue()),
+                () -> assertTrue(queue.isEmpty())
+        );
+    }
+
+    @Test
+    void enqueueDequeueMultipleTimes() {
+        assertAll("enqueue and dequeue multiple cycles",
+                () -> {
+                    FanRequest f1 = new FanRequest(1, "Fan1", "VIP", "08:00");
+                    FanRequest f2 = new FanRequest(2, "Fan2", "General", "08:30");
+
+                    queue.enqueue(f1);
+                    queue.dequeue();
+                    queue.enqueue(f2);
+                },
+                () -> assertEquals(1, queue.size()),
+                () -> assertEquals(new FanRequest(2, "Fan2", "General", "08:30"), queue.dequeue()),
+                () -> assertTrue(queue.isEmpty())
+        );
+    }
+
+    @Test
+    void manyRequests() {
+        assertAll("many fan requests",
+                () -> {
+                    for (int i = 0; i < 100; i++) {
+                        queue.enqueue(new FanRequest(i, "Fan" + i, "General", i + ":00"));
+                    }
+                },
+                () -> assertEquals(100, queue.size()),
+                () -> {
+                    for (int i = 0; i < 100; i++) {
+                        assertEquals(new FanRequest(i, "Fan" + i, "General", i + ":00"), queue.dequeue());
+                    }
+                },
+                () -> assertTrue(queue.isEmpty())
+        );
+    }
+
+    @Test
+    void frontAfterClear() {
+        FanRequest f1 = new FanRequest(1, "Fan1", "VIP", "10:00");
+
+        assertAll("front after clear",
+                () -> queue.enqueue(f1),
+                () -> assertEquals(1, queue.size()),
+                () -> queue.clear(),
+                () -> assertTrue(queue.isEmpty()),
+                () -> assertThrows(NoSuchElementException.class, () -> queue.front())
+        );
+    }
+
+    @Test
+    void alternatingEnqueueDequeue() {
+        assertAll("alternating enqueue and dequeue",
+                () -> {
+                    for (int i = 0; i < 5; i++) {
+                        queue.enqueue(new FanRequest(i, "Fan" + i, "General", i + ":00"));
+                        if (i % 2 == 1) {
+                            queue.dequeue();
+                        }
+                    }
+                },
+                () -> assertEquals(3, queue.size())
+        );
+    }
+
+    @Test
+    void frontDoesNotRemove() {
+        FanRequest f1 = new FanRequest(1, "Fan1", "VIP", "10:00");
+
+        assertAll("front does not remove element",
+                () -> queue.enqueue(f1),
+                () -> assertEquals(f1, queue.front()),
+                () -> assertEquals(1, queue.size()),
+                () -> assertEquals(f1, queue.front()),
+                () -> assertEquals(1, queue.size())
         );
     }
 }
