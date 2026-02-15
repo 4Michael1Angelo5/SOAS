@@ -245,6 +245,10 @@ public class UndoManagerTest {
             );
     }
 
-
+    @Test
+    void testDemonstrateLIFO() {
+        undoManager.demonstrateLIFO();
+        // This will only show the output, doesn't assert anything
+    }
 
 }
