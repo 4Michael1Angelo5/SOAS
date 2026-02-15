@@ -2,6 +2,7 @@ import manager.FanTicketQueue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import types.FanRequest;
+import util.ArrayStore;
 import util.LinkedQueue;
 
 import java.util.NoSuchElementException;
@@ -147,6 +148,14 @@ public class FanTicketQueueTest {
     // ========== edge cases ==========
 
     @Test
+    void peekFrontOnEmptyQueue() {
+        assertAll("peek front on empty",
+                () -> assertTrue(queue.isEmpty()),
+                () -> assertThrows(NoSuchElementException.class, () -> fanTicketQueue.peekFront())
+        );
+    }
+
+    @Test
     void singleElementQueue() {
         FanRequest single = new FanRequest(1, "Single", "VIP", "10:00");
 
@@ -211,28 +220,88 @@ public class FanTicketQueueTest {
     void alternatingEnqueueDequeue() {
         assertAll("alternating enqueue and dequeue",
                 () -> {
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 6; i++) {
                         queue.enqueue(new FanRequest(i, "Fan" + i, "General", i + ":00"));
-                        if (i % 2 == 1) {
-                            queue.dequeue();
-                        }
+                        queue.enqueue(new FanRequest(i + 100, "Fan" + (i + 100), "VIP", (i + 10) + ":00"));
+                        queue.dequeue();
                     }
                 },
-                () -> assertEquals(3, queue.size())
+                () -> assertEquals(6, queue.size(),
+                        "Should have 6 fans remaining after alternating pattern")
+        );
+    }
+
+
+    // ========== FanTicketQueue methods ==========
+
+    @Test
+    void testQueueValidation() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new FanTicketQueue(() -> new ArrayStore<>(FanRequest.class, 16)),
+                "FanTicketQueue should only accept Queue implementations");
+    }
+
+    @Test
+    void testPeekFront() {
+        FanRequest f1 = new FanRequest(1, "John", "VIP", "10:00");
+        FanRequest f2 = new FanRequest(2, "Jane", "General", "10:15");
+
+        assertAll("peek front",
+                () -> {
+                    queue.enqueue(f1);
+                    queue.enqueue(f2);
+                },
+                () -> assertEquals(f1, fanTicketQueue.peekFront()),
+                () -> assertEquals(2, fanTicketQueue.getQueueLength()),
+                () -> assertEquals(f1, fanTicketQueue.peekFront(),
+                        "Peek should not remove the element")
         );
     }
 
     @Test
-    void frontDoesNotRemove() {
-        FanRequest f1 = new FanRequest(1, "Fan1", "VIP", "10:00");
+    void testHasWaitingFans() {
+        FanRequest f1 = new FanRequest(1, "John", "VIP", "10:00");
 
-        assertAll("front does not remove element",
-                () -> queue.enqueue(f1),
-                () -> assertEquals(f1, queue.front()),
-                () -> assertEquals(1, queue.size()),
-                () -> assertEquals(f1, queue.front()),
-                () -> assertEquals(1, queue.size())
+        assertAll("has waiting fans",
+                () -> assertFalse(fanTicketQueue.hasWaitingFans(),
+                        "Empty queue should have no waiting fans"),
+                () -> {
+                    queue.enqueue(f1);
+                    assertTrue(fanTicketQueue.hasWaitingFans());
+                },
+                () -> {
+                    queue.dequeue();
+                    assertFalse(fanTicketQueue.hasWaitingFans());
+                }
         );
-
     }
+
+    @Test
+    void testGetQueueLength() {
+        assertAll("queue length",
+                () -> assertEquals(0, fanTicketQueue.getQueueLength(),
+                        "Empty queue should have length 0"),
+                () -> {
+                    for (int i = 0; i < 5; i++) {
+                        queue.enqueue(new FanRequest(i, "Fan" + i, "General", i + ":00"));
+                    }
+                    assertEquals(5, fanTicketQueue.getQueueLength());
+                },
+                () -> {
+                    queue.dequeue();
+                    assertEquals(4, fanTicketQueue.getQueueLength());
+                }
+        );
+    }
+
+    @Test
+    void testDemonstrateFIFO() {
+        assertAll("demonstrate FIFO",
+                () -> assertDoesNotThrow(() -> fanTicketQueue.demonstrateFIFO(),
+                        "FIFO demonstration should run without errors"),
+                () -> assertTrue(fanTicketQueue.getData().isEmpty(),
+                        "Queue should be empty after demo completes")
+        );
+    }
+
 }

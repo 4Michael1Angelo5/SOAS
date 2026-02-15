@@ -245,10 +245,115 @@ public class UndoManagerTest {
             );
     }
 
+    // ========== UndoManager methods ==========
+
+    @Test
+    void testStackValidation() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new UndoManager(() -> new ArrayStore<>(Action.class, 16)),
+                "UndoManager should only accept Stack implementations");
+    }
+
+    @Test
+    void testPeekMethod() {
+        Action a1 = new Action(1, ActionType.ADD_PLAYER, "Action1", "t1");
+        Action a2 = new Action(2, ActionType.REMOVE_PLAYER, "Action2", "t2");
+
+        assertAll("peek method",
+                () -> {
+                    undoManager.recordAction(a1);
+                    undoManager.recordAction(a2);
+                },
+                () -> assertEquals(a2, undoManager.peek()),
+                () -> assertEquals(2, stack.size(),
+                        "Peek should not remove the action"),
+                () -> assertEquals(a2, undoManager.peek(),
+                        "Peek should return same action")
+        );
+    }
+
+    @Test
+    void testPushPopMethods() {
+        Action a1 = new Action(1, ActionType.ADD_PLAYER, "Action1", "t1");
+        Action a2 = new Action(2, ActionType.REMOVE_PLAYER, "Action2", "t2");
+
+        assertAll("push and pop",
+                () -> {
+                    undoManager.push(a1);
+                    assertEquals(1, stack.size());
+                },
+                () -> {
+                    undoManager.push(a2);
+                    assertEquals(2, stack.size());
+                },
+                () -> assertEquals(a2, undoManager.pop()),
+                () -> assertEquals(1, stack.size()),
+                () -> assertEquals(a1, undoManager.pop()),
+                () -> assertTrue(stack.isEmpty())
+        );
+    }
+
+    @Test
+    void testRecordAction() {
+        Action a1 = new Action(1, ActionType.ADD_PLAYER, "Action1", "t1");
+        Action a2 = new Action(2, ActionType.REMOVE_PLAYER, "Action2", "t2");
+
+        assertAll("record action",
+                () -> {
+                    undoManager.recordAction(a1);
+                    assertEquals(1, stack.size());
+                },
+                () -> {
+                    undoManager.recordAction(a2);
+                    assertEquals(2, stack.size());
+                },
+                () -> assertEquals(a2, stack.peek())
+        );
+    }
+
+    @Test
+    void testUndo() {
+        Action a1 = new Action(1, ActionType.ADD_PLAYER, "Action1", "t1");
+        Action a2 = new Action(2, ActionType.REMOVE_PLAYER, "Action2", "t2");
+
+        assertAll("undo action",
+                () -> {
+                    undoManager.recordAction(a1);
+                    undoManager.recordAction(a2);
+                },
+                () -> assertEquals(a2, undoManager.undo()),
+                () -> assertEquals(1, stack.size()),
+                () -> assertEquals(a1, undoManager.undo()),
+                () -> assertTrue(stack.isEmpty())
+        );
+    }
+
+    @Test
+    void testCanUndo() {
+        Action a1 = new Action(1, ActionType.ADD_PLAYER, "Action1", "t1");
+
+        assertAll("can undo",
+                () -> assertFalse(undoManager.canUndo(),
+                        "Empty stack should not allow undo"),
+                () -> {
+                    undoManager.recordAction(a1);
+                    assertTrue(undoManager.canUndo());
+                },
+                () -> {
+                    undoManager.undo();
+                    assertFalse(undoManager.canUndo());
+                }
+        );
+    }
+
     @Test
     void testDemonstrateLIFO() {
-        undoManager.demonstrateLIFO();
-        // This will only show the output, doesn't assert anything
+        assertAll("demonstrate LIFO",
+                () -> assertDoesNotThrow(() -> undoManager.demonstrateLIFO(),
+                        "LIFO demonstrate should run without errors"),
+                () -> assertTrue(undoManager.getData().isEmpty(),
+                        "Stack should be empty after demo completes")
+        );
     }
 
 }

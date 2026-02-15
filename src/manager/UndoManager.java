@@ -4,6 +4,7 @@ import types.Action;
 import types.ActionType;
 import types.Undoable;
 import util.DataContainer;
+import util.Stack;
 
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -14,7 +15,18 @@ public class UndoManager extends  DataManager<Action>{
 
     public UndoManager( Supplier<DataContainer<Action>> theSupplier){
         super(Action.class, theSupplier);
+        validateStack();
+    }
 
+    /**
+     * Checks that the data container is a Stack.
+     * UndoManager only works with Stack implementations.
+     * @throws IllegalArgumentException if myData is not a Stack
+     */
+    private void validateStack() {
+        if (!(myData instanceof Stack)) {
+            throw new IllegalArgumentException("UndoManager needs a Stack");
+        }
     }
 
     // ================================ flags =================================
@@ -53,7 +65,7 @@ public class UndoManager extends  DataManager<Action>{
 
      */
 
-    // ================================ stack operations =================================
+    // ========= stack operations =========
 
     /**
      * Look at the most recent action without undoing it.
