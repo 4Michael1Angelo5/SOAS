@@ -131,9 +131,15 @@ The project is organized with separate source and test roots to maintain clean c
       * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction 
             Manager/ TransactionFeed, etc.
       * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
-      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions. 
+      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
+      * `UndoManager`:  concrete child class of `DataManager` that brings specific functionality needed to undo actions from the other managers.
+      * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line. 
     * results/
-        * `Results.java`: The benchmarking suite. It automates experiments across 50, 500, and 5000 records,
+        * `ExperimentResults.java`: A simple Record class used to report a specific result from a benchmark test. 
+        * `Results.java`: Abstract parent class defining all common behavior to concrete Benchmark Results classes: `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`. It automates experiments across 50, 500, and 5000 records,
+        * `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`: Concrete child classes of the `Results` class that handle specific testing needed for managing their respective `DataTypes`.
+        * `Experiment.java`: Interface defining contract for all Results classes.
+        * 
           calculating the average execution time (ms) for Add, Remove, and Search operations.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
