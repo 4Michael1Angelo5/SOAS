@@ -2,7 +2,6 @@ package manager;
 
 import types.DataType;
 import util.DataContainer;
-import util.ManagerConfigException;
 
 import java.io.IOException;
 
@@ -53,8 +52,7 @@ public interface Manager<T extends DataType> {
      * most efficient method.
      * @return the object removed.
      */
-    T remove();
-
+    T removeData();
 
 
     // =====================  util =======================

@@ -1,74 +1,33 @@
 package benchmark;
 
 
-import types.DataType;
-import util.DataContainer;
-
-import java.util.function.Supplier;
-
 /**
+ * Provides an implementation for benchmarking the execution time of tasks.
+ * This class allows for simple speed tests as well as tests requiring
+ * a setup phase before each iteration to ensure a clean state.
  * @author Chris Chun, Ayush
- * @version 1.1
+ * @version 1.3
  */
 public class BenchmarkRunner implements Benchmark {
 
+    /**
+     * Constructs a new BenchmarkRunner.
+     */
     public BenchmarkRunner() {
         super();
     }
 
     /**
-     * Runs a speed test on a given task multiple times and reports the results
-     * @param theTimesToRun the number of times to repeat the task
-     * @param theTask the task/method to be executed
+     * Runs a speed test where a setup task is executed before every
+     * single iteration of the main task. This is useful for testing
+     * operations that modify a data structure (like add or remove)
+     * where the state must be reset to maintain consistent timing.
+     * @param theTimesToRun the number of iterations to perform.
+     * @param theSetupTask the task to run before each iteration (not timed).
+     * @param theTask the main task to be benchmarked.
+     * @return the average execution time per iteration in milliseconds (ms).
      */
     @Override
-    public void runSpeedTest(int theTimesToRun, Runnable theTask) {
-
-        System.out.println("\n=== Running Speed Test ===");
-        System.out.println("Number of runs: " + theTimesToRun);
-
-        long startTime = System.currentTimeMillis();
-
-        // run the task multiple times
-        for (int i = 0; i < theTimesToRun; i++) {
-            theTask.run();
-        }
-
-        long endTime = System.currentTimeMillis();
-        long totalTime = endTime - startTime;
-        double avgTime = (double) totalTime / theTimesToRun;
-
-
-        System.out.println("Total time: " + totalTime + " ms");
-        System.out.println("Average time per run: " + avgTime + " ms");
-        System.out.println("==========================\n");
-    }
-
-    /**
-     * Runs a speed test with a custom label for better output
-     * @param theTimesToRun number of times to run
-     * @param theTask the task to execute
-     * @param label description of what's being tested
-     */
-    public void runSpeedTest(int theTimesToRun, Runnable theTask, String label) {
-        System.out.println("\n=== Speed Test: " + label + " ===");
-        System.out.println("Number of runs: " + theTimesToRun);
-
-        long startTime = System.currentTimeMillis();
-
-        for (int i = 0; i < theTimesToRun; i++) {
-            theTask.run();
-        }
-
-        long endTime = System.currentTimeMillis();
-        long totalTime = endTime - startTime;
-        double avgTime = (double) totalTime / theTimesToRun;
-
-        System.out.println("Total time: " + totalTime + " ms");
-        System.out.println("Average time per run: " + avgTime + " ms");
-        System.out.println("==========================\n");
-    }
-
     public double
     runSpeedTestWithSetup(
             int theTimesToRun,
@@ -81,21 +40,29 @@ public class BenchmarkRunner implements Benchmark {
 
             theSetupTask.run();
 
-            totalTime += runSpeedTestAndGetAvg(1, theTask);
+            totalTime += runSpeedTest(1, theTask);
         }
 
         return totalTime/theTimesToRun;
     }
 
-    public double runSpeedTestAndGetAvg(int theTimesToRun, Runnable theTask) {
-        long startTime = System.currentTimeMillis();
+    /**
+     * Runs a speed test for a specified number of iterations and
+     * calculates the average execution time.
+     * @param theTimesToRun the number of iterations to perform.
+     * @param theTask the task to be benchmarked.
+     * @return the average execution time per iteration in milliseconds (ms).
+     */
+    @Override
+    public double runSpeedTest(int theTimesToRun, Runnable theTask) {
+        long startTime = System.nanoTime();
 
         for (int i = 0; i < theTimesToRun; i++) {
             theTask.run();
         }
 
-        long endTime = System.currentTimeMillis();
+        long endTime = System.nanoTime();
         long totalTime = endTime - startTime;
-        return (double) totalTime / theTimesToRun;
+        return (double) totalTime / theTimesToRun / 1_000_000 ;
     }
 }

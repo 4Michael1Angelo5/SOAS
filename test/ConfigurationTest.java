@@ -105,4 +105,10 @@ public class ConfigurationTest {
         assertEquals(Player.class, rm.getDataClass(),
                 "Manager must maintain a runtime reference to the class it manages.");
     }
+
+    @Test
+    void testDoesNotAllowNullAdd() {
+        RosterManager rm = new RosterManager(playSllSup);
+        assertThrows(IllegalArgumentException.class, ()-> rm.addData(null));
+    }
 }
