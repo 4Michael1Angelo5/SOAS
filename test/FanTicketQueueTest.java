@@ -233,5 +233,6 @@ public class FanTicketQueueTest {
                 () -> assertEquals(f1, queue.front()),
                 () -> assertEquals(1, queue.size())
         );
+
     }
 }

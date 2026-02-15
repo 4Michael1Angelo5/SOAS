@@ -73,8 +73,6 @@ public class ConfigurationTest {
         rm.addPlayer(new Player(1, "Old Player", "QB", 10, 100));
         assertEquals(1, rm.getPlayerData().size());
 
-        // Now trigger a load (Assume you have a dummy small CSV)
-        // This should trigger your 'Hard Reset' logic
         rm.loadCsvData("data/seahawks_players.csv");
 
         // The 'Old Player' should be gone.

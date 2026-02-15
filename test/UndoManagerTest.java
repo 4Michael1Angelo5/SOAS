@@ -239,15 +239,12 @@ public class UndoManagerTest {
 
     @Test
     void testEdgeCase() {
-        Action newAction = new Action(1,null, "Brown", "some Time stamp");
-
-
-        undoManager.addData(null);
-
         assertAll("test edge case handling",
-                ()-> assertThrows(Exception.class, ()-> undoManager.addData(newAction) ),
-                () -> assertThrows(Exception.class, ()-> undoManager.addData(null))
+                ()-> assertThrows(Exception.class, ()-> new Action(1,null, "Brown", "some Time stamp") ),
+                () -> assertThrows(IllegalArgumentException.class, ()-> undoManager.addData(null))
             );
     }
+
+
 
 }

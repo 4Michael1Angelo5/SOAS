@@ -178,10 +178,4 @@ public class DataLoader <T extends DataType> {
             );
         }
     }
-
-    public static void main(String args[]) throws IOException{
-        Supplier<DataContainer<Action>> undoArraySup = ()-> new ArrayStore<>(Action.class, 16);
-        Supplier<DataContainer<FanRequest>> fanSllSup = SinglyLinkedList::new;
-
-    }
 }

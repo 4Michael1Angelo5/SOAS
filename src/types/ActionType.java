@@ -8,8 +8,4 @@ public enum ActionType {
     ADD_TRANSACTION,
     REMOVE_TRANSACTION,
     UPDATE_STATS;
-
-    public static ActionType validate(ActionType type) {
-        return Objects.requireNonNull(type, "ActionType cannot be null");
-    }
 }

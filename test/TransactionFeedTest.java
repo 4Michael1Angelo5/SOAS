@@ -282,4 +282,14 @@ class TransactionFeedTest {
                 }
         );
     }
+
+    @Test
+    public void onlyAllowsValidTransactionArguments() {
+
+        assertAll("testing adding null and creating null transactions",
+                ()-> assertThrows(IllegalArgumentException.class, ()-> manager.addData(null)),
+                () -> assertThrows(IllegalArgumentException.class, () -> new Transaction(1,null,null,null))
+                );
+
+    }
 }
