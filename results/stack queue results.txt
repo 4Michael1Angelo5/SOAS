@@ -1,0 +1,11 @@
+========== Benchmark Results ==========
+Size       Operation       Avg Time (ms)  
+
+----------------------------------------
+50         pop/push        0.023575   
+50         Enqueue/Dequeue 0.020040        
+500        pop/push        0.040217  
+500        Enqueue/Dequeue 0.032857      
+5000       pop/push        0.137637  
+5000       Enqueue/Dequeue 0.144105      
+========================================
