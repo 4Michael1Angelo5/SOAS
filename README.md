@@ -19,10 +19,9 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 | Role | Member(s) | Primary Responsibilities |
 | :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris, Ayush | Ayush designed and implemented the `TransactionFeed`, Chris designed and implemented the `SinglyLinkedList` class|
-| **Tester: JUnit Tests** | Chris, Ayush | Ayush designed the Junit 5 test suite for the `TransactionFeed`. Chris created the test suite for the `SinglyLinkedList` class|
-| **Analyst: Benchmark + Analysis** | Ayush | Took charge of displaying the results of the `BenchmarkRunner` for the `TransactionFeed`|
-
+| **Implementer: Core Logic** | Chris, Ayush | Chris and Ayush designed the `UndoManager` and `FanTicketQueue`, and Chris implemented the core ADTs `LinkedQueue` and `ArrayStack`, and scaffolded out the dependency injection strategy. |
+| **Tester: JUnit Tests** | Chris, Ayush | Ayush designed the Junit 5 test suite for the `UndoManager`, and `FanTicketQueue` class|
+| **Analyst: Benchmark + Analysis** | Chris | Took charge of implementing the results for the `UndoManager` and the `FanTicketQueue`|
 ---
 
 ## Analysis Section
@@ -49,8 +48,8 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 3. Compare your measured performance trends across dataset sizes.
     - In general, the results from our benchmark testing with data sample sizes of 50, 500,
       and 5,000 reveal that stacks and queues are incredibly efficient at the problems of
-      undoing and processing requests. These operations are $O(1)$ time complexity, making them
-      well-suited for processing large data sizes. We observed that a max peak stack depth of
+      undoing and processing requests. These operations have $O(1)$ time complexity, making them
+      well-suited for processing large data sizes. We observed that a maximum peak stack depth of
       5,000 undo actions required, on average, only 0.25 milliseconds for push and pop
       operations. This efficiency is the signature hallmark of these data structures.  
 
@@ -82,11 +81,11 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
 ```
 
 This design allowed us to fluidly test each Manager class with different data structures. A
-RosterManager could use a SinglyLinkedList, an Array, or a HashMap, etc; all while being type
-safe and predictable.
+RosterManager could use a SinglyLinkedList, an Array, or a HashMap, etc, all while being type-safe
+and predictable.
 
 Of course, with such a design, there were and still are significant challenges and drawbacks. For
-example, in order for us to do this, it meant creating a common interface for all manager classes
+example, for us to do this, it meant creating a common interface for all manager classes
 to use. All managers need the ability to add data and remove data. So the obvious thing to do was
 to create a method called addData and removeData. The trouble with this is that we started to
 lose the semantic meaning of what adding or removing data actually did! It pushes the
@@ -138,11 +137,15 @@ The project is organized with separate source and test roots to maintain clean c
           calculating the average execution time (ms) for Add, Remove, and Search operations.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
-        * `Player.java`, `Drill.java`, `Transaction.java`: Data models.
+        * `Player.java`, `Drill.java`, `Transaction.java`, `Action`, `UndoRecord`: Data models.
+    * simulator/
+      * `Simulator.java`: A Java class that simulates processing 5000 requests in the `TransactionFeed` and `RosterManager`, then undoing those actions with the `UndoManager`. 
     * util/
       * `SinglyLinkedList.java`: A generic, low-level utility class that manages a raw Singly Linked List (`SinglyLinkedList<T>`). 
       * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`). 
       It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
+      * `ArrayStack`: An array-based implementation of a stack.
+      * `LinkedQueue`: A singly linked list implementation of a Queue. 
     * `Main` - CLI-driven menu interface for interacting with the SOASS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
