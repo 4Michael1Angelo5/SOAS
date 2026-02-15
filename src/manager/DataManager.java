@@ -11,6 +11,8 @@ import types.DataType;
 import util.ManagerConfigException;
 import util.MismatchedContainerFromLoaderException;
 
+import static java.util.Objects.isNull;
+
 /**
  * DataManager provides a high-level abstraction for managing collections of {@link DataType}
  * objects.
@@ -118,6 +120,10 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
      */
     @Override
     public void addData(T theData) {
+
+        if (isNull(theData)) {
+            throw new IllegalArgumentException("The Data Cannot be null");
+        }
         myData.add(theData);
     }
 
@@ -139,7 +145,7 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
      */
     // ======================= removing  ===========================
     @Override
-    public T remove(){
+    public T removeData(){
         return myData.remove();
     }
 

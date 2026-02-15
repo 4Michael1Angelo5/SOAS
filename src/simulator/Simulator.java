@@ -324,7 +324,7 @@ public class Simulator {
 
         BenchmarkRunner br = new BenchmarkRunner();
 
-        double res = br.runSpeedTestAndGetAvg(1,()-> {
+        double res = br.runSpeedTest(1,()-> {
             try {
                 sim.runSimulation();
             } catch (IOException e) {

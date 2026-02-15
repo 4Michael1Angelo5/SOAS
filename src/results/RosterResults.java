@@ -6,7 +6,6 @@ import manager.TransactionFeed;
 import manager.UndoManager;
 import types.Action;
 import types.Transaction;
-import types.UndoRecord;
 import util.ArrayStack;
 import util.DataContainer;
 import types.Player;
@@ -88,7 +87,7 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         final int inputSize = myManager.getPlayerData().size();
 
-        final double avgTime = benchmarkRunner.runSpeedTestAndGetAvg(TRIAL_RUNS, this::searchByNameNTimes);
+        final double avgTime = benchmarkRunner.runSpeedTest(TRIAL_RUNS, this::searchByNameNTimes);
 
         return new ExperimentResult(inputSize, operation, avgTime);
     }

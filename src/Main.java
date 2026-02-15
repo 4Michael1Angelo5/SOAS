@@ -57,13 +57,17 @@ public class Main {
 
     private static final Simulator mySimulator = new Simulator();
 
+    public static final String ACTIONS50 = "data/seahawks_undo_actions_50.csv";
+
+    public static final String  FAN50 = "data/seahawks_fan_queue_50.csv";
+
     public static void main(String[] args) throws IOException {
 
         UndoManager undoManager = new UndoManager(ACTION_STACK);
         FanTicketQueue fanRequestManager = new FanTicketQueue(FAN_QUEUE);
 
         UndoResults undoResults = new UndoResults(undoManager,ACTION_STACK);
-        FanTicketResults fanTickectResults = new FanTicketResults(fanRequestManager, FAN_QUEUE);
+        FanTicketResults fanTicketResults = new FanTicketResults(fanRequestManager, FAN_QUEUE);
 
         boolean running = true;
 
@@ -74,26 +78,38 @@ public class Main {
             switch (choice) {
                 case "1" -> {
                     // load actions
-                    undoManager.loadCsvData("data/seahawks_undo_actions_50.csv");
+                    undoManager.loadCsvData(ACTIONS50);
                     logger.info(ANSI_GREEN+ "Successfully loaded actions" + ANSI_RESET);
                 }
                 case "2" -> {
                     // load fan requests
-                    fanRequestManager.loadCsvData("data/seahawks_fan_queue_5000.csv");
+                    fanRequestManager.loadCsvData(FAN50);
                     logger.info(ANSI_GREEN+ "Successfully loaded fan requests " + ANSI_RESET);
                 }
                 case "3" -> {
                     //  Undo Action (pop)
-                    Action removed = undoManager.remove();
+                    int size = undoManager.getData().size();
 
-                    logger.info(ANSI_GREEN+ "Successfully popped "
-                            +  removed + " from the actions stack" + ANSI_RESET);
+                    int numRemoves = 0;
+                    while(numRemoves < size/2) {
+                        undoManager.removeData();
+                        numRemoves++;
+                    }
+
+                    logger.info(ANSI_GREEN+ "Successfully undid "
+                            +  numRemoves + " actions from the actions stack" + ANSI_RESET);
                 }
                 case "4" -> {
                     // Dequeue Request
-                    FanRequest removed = fanRequestManager.remove();
+                    int fanRequestsProcessed = 0;
+                    int size = fanRequestManager.getData().size();
+
+                    while (fanRequestsProcessed < size/2){
+                        fanRequestManager.processRequest();
+                        fanRequestsProcessed++;
+                    }
                     logger.info(ANSI_GREEN+ "Successfully dequeued "
-                            +  removed + " from the fan request queue" + ANSI_RESET);
+                            +  fanRequestsProcessed + " fan requests from the fan request queue" + ANSI_RESET);
                 }
                 case "5" -> {
 
@@ -105,7 +121,7 @@ public class Main {
                 case "7" -> {
                     // run all experiments
                     undoResults.runAllExperiments();
-                    fanTickectResults.runAllExperiments();
+                    fanTicketResults.runAllExperiments();
                 }
                 case "8" -> mySimulator.runSimulation();
                 case "0" -> running = false;
@@ -125,8 +141,8 @@ public class Main {
                 =====================
                 1. Load Actions
                 2. Load Fan Request
-                3. Undo Action (pop)
-                4. Dequeue Request
+                3. Undo 50% (pop)
+                4. Process 50% (dequeue)
                 5. Print Actions
                 6. Print Fan Queue
                 7. Run benchmark

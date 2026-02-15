@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import types.Action;
 import types.ActionType;
 import util.ArrayStack;
+import util.ArrayStore;
 
 import java.util.NoSuchElementException;
 
@@ -80,6 +81,8 @@ public class UndoManagerTest {
     @Test
     void multipleUndos() {
 
+
+
         assertAll("multiple undos",
                 () -> {
                     Action a1 = new Action(1, ActionType.ADD_PLAYER, "A", "t1");
@@ -101,8 +104,6 @@ public class UndoManagerTest {
 
                 // empty
                 () -> assertTrue(stack.isEmpty()),
-
-                // shouldn't allow not null to pass
                 () -> assertThrows(NoSuchElementException.class, () -> stack.pop())
         );
     }
@@ -234,6 +235,19 @@ public class UndoManagerTest {
                     assertEquals("dcba", result.toString());
                 }
         );
+    }
+
+    @Test
+    void testEdgeCase() {
+        Action newAction = new Action(1,null, "Brown", "some Time stamp");
+
+
+        undoManager.addData(null);
+
+        assertAll("test edge case handling",
+                ()-> assertThrows(Exception.class, ()-> undoManager.addData(newAction) ),
+                () -> assertThrows(Exception.class, ()-> undoManager.addData(null))
+            );
     }
 
 }

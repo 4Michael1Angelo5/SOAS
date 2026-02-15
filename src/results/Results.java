@@ -201,7 +201,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
 
         int inputSize = myManager.getData().size();
 
-        double avgTime = myBenchmarkRunner.runSpeedTestAndGetAvg(TRIAL_RUNS, this::addNTimes);
+        double avgTime = myBenchmarkRunner.runSpeedTest(TRIAL_RUNS, this::addNTimes);
 
         return new ExperimentResult(inputSize, theOperationName, avgTime);
     }
@@ -220,7 +220,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * * @param theResult The result to display.
      */
     public void logExperiment(ExperimentResult theResult) {
-        String row = String.format("%-10s %-15s %-15.1f", theResult.inputSize(), theResult.operation(), theResult.avgTime());
+        String row = String.format("%-10s %-15s %-15.6f", theResult.inputSize(), theResult.operation(), theResult.avgTime());
         logger.info(ANSI_GREEN + row + ANSI_RESET);
     }
 

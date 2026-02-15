@@ -62,7 +62,7 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
 
     // gather results
     public ExperimentResult testAddFrontNTimes() {
-        double avgTime = myBenchmarkRunner.runSpeedTestAndGetAvg(
+        double avgTime = myBenchmarkRunner.runSpeedTest(
                 TRIAL_RUNS,
                 this::addFrontNTimes);
         String operationName = "add front";
@@ -94,7 +94,7 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
         int inputSize = myManager.getTransactionData().size();
         String operation = "add rear";
         double avgTime =
-                myBenchmarkRunner.runSpeedTestAndGetAvg(TRIAL_RUNS, this::addRearNTimes);
+                myBenchmarkRunner.runSpeedTest(TRIAL_RUNS, this::addRearNTimes);
 
         return new ExperimentResult(inputSize, operation, avgTime);
 
@@ -146,7 +146,7 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
         int inputSize = myManager.getTransactionData().size();
         String operationName = "search";
         final double avgTime =
-                myBenchmarkRunner.runSpeedTestAndGetAvg(
+                myBenchmarkRunner.runSpeedTest(
                         TRIAL_RUNS,
                         this::searchListNTimes);
         return new ExperimentResult(inputSize, operationName, avgTime);
