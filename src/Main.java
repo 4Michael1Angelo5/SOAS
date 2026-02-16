@@ -1,11 +1,18 @@
-import manager.TransactionFeed;
-import results.TransactionResults;
-import types.Transaction;
+import manager.FanTicketQueue;
+import manager.UndoManager;
+import results.FanTicketResults;
+import results.UndoResults;
+import simulator.Simulator;
+import types.Action;
+import types.FanRequest;
+import util.ArrayStack;
+import util.DataContainer;
+import util.LinkedQueue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 
@@ -14,11 +21,14 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.2
+ * @version 1.3
  */
 public class Main {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
+
+    public static final  Supplier<DataContainer<Action>> ACTION_STACK = () -> new ArrayStack<>(Action.class);
+    public static final Supplier<DataContainer<FanRequest>> FAN_QUEUE = LinkedQueue::new;
 
     static {
         // attempt to use logging properties file
@@ -34,22 +44,30 @@ public class Main {
         }
     }
 
-
     /**
      * Reader to read user inputs from the command line.
      */
     private static final BufferedReader reader =
             new BufferedReader( new InputStreamReader(System.in));
 
-
     /**
      * Logger for all your logging needs
      */
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
+    private static final Simulator mySimulator = new Simulator();
+
+    public static final String ACTIONS50 = "data/seahawks_undo_actions_50.csv";
+
+    public static final String  FAN50 = "data/seahawks_fan_queue_50.csv";
+
     public static void main(String[] args) throws IOException {
-        TransactionResults tests = new TransactionResults();
-        TransactionFeed transactionFeed = new TransactionFeed();
+
+        UndoManager undoManager = new UndoManager(ACTION_STACK);
+        FanTicketQueue fanRequestManager = new FanTicketQueue(FAN_QUEUE);
+
+        UndoResults undoResults = new UndoResults(undoManager,ACTION_STACK);
+        FanTicketResults fanTicketResults = new FanTicketResults(fanRequestManager, FAN_QUEUE);
 
         boolean running = true;
 
@@ -59,58 +77,53 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    // resets the data back to original csv.
-                    transactionFeed.loadTransactionData("data/seahawks_transactions.csv");
-                    logger.info(ANSI_GREEN+ "Successfully loaded transactions" + ANSI_RESET);
+                    // load actions
+                    undoManager.loadCsvData(ACTIONS50);
+                    logger.info(ANSI_GREEN+ "Successfully loaded actions" + ANSI_RESET);
                 }
                 case "2" -> {
-                    Transaction breakingNews =
-                            new Transaction(1271, "Injury", "Chris C.", "2026-01-14");
-                    // add transaction to the front
-                    transactionFeed.addTransactionFront(breakingNews);
-                    logger.info(ANSI_GREEN+ "Successfully added "
-                            +  breakingNews + " to the front of the transaction feed" + ANSI_RESET);
+                    // load fan requests
+                    fanRequestManager.loadCsvData(FAN50);
+                    logger.info(ANSI_GREEN+ "Successfully loaded fan requests " + ANSI_RESET);
                 }
                 case "3" -> {
-                    Transaction olderNews =
-                            new Transaction(111, "Trade", "Jerry Rice", "2026-01-10");
-                    // add transaction to the end
-                    transactionFeed.addTransactionRear(olderNews);
-                    logger.info(ANSI_GREEN+ "Successfully added "
-                            +  olderNews + " to the end of the transaction feed" + ANSI_RESET);
+                    //  Undo Action (pop)
+                    int size = undoManager.getData().size();
+
+                    int numRemoves = 0;
+                    while(numRemoves < size/2) {
+                        undoManager.removeData();
+                        numRemoves++;
+                    }
+
+                    logger.info(ANSI_GREEN+ "Successfully undid "
+                            +  numRemoves + " actions from the actions stack" + ANSI_RESET);
                 }
                 case "4" -> {
-                    Transaction transaction =
-                            new Transaction(89, "Injury", "Ayush", "2025-01-10");
-                    try {
+                    // Dequeue Request
+                    int fanRequestsProcessed = 0;
+                    int size = fanRequestManager.getData().size();
 
-                        transactionFeed.insertTransaction(3, transaction);
-                        logger.info(ANSI_GREEN+ "Successfully added "
-                                +  transaction + " at index 3 to the transaction feed" + ANSI_RESET);
-
-                    } catch(IllegalArgumentException e) {
-                        logger.warning(e.toString());
-                        logger.warning("Cannot insert at index 3 because the transaction feed only has, "
-                                +  transactionFeed.getTransactionData().size() + " transactions");
+                    while (fanRequestsProcessed < size/2){
+                        fanRequestManager.processRequest();
+                        fanRequestsProcessed++;
                     }
-
+                    logger.info(ANSI_GREEN+ "Successfully dequeued "
+                            +  fanRequestsProcessed + " fan requests from the fan request queue" + ANSI_RESET);
                 }
                 case "5" -> {
-                    try {
-                        Transaction removed  = transactionFeed.removeFront();
-                        logger.info(ANSI_GREEN+ "Successfully removed "
-                                +  removed + " to the end of the transaction feed" + ANSI_RESET);
-                    } catch (NoSuchElementException e) {
-                        logger.warning(e.toString());
-                        logger.warning(" Cannot remove transaction from the feed because it is empty");
-                    }
+
+                    undoManager.printData();
                 }
                 case "6" -> {
-                    transactionFeed.printTransactions();
+                    fanRequestManager.printData();
                 }
                 case "7" -> {
-                    tests.runAllExperiments();
+                    // run all experiments
+                    undoResults.runAllExperiments();
+                    fanTicketResults.runAllExperiments();
                 }
+                case "8" -> mySimulator.runSimulation();
                 case "0" -> running = false;
                 default -> {
                     logger.info("""
@@ -126,13 +139,14 @@ public class Main {
         logger.info("""
                 Seahawks Data Options
                 =====================
-                1. Load transaction feed
-                2. Add breaking news (front)
-                3. Add older update (rear)
-                4. Insert at position
-                5. Remove transaction
-                6. Print first N
+                1. Load Actions
+                2. Load Fan Request
+                3. Undo 50% (pop)
+                4. Process 50% (dequeue)
+                5. Print Actions
+                6. Print Fan Queue
                 7. Run benchmark
+                8. Bonus! Run Simulation.
                 0. Exit
                 """);
     }

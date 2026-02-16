@@ -19,79 +19,96 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 | Role | Member(s) | Primary Responsibilities |
 | :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris, Ayush | Ayush designed and implemented the `TransactionFeed`, Chris designed and implemented the `SinglyLinkedList` class|
-| **Tester: JUnit Tests** | Chris, Ayush | Ayush designed the Junit 5 test suite for the `TransactionFeed`. Chris created the test suite for the `SinglyLinkedList` class|
-| **Analyst: Benchmark + Analysis** | Ayush | Took charge of displaying the results of the `BenchmarkRunner` for the `TransactionFeed`|
-
+| **Implementer: Core Logic** | Chris, Ayush | Chris and Ayush designed the `UndoManager` and `FanTicketQueue`, and Chris implemented the core ADTs `LinkedQueue` and `ArrayStack`, and scaffolded out the dependency injection strategy. |
+| **Tester: JUnit Tests** | Chris, Ayush | Ayush designed the Junit 5 test suite for the `UndoManager`, and `FanTicketQueue` class|
+| **Analyst: Benchmark + Analysis** | Chris | Took charge of implementing the results for the `UndoManager` and the `FanTicketQueue`|
 ---
 
 ## Analysis Section
-1. Why does addFront differ drastically between arrays and linked lists?
-   - Adding to the front of a linked list is more efficent then adding to the front of an array. This is because
-     adding to the front of the array requires shifting all the elements in the array one index position to the right.
-     Singly linked lists, on the other hand, only require two pointer reassignments: the new head becomes the element we are adding to the list,
-     and the new node's next points to the rest of the list. Because each node in the list contains information about which node
-     comes after it, we do not need to iterate through each node to maintain contiguous memory, whereas with arrays, contiguous memory
-     is maintained by simple arithmetic, by array addressing each element based on where it is located from the front of the list.  
-2. When does a linked list outperform an array?
-   - A linked list outperforms an array when needing to frequently add or remove elements from the front of the list. The time complexity
-     for adding or removing from the front in a linked list is $O(1)$, whereas with an array it is $O(n)$. If, for example, we needed to
-     implement a First In First Out (FIFO) data structure like a Queue to manage user requests, an array would be a poor choice because each update
-     of adding and removing from the array would result in constant shifting of the data elements in the list.  
-3. When is an array better?
-   - An array is superior to a linked list when needing frequent access to the contents of the list, not contained in the front or the end of the list.
-     An array's main advantage over a linked list is that it can retrieve information about the contents anywhere in the list in $O(1)$ constant time, whereas
-     with a singly linked list, it takes $O(n)$ time because each node only knows about what its immediate neighbor's value is. This means that to find the value
-     of a specific indexed position node, we need to iterate over the list until we reach that specific node to figure out what its value is. 
-4. What is the cost of pointer traversal?
-   - The cost of pointer traversal is $O(n)$. If the linked list has 100 elements, and we want to get what is at index position 49.
-     We would need to create a dummy pointer node, `walker`. We set `walker` to point to the head of the linked list, and keep track of how many
-     steps `walker` has taken. We enter a loop and advance `walker` by setting `walker = walker.next`, and increment the step count. Once the step
-     count equals index 49 `walker` is standing on the node, whose value we are interested in retrieving.  
-5. Would this scale to 100,000 transactions?
-   - A linked list data structure would be a good choice if we did not need to frequently retrieve transaction data that was not at the front or end of the list.
-     If managing transaction data requires processing requests in FIFO order, then this data structure is suitable for 100,000 transactions.
-     On the other hand, if the transaction data needs to be updated frequently or modified, the performance will deteriorate. However, in real-world applications
-     "Transactions" are generally considered immutable. If an error occurs with a transaction, a new transaction is appended or enqueued to correct the error. Example:
-     User A pays user B $50. Error: user A should have paid user B $60. Result new transaction: user A pays user B $10 - Not lets go back and change the ledger of the transaction
-     histories. So in my opinion, a singly linked list is acceptable for managing transactions, provided a transaction for the domain business logic is expected to be
-     an immutable history of all transactions that have taken place.   
+## Analysis Section
 
-## Reflection & Team Process
-Ayush and Chris worked more efficiently this sprint. Last week, Chris and Ayush felt overwhelmed because they didn't dedicate enough time during the week 
-to finish sprint deliverables for PA1, resulting in them having to spend all day Sunday and Sunday night to meet project deadlines. This week, Chris worked 
-ahead of schedule, and as soon as PA1 was finished, Chris designed the `SinglyLinkedList` class for PA2. Ayush commited working extra time to work on Friday 
-and quickly implemented the `TransactionFeed` class utilizing the `SinglyLinkedList` class Chris designed. This made Friday's work meeting more productive 
-because the lowest-level data structure was already complete, so the team could work on introducing the core project features.
+1. Explain why Undo is a stack problem (LIFO)
+    - Undo is a stack problem because the order in which we undo actions is Last-In-First-Out
+      (LIFO) by nature. If a linear progression of steps is taken from state A to B to C, to
+      get back to state A, I must undo or revert back to state B, then A. The most recent
+      action must be reversed first, which aligns perfectly with how a stack operates—the last
+      item pushed onto the stack is the first item popped off.
 
-Both Chris and Ayush realized that there was some growing inefficiency in the code base, but the team decided to defer dealing with it until after the completion of 
-The sprint deliverables for PA2. Currently, the `BenchmarkRunner` class is not designed to be flexible. Additionally, while the team made a good 
-effort at designing a flexible abstract `DataLoader` class and an abstract `DataManager` class, there is still room for improvement. For example, the `DataLoader` is 
-data-type agnostic. It does not care if it has loading `Player` data, `Drills` data, or `Transaction` data. It knows how to gracefully handle each data type and parse
-CSV data into the correct `Player`, `Drills`, or `Transaction` data object. All the `DataLoader` cares about is that whoever is the caller of the `DataLoader` specifies 
-up front which type of data it needs to load. However, the `DataLoader` and `DataManager` are not **data container agnostic**. Each one of those classes can only manage
-and load data using an array-based data structure. 
+2. Explain why Fan lines are a queue problem (FIFO)
+    - Fan lines are a queue problem because they rely on First-In-First-Out (FIFO) behavior.
+      Generally speaking, we try to establish a meritocracy when processing requests, and that
+      system of merit is built around the philosophy that the first request received should be
+      the first one honored. Just like when we stand in line at a coffee shop, if someone cuts
+      in front of you, you may be upset because you were in line first. Additionally, if both
+      you and the person behind you are ordering the same thing, then you may be upset when
+      they are served before you. Processing requests in this way not only satisfies the client
+      but also provides a predictable format for systems to ensure that all requests are
+      handled.
 
-This is where the problem is. With every new sprint, we will be tasked with adding functionality for a new type of data structure to act as our "data container". 
-This means our `DataLoader` and `DataManager` will always create an array list of the CSV data objects, and creation of the proper data structure to contain and manipulate
-those objects will be left as a chore to its children. This design is inefficient. No matter what data structure acts as our container, we have certain guarantees upfront about
-what the container should be able to do. It should be able to modify the contents inside the container via `add()`, `remove()`, and `update()`, 
-and it should expose an easy way to iterate over those objects. The better design would be create a sealed interface for all the supported data structures 
-that will act as storage containers for `Player`, `Drills`, and `Transaction` data. Then it becomes the responsibility of the caller to specify what data objects we are
-dealing with, `Player`, `Drills`, or `Transaction`, and which type of storage container they want to use to manage that data: `ArrayList`, `SinglyLinkedList`, `HashMap`, `Stack`,
-`Queue` etc. This design is superior because then the concrete child classes that extend `DataManager` only need to connsern them selves with methods that are specific to managing
-`Player`, `Drills`, or `Transaction` objects.
+3. Compare your measured performance trends across dataset sizes.
+    - In general, the results from our benchmark testing with data sample sizes of 50, 500,
+      and 5,000 reveal that stacks and queues are incredibly efficient at the problems of
+      undoing and processing requests. These operations have $O(1)$ time complexity, making them
+      well-suited for processing large data sizes. We observed that a maximum peak stack depth of
+      5,000 undo actions required, on average, only 0.25 milliseconds for push and pop
+      operations. This efficiency is the signature hallmark of these data structures.  
 
-Similarly, the `Results` class that utilizes the `Benchmarkrunner` is not flexible enough. To complete this sprint deliverable of displaying the benchmark 
-results of adding, removing, and updating with the new `SinglyLinkedList` data structure, we duplicated the same logic as the `Results` class for PA1, but swapped
-the data structure to a `SinglyLinkedList` and used the new `TransactionFeed` instead of `RosterManager` to gather the test results. This is an inefficient design.
-The `Results` class's job is to display results. It should not be opinionated about displaying results for a `TransactionFeed`, or a `RosterManager`, or a `DrillsManager`;
-It should just be to format and gather results from the `BenchMarkrunner` - that's it! 
+# Reflection: Code Architecture Improvements for PA3
 
-Unfortunately, although the team realized there was some inefficiency, we ultimately decided to move forward with the current design in favor of meeting project deadlines. 
-We weighed out the pros and cons of introducing these changes into PA2. Although implementing the changes would result in a more robust, flexible, and scalable application, 
-doing so would mean introducing breaking changes to the current code base and result in a substantial code refactor, which would take more time than simply duplicating the logic.
-The team decided that for PA3, these features would be introduced. 
+Chris and Ayush made significant improvements to the code base for PA3. The team utilized
+inheritance by creating a generic abstract parent class `DataManager<T>`. The DataManager
+centralizes shared behavior of all the concrete `Manager` classes, e.g., `RosterManager`,
+`TransactionFeed`. The team built upon this design for PA3 by scaffolding out a dependency
+injection strategy into the `DataManagers`, making them not only `DataType` agnostic but also
+`DataContainer` agnostic - meaning each concrete child of the DataManager class can easily swap
+different DataContainers to test the efficiency and suitability of different data structures for
+managing the data they are responsible for.
+
+The dependency injection strategy was achieved by modifying the constructors of the DataManager
+to accept a `Supplier<DataContainer<T>>`, and by changing the method signature of DataManager to
+implement a shared abstract interface `Manager<T>`. This design direction was chosen because it
+allowed the team to treat the DataContainers as independent variables for benchmark testing.
+Essentially, the team built a benchmark testing framework for data structures disguised as a
+Seahawks Data Analysis app!
+
+The team did not stop here. The team carried out this strategy at all levels of the application,
+including the `Results` classes, mirroring the same dependency injection and abstract parent
+hierarchy of `Manager` classes. The team decoupled the DataContainer and DataType from the
+Results classes and enforced strict type safety by tying each instance of its child classes to a
+`DataType<T>` and `Manager<T>` of type `M`.
+```java
+public abstract class Results<T extends DataType, M extends Manager<T>>
+```
+
+This design allowed us to fluidly test each Manager class with different data structures. A
+RosterManager could use a SinglyLinkedList, an Array, or a HashMap, etc, all while being type-safe
+and predictable.
+
+Of course, with such a design, there were and still are significant challenges and drawbacks. For
+example, for us to do this, it meant creating a common interface for all manager classes
+to use. All managers need the ability to add data and remove data. So the obvious thing to do was
+to create a method called addData and removeData. The trouble with this is that we started to
+lose the semantic meaning of what adding or removing data actually did! It pushes the
+responsibility and cognitive load on the developer to understand that when I am removing from a
+stack, removeData means remove from the top of the stack; when removing from a min heap,
+removeData means remove the root node and perform heapify down, etc. With so much abstraction,
+there are several layers the developer needs to think through just to understand what they are
+doing.
+
+Additionally, there are several imperfect details about the abstraction that still bother the
+team - and that is the leaky abstraction between the DataTypes and DataManagers. The DataManagers
+cannot be truly data container agnostic. They need to be able to do specific things to manage
+their data, which demands certain data structures. For example, a RosterManager needs to be able
+to search and update players in the roster, but a stack does not provide this functionality. This
+required the data structures to reveal implementation details to the managers by having flags
+such as `needsIndexedAccess()` and `supportsIndexedAccess()`. In this way, the application can
+guard against a developer configuring a RosterManager with a stack.
+
+Although there were several cons for this design approach, the team felt that the benefits
+outweighed the drawbacks. This design approach allows the team to be incredibly flexible and
+reduces code redundancy. Next week, when we need to design a min stack, the hardest part will be
+implementing the data structure logic, but incorporating that data structure into our existing
+framework and ecosystem will be frictionless - zero code repeat, just plug and play. 
 
 
 
@@ -114,17 +131,27 @@ The project is organized with separate source and test roots to maintain clean c
       * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction 
             Manager/ TransactionFeed, etc.
       * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
-      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions. 
+      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
+      * `UndoManager`:  concrete child class of `DataManager` that brings specific functionality needed to undo actions from the other managers.
+      * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line. 
     * results/
-        * `Results.java`: The benchmarking suite. It automates experiments across 50, 500, and 5000 records,
+        * `ExperimentResults.java`: A simple Record class used to report a specific result from a benchmark test. 
+        * `Results.java`: Abstract parent class defining all common behavior to concrete Benchmark Results classes: `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`. It automates experiments across 50, 500, and 5000 records,
+        * `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`: Concrete child classes of the `Results` class that handle specific testing needed for managing their respective `DataTypes`.
+        * `Experiment.java`: Interface defining contract for all Results classes.
+        * 
           calculating the average execution time (ms) for Add, Remove, and Search operations.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
-        * `Player.java`, `Drill.java`, `Transaction.java`: Data models.
+        * `Player.java`, `Drill.java`, `Transaction.java`, `Action`, `UndoRecord`: Data models.
+    * simulator/
+      * `Simulator.java`: A Java class that simulates processing 5000 requests in the `TransactionFeed` and `RosterManager`, then undoing those actions with the `UndoManager`. 
     * util/
       * `SinglyLinkedList.java`: A generic, low-level utility class that manages a raw Singly Linked List (`SinglyLinkedList<T>`). 
       * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`). 
       It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
+      * `ArrayStack`: An array-based implementation of a stack.
+      * `LinkedQueue`: A singly linked list implementation of a Queue. 
     * `Main` - CLI-driven menu interface for interacting with the SOASS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.

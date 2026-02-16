@@ -1,25 +1,35 @@
 package manager;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 
+import types.Transaction;
+import util.DataContainer;
 import types.Player;
-import util.ArrayStore;
 
 /**
  * Responsible for
- * Storing players using an array
+ * Storing players in a DataContainer.
  * Adding players
  * Removing players
  * Updating stats
  * Searching
  * Printing
  * @author Chris Chun, Ayush
- * @version 1.1
+ * @version 1.2
  */
 final public class RosterManager extends DataManager<Player> {
 
-    public RosterManager(){
-        super(Player.class);
+    public <T>RosterManager(Supplier<DataContainer<Player>> theSupplier){
+
+        super(Player.class, theSupplier);
+    }
+
+    // ================================= flags =================================
+    @Override
+    public boolean needsIndexedAccess() {
+        return true;
     }
 
 
@@ -27,11 +37,17 @@ final public class RosterManager extends DataManager<Player> {
 
     /**
      * getter
-     * @return an ArrayStore of the player roster.
+     * @return a DataContainer of the player roster.
      */
-    public ArrayStore<Player> getPlayerData() {
+    public DataContainer<Player> getPlayerData() {
         return this.getData();
     }
+
+    @Override
+    public Class<RosterManager> getManagerClass(){
+        return RosterManager.class;
+    }
+
 
     // ================================= adding =================================
 
@@ -44,26 +60,72 @@ final public class RosterManager extends DataManager<Player> {
     }
 
     public void loadPlayerData(String theFilePath) throws IOException {
-        this.addCsvData(theFilePath);
+        this.loadCsvData(theFilePath);
     }
+
+    // ================================= removing =================================
+
+    /**
+     * remove element by index
+     * This operation can only be performed by roster managers that require indexed access.
+     * @param theIndex the index of the element to remove.
+     * @return the removed element.
+     */
+    public Player removeAt(int theIndex) {
+        if (!this.needsIndexedAccess()) {
+            throw new IllegalArgumentException("Stacks and Queues do not support indexed access");
+        }
+        return myData.removeAt(theIndex);
+    }
+
+
+    public Player removeById(int theId) {
+
+        int index = myData.findBy((theDataObject) -> theDataObject.id() == theId);
+
+        // throw exception if not found
+        if (index == -1) {
+            throw new NoSuchElementException("id not found");
+        }
+
+        // store it
+        Player theRemovedData =  myData.get(index);
+
+      // remove it, and shift everything
+        myData.removeAt(index);
+
+        return theRemovedData;
+    }
+
+
+    // ================================== updating ================================
+
+        public void setData(int theIndex, Player theData) {
+
+        myData.set(theIndex,theData);
+    }
+
+
 
     // ================================= searching =================================
 
+
+    /**
+     *
+     * @param theId theId of the data entry (Player, Drills, Transaction)
+     * @return the index of the data if present, -1 otherwise.
+     */
+    public int findById(int theId) {
+
+        return myData.findBy( ( theDataObject) -> theDataObject.id() == theId);
+    }
     /**
      * Finds the first index of the player with the matching name and -1 otherwise.
      * @param theName name of the player to find.
      * @return the first index of the player with the matching name and -1 otherwise
      */
     public int findByName(String theName) {
-        int index = -1;
-
-        for (int i = 0; i < this.getPlayerData().size(); i++) {
-            if (getPlayerData().get(i).name().equals(theName)) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+        return myData.findBy((player)-> player.name().equals(theName));
     }
 
     /**
@@ -72,15 +134,7 @@ final public class RosterManager extends DataManager<Player> {
      * @return returns the first index of the player with the matching position, and -1 otherwise.
      */
     public int findByPosition(String thePos) {
-        int index = -1;
-
-        for (int i = 0; i < getData().size(); i++) {
-            if (getData().get(i).position().equals(thePos)) {
-                index = i;
-                break;
-            }
-        }
-        return index;
+        return myData.findBy(player-> player.position().equals(thePos));
     }
 
     /**
@@ -89,19 +143,11 @@ final public class RosterManager extends DataManager<Player> {
      * @return returns the first index of the player with the matching jersey, and -1 otherwise.
      */
     public int findByJersey(int theJerseyNumber) {
-        int index = -1;
-
-        for (int i = 0; i < getData().size(); i++) {
-            if (getData().get(i).jersey() == theJerseyNumber) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-
+        return myData.findBy(player-> player.jersey() == theJerseyNumber);
     }
 
     // ================================= updating =================================
+
 
     /**
      * Updates the yards of the player with the matching id provided
@@ -109,7 +155,7 @@ final public class RosterManager extends DataManager<Player> {
      * @param theNewYards the yards to update
      */
     public void updateStats(int theId, int theNewYards) {
-        int index = findById(theId);
+        int index = myData.findBy(e -> e.player_id() == theId);
 
         // not found
         if (index == -1) {
@@ -118,7 +164,7 @@ final public class RosterManager extends DataManager<Player> {
 
         Player prev = getData().get(index);
         Player newPlayer = new Player(prev.id(), prev.name(), prev.position(), prev.jersey(),theNewYards);
-        getPlayerData().setData(index, newPlayer);
+        myData.set(index, newPlayer);
     }
 
     //================================= printing =================================
@@ -127,8 +173,7 @@ final public class RosterManager extends DataManager<Player> {
      * Prints the roster
      */
     public void printRoster() {
-        this.printData(this.getPlayerData());
+        this.printData();
     }
-
 
 }

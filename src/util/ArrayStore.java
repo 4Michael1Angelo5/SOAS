@@ -1,6 +1,15 @@
 package util;
 
-public class ArrayStore<T>{
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.function.Predicate;
+
+/**
+ * ArrayStore is a low-level array based implementation of an ArrayList.
+ * @param <T> Defines the type of Objects this ArrayStore will contain.
+ */
+public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     private T[] myData;
     final private Class<T> dataClass;
@@ -16,12 +25,66 @@ public class ArrayStore<T>{
         this.myData = (T[]) java.lang.reflect.Array.newInstance(theClass,theCapacity);
     }
 
+    // ================== getting & setting ======================
+    @Override
+    public void set(int theIndex, T theData) {
+        if (theIndex < 0 || theIndex >= size){
+            throw new IndexOutOfBoundsException("Index out of bounds");
+        }
+        myData[theIndex] = theData;
+    }
+
+    @Override
+    public int size() {
+        return size;
+    }
+
+    @Override
+    public boolean supportsIndexedAccess() {
+        return true;
+    }
+
+
+
+    // ================== adding ========================
+
+    /**
+     * Adds an element to the end of the ArrayStore.
+     * @param theData the object to add to the list.
+     */
     public void add(T theData) {
         if (size == myData.length){
             resize();
         }
         myData[size++] = theData;
     }
+
+    @Override
+    public void add(int theIndex, T theVal) {
+        // 1. Bounds check
+        if (theIndex < 0 || theIndex > size) {
+            throw new IndexOutOfBoundsException(
+                    "Cannot insert at index " + theIndex + " for array of size " + size
+            );
+        }
+
+        // 2. Resize if full
+        if (size == myData.length) {
+            resize();
+        }
+
+        // 3. Shift elements right
+        for (int i = size - 1; i >= theIndex; i--) {
+            myData[i + 1] = myData[i];
+        }
+
+        // 4. Insert the new value
+        myData[theIndex] = theVal;
+
+        // 5. Increment size
+        size++;
+    }
+
 
     public T get(int theIndex) {
         if (theIndex >= size || theIndex < 0) {
@@ -30,7 +93,50 @@ public class ArrayStore<T>{
         return myData[theIndex];
     }
 
-    public T removeAtIndex(int theIndex) {
+    public void append(ArrayStore<T> theArray) {
+        while (myData.length - size < theArray.size) {
+            resize();
+        }
+        int index = 0;
+        int newSize = size + theArray.size;
+        for (int i = size; i < newSize; i++) {
+            set(i, theArray.get(index++));
+        }
+        size = newSize;
+    }
+
+    // ================== removing ========================
+
+    /**
+     * Removes the last item in the ArrayStore.
+     * @return the last item removed from the ArrayStore.
+     * @throws NoSuchElementException if the ArrayStore is empty
+     */
+    @Override
+    public T remove() throws NoSuchElementException {
+        if (isEmpty()) {
+            throw new NoSuchElementException("No such element");
+        }
+        T removed = myData[size -1];
+        myData[size -1] = null;
+        size--;
+        return removed;
+    }
+
+
+    @Override
+    public T remove(T theVal) throws NoSuchElementException {
+        T removed;
+        int index = indexOf(theVal);
+
+        if (index == -1) {
+            throw new NoSuchElementException("Not found");
+        }
+        return removeAt(index);
+    }
+
+    @Override
+    public T removeAt(int theIndex) {
 
         T theItemRemoved = get(theIndex);
 
@@ -43,14 +149,48 @@ public class ArrayStore<T>{
         return theItemRemoved;
     }
 
-    public void setData(int theIndex, T theData) {
-        myData[theIndex] = theData;
+    // ================== searching ========================
+
+    @Override
+    public int findBy(Predicate<T> thePredicate) {
+
+        if (size == 0) {
+            return -1;
+        }
+
+        int index = -1;
+        for (int i =0; i < size; i++) {
+            if (thePredicate.test( myData[i])) {
+                return i;
+            }
+        }
+        return index;
     }
 
-    public int size() {
-        return size;
+    public int indexOf(T theItem) {
+        int idx = -1;
+
+        for (int i = 0; i < size; i++) {
+            if (Objects.equals(theItem, myData[i])) {
+                idx = i;
+            }
+        }
+
+        return idx;
     }
 
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void clear() {
+        myData = (T[]) java.lang.reflect.Array.newInstance(dataClass,16);
+        size = 0;
+    }
+
+    // ================== helper ========================
 
     @SuppressWarnings("unchecked")
     private void resize() {
@@ -59,16 +199,33 @@ public class ArrayStore<T>{
         myData = newArray;
     }
 
-    public void append(ArrayStore<T> theArray) {
-        while (myData.length - size < theArray.size) {
-            resize();
-        }
-        int index = 0;
-        int newSize = size + theArray.size;
-        for (int i = size; i < newSize; i++) {
-            setData(i, theArray.get(index++));
-        }
-        size = newSize;
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            int i = 0;
+
+            @Override
+            public boolean hasNext() {
+                return i < size;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException("no next");
+                }
+                return myData[i++];
+            }
+        };
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            sb.append(myData[i]);
+        }
+
+        return sb.toString();
+    }
 }

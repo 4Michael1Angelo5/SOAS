@@ -1,66 +1,62 @@
 package loader;
 
 import java.io.*;
-import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
+
+import types.*;
 import util.ArrayStore;
-import types.Player;
-import types.Drill;
-import types.Transaction;
-import types.DataType;
+import util.DataContainer;
+import util.SinglyLinkedList;
 
 /**
+ * DataLoader is a universal, type-agnostic engine responsible for parsing
+ * CSV data into domain-specific objects.
+ * * <p>By utilizing a {@link Supplier}, this class is decoupled from the
+ * underlying storage mechanism. It can populate any structure that implements
+ * {@link DataContainer}, whether it be an array-based store, a linked list,
+ * or a LIFO/FIFO structure.</p>
+ * * <p>The loader uses the {@code dataClass} to reflectively cast parsed
+ * objects, ensuring strict type safety at runtime without the need for
+ * specialized loader subclasses.</p>
+ *
  * @author Chris Chun, Ayush
- * @version 1.2
+ * @version 1.3
+ * @param <T> The {@link DataType} this loader is configured to handle.
  */
-public class DataLoader implements Loader {
+public class DataLoader <T extends DataType> {
 
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public DataLoader(){
+    private final Supplier<DataContainer<T>> myContainerSupplier;
+    private final Class<T> myDataClass;
+
+    public DataLoader(Class<T> theDataClass, Supplier<DataContainer<T>> theSupplier){
         super();
+        myContainerSupplier = theSupplier;
+        myDataClass = theDataClass;
+        validateConstructor(theDataClass, theSupplier);
     }
 
     private static final Logger logger = Logger.getLogger(DataLoader.class.getName());
 
-    @Override
-    public ArrayStore<Player> loadPlayers(String theFilePath)
-            throws IOException, IllegalArgumentException{
-        return loadData(Player.class,theFilePath);
-    }
-
-    @Override
-    public ArrayStore<Drill> loadDrills(String theFilePath)
-            throws IOException, IllegalArgumentException {
-        return loadData(Drill.class, theFilePath);
-    }
-
-    @Override
-    public ArrayStore<Transaction> loadTransactions(String theFilePath)
-            throws IOException, IllegalArgumentException {
-        return loadData(Transaction.class, theFilePath);
-    }
-
-    /**
-     * Prints data parsed from a csv file.
-     * @param theData An array list of DataType objects.
-     * @param <T> the Data type to print. can either be Player, Drill, Transaction
-     */
-    public <T> void printData(List<T> theData){
-        for(T data : theData) {
-            logger.info(ANSI_GREEN + data.toString() + ANSI_RESET);
+    private void validateConstructor(Class<T> theDataClass, Supplier<DataContainer<T>> theSupplier) {
+        if (theSupplier == null){
+            throw new IllegalArgumentException("Supplier cannot be null");
         }
+        if (!theSupplier.get().isEmpty()){
+            throw new IllegalArgumentException("Supplier returned a non empty container");
+        }
+
     }
 
     /**
      * Parses Data from a csv row into its corresponding data type.
-     * @param dataClass can either be of type Player, Drills, or Transaction
      * @param theCsvRow a comma separated string of values.
      * @return A DataType object either: Player, Drills, or Transaction
-     * @param <T> DataType either: Player, Drills, or Transaction
      */
-    private <T extends DataType> T parseData(Class<T> dataClass, String theCsvRow)
+    private T parseData(String theCsvRow)
             throws IllegalArgumentException {
 
         String[] row = theCsvRow.split(",");
@@ -68,45 +64,67 @@ public class DataLoader implements Loader {
         Object result;
 
         try {
-            if (dataClass == Player.class) {
+            if (myDataClass == Player.class) {
 
-                result = new Player(Integer.parseInt(row[0]),row[1],row[2],Integer.parseInt(row[3]), Integer.parseInt(row[4]));
+                result = new Player(
+                        Integer.parseInt(row[0]),
+                        row[1],
+                        row[2],
+                        Integer.parseInt(row[3]),
+                        Integer.parseInt(row[4]));
             }else
-            if(dataClass == Drill.class) {
+            if(myDataClass == Drill.class) {
 
-                result = new Drill(Integer.parseInt(row[0]) ,row[1], Integer.parseInt(row[2]));
+                result = new Drill(
+                        Integer.parseInt(row[0]),
+                        row[1],
+                        Integer.parseInt(row[2]));
 
             }else
-            if (dataClass == Transaction.class) {
+            if (myDataClass == Transaction.class) {
 
-                result = new Transaction(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+                result = new Transaction(
+                        Integer.parseInt(row[0]),
+                        row[1],
+                        row[2],
+                        row[3]);
 
-            }else {
+            }else
+            if (myDataClass == Action.class){
 
-                throw new IllegalArgumentException(dataClass.getName() + " is not a supported data type");
+                result = new Action(
+                        Integer.parseInt(row[0]),
+                        ActionType.valueOf(row[1]),
+                        row[2],
+                        row[3]);
+
+            }else
+            if (myDataClass == FanRequest.class) {
+                result = new FanRequest(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+            }
+            else {
+
+                throw new IllegalArgumentException(myDataClass.getName() + " is not a supported data type");
             }
 
         }catch(IndexOutOfBoundsException e) {
 
-             throw new IllegalArgumentException("Encountered malformed column input in the csv.");
+            throw new IllegalArgumentException("Encountered malformed column input in the csv.");
         }
 
-       return dataClass.cast(result);
+        return myDataClass.cast(result);
     }
 
     /**
      * Helper method to load data from a csv file.
-     * @param theDataType the data type the csv file is supposed to represent.
-     *                    Can either be Player, Drill, Transaction.
      * @param theFilePath a string path to resource csv file.
-     * @param <T> the data type to load: Can either be Player, Drill, Transaction.
      * @return an array list of data objects.
      */
-    public <T extends DataType>
-    ArrayStore<T> loadData(Class<T> theDataType,String theFilePath)
+    public DataContainer<T>
+    loadData(String theFilePath)
             throws IllegalArgumentException, IOException{
 
-        ArrayStore<T> dataArray = new ArrayStore<>(theDataType, 16);
+        DataContainer<T> dataContainer = myContainerSupplier.get();
 
         try(BufferedReader br = new BufferedReader(new FileReader(theFilePath))){
 
@@ -114,24 +132,15 @@ public class DataLoader implements Loader {
             String headerColumns = br.readLine();
             if (headerColumns == null) {
                 throw new IllegalArgumentException("the CSV is empty");
-            };
-
-            // mark current position (second row)
-            br.mark(1024);
-            String secondLine = br.readLine();
-            // rewind back to second row where data should be
-            br.reset();
-
-            // check if second row is empty
-            if (secondLine == null || secondLine.isBlank()) {
-                throw new IllegalArgumentException("CSV has no data rows");
             }
+
+            validateHeaders(headerColumns, theFilePath);
 
             String nextLine;
             while ( (nextLine = br.readLine()) != null) {
                 try {
 
-                    dataArray.add(parseData(theDataType, nextLine));
+                    dataContainer.add(parseData(nextLine));
 
                 } catch (IllegalArgumentException e) {
                     // Catch errors from parseData (bad columns, bad numbers)
@@ -145,6 +154,28 @@ public class DataLoader implements Loader {
             throw new FileNotFoundException("");
         }
 
-        return dataArray;
+        return dataContainer;
+    }
+
+    private void validateHeaders(String theHeaderRow, String theFilePath){
+        boolean isValid = false;
+        theHeaderRow = theHeaderRow.trim();
+
+        switch (myDataClass.getSimpleName()) {
+            case "Player" -> isValid = theHeaderRow.equals("player_id,name,position,jersey,yards");
+            case "Transaction" -> isValid = theHeaderRow.equals("trans_id,type,player,timestamp");
+            case "Drill" -> isValid = theHeaderRow.equals("drill_id,name,urgency");
+            case "Action" -> isValid = theHeaderRow.equals("action_id,action_type,target,timestamp");
+            case "FanRequest" -> isValid = theHeaderRow.equals("fan_id,name,service_type,arrival_time");
+            default -> throw new RuntimeException("Unsupported DataType for loader");
+        }
+
+        if (!isValid) {
+            throw new IllegalArgumentException(
+                    "\nThe CSV data does match the expected header for " +
+                            myDataClass.getSimpleName() + " please check the " +
+                            "file path: " + theFilePath
+            );
+        }
     }
 }
