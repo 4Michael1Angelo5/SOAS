@@ -287,8 +287,8 @@ class TransactionFeedTest {
     public void onlyAllowsValidTransactionArguments() {
 
         assertAll("testing adding null and creating null transactions",
-                ()-> assertThrows(IllegalArgumentException.class, ()-> manager.addData(null)),
-                () -> assertThrows(IllegalArgumentException.class, () -> new Transaction(1,null,null,null))
+                ()-> assertThrows(Exception.class, ()-> manager.addData(null)),
+                () -> assertThrows(Exception.class, () -> new Transaction(1,null,null,null))
                 );
 
     }

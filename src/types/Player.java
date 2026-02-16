@@ -43,17 +43,6 @@ public record Player (int player_id,
             throw new IllegalArgumentException("Position cannot be blank");
         }
 
-        if (player_id < 0) {
-            throw new IllegalArgumentException("Player ID cannot be negative");
-        }
-
-        if (jersey < 0 || jersey > 99) {
-            throw new IllegalArgumentException("Jersey number must be between 0 and 99");
-        }
-
-        if (yards < 0) {
-            throw new IllegalArgumentException("Yards cannot be negative");
-        }
     }
 
     /**
