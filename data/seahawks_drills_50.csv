@@ -1,0 +1,51 @@
+drill_id,name,urgency,duration_min,fatigue_cost,install_by_day
+2001,DB Footwork 1,4,8,9,1
+2002,Coverage Shells 2,5,8,6,2
+2003,Two-Minute Drill 3,1,8,8,1
+2004,Tackling Form 4,1,10,10,6
+2005,Coverage Shells 5,2,10,3,5
+2006,Goal Line 6,2,12,7,6
+2007,OL Zone Steps 7,5,8,5,3
+2008,Ball Security 8,5,18,4,1
+2009,Red Zone Passing 9,3,8,7,4
+2010,Pass Rush Moves 10,4,18,3,5
+2011,Ball Security 11,4,8,9,7
+2012,Run Fits 12,3,8,9,3
+2013,Screen Defense 13,3,20,4,4
+2014,Pass Rush Moves 14,2,15,4,4
+2015,OL Zone Steps 15,3,18,5,2
+2016,Tackling Form 16,1,10,6,1
+2017,Special Teams Lane 17,1,15,7,1
+2018,DB Footwork 18,5,12,10,7
+2019,Red Zone Passing 19,3,18,5,5
+2020,Two-Minute Drill 20,3,20,4,4
+2021,Red Zone Passing 21,2,18,2,5
+2022,Tackling Form 22,1,12,7,1
+2023,OL Zone Steps 23,1,15,3,2
+2024,Blitz Pickup 24,4,20,4,3
+2025,Special Teams Lane 25,2,15,2,1
+2026,DB Footwork 26,2,20,7,2
+2027,Pass Rush Moves 27,5,18,7,7
+2028,DB Footwork 28,4,18,2,6
+2029,RPO Reads 29,4,20,8,4
+2030,Tackling Form 30,4,10,9,6
+2031,Special Teams Lane 31,4,12,6,1
+2032,Special Teams Lane 32,3,12,9,1
+2033,Red Zone Passing 33,4,18,6,7
+2034,Tackling Form 34,1,10,10,1
+2035,Goal Line 35,4,8,4,3
+2036,Goal Line 36,5,18,1,1
+2037,Tackling Form 37,5,8,3,1
+2038,Run Fits 38,1,20,4,3
+2039,Red Zone Passing 39,1,20,8,4
+2040,Goal Line 40,4,10,1,7
+2041,Goal Line 41,1,15,1,4
+2042,Goal Line 42,2,10,8,7
+2043,RPO Reads 43,4,8,5,2
+2044,Tackling Form 44,4,20,5,1
+2045,Coverage Shells 45,4,18,10,6
+2046,Screen Defense 46,3,15,8,6
+2047,Goal Line 47,4,18,6,4
+2048,Red Zone Passing 48,4,10,8,7
+2049,Coverage Shells 49,2,18,6,7
+2050,Special Teams Lane 50,3,10,7,5

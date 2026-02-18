@@ -67,40 +67,48 @@ public class DataLoader <T extends DataType> {
             if (myDataClass == Player.class) {
 
                 result = new Player(
-                        Integer.parseInt(row[0]),
-                        row[1],
-                        row[2],
-                        Integer.parseInt(row[3]),
-                        Integer.parseInt(row[4]));
+                        Integer.parseInt(row[0]),  // player_id
+                        row[1],                    // name
+                        row[2],                    // position
+                        Integer.parseInt(row[3]),  // jersey
+                        Integer.parseInt(row[4])); // yards
             }else
             if(myDataClass == Drill.class) {
 
                 result = new Drill(
-                        Integer.parseInt(row[0]),
-                        row[1],
-                        Integer.parseInt(row[2]));
+                        Integer.parseInt(row[0]), // drill_id
+                        row[1],                   // name
+                        Integer.parseInt(row[2]), // urgency
+                        Integer.parseInt(row[3]), // duration_min
+                        Integer.parseInt(row[4]), // fatigue_cost
+                        Integer.parseInt(row[5])  // install_by_day
+                        );
 
             }else
             if (myDataClass == Transaction.class) {
 
                 result = new Transaction(
-                        Integer.parseInt(row[0]),
-                        row[1],
-                        row[2],
-                        row[3]);
+                        Integer.parseInt(row[0]), // trans_id
+                        row[1],                   // type
+                        row[2],                   // player
+                        row[3]);                  // timestamp
 
             }else
             if (myDataClass == Action.class){
 
                 result = new Action(
-                        Integer.parseInt(row[0]),
-                        ActionType.valueOf(row[1]),
-                        row[2],
-                        row[3]);
+                        Integer.parseInt(row[0]),   // action_id
+                        ActionType.valueOf(row[1]), // action_type
+                        row[2],                     // target
+                        row[3]);                    // timestamp
 
             }else
             if (myDataClass == FanRequest.class) {
-                result = new FanRequest(Integer.parseInt(row[0]),row[1],row[2],row[3]);
+                result = new FanRequest(
+                        Integer.parseInt(row[0]),  // fan_id
+                        row[1],                    // name
+                        row[2],                    // service_type
+                        row[3]);                   // arrival_time
             }
             else {
 
@@ -164,7 +172,7 @@ public class DataLoader <T extends DataType> {
         switch (myDataClass.getSimpleName()) {
             case "Player" -> isValid = theHeaderRow.equals("player_id,name,position,jersey,yards");
             case "Transaction" -> isValid = theHeaderRow.equals("trans_id,type,player,timestamp");
-            case "Drill" -> isValid = theHeaderRow.equals("drill_id,name,urgency");
+            case "Drill" -> isValid = theHeaderRow.equals("drill_id,name,urgency,duration_min,fatigue_cost,install_by_day");
             case "Action" -> isValid = theHeaderRow.equals("action_id,action_type,target,timestamp");
             case "FanRequest" -> isValid = theHeaderRow.equals("fan_id,name,service_type,arrival_time");
             default -> throw new RuntimeException("Unsupported DataType for loader");

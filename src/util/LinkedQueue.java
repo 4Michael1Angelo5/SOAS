@@ -5,9 +5,16 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * A Singly Linked List implementation of
+ * a queue.
+ * @author Chris Chun, Ayush.
+ * @version 1.1
+ * @param <T>
+ */
 public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
 
-    public SinglyLinkedList<T> myQueue = new SinglyLinkedList<>();
+    private SinglyLinkedList<T> myQueue = new SinglyLinkedList<>();
 
     private final String ILLEGAL_ARG_ERR = "Queues do not support indexed based access beyond the front";
 
@@ -85,9 +92,7 @@ public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
     // =========================  removing  ============================
 
     @Override
-    public T dequeue() {
-        return myQueue.remove();
-    }
+    public T dequeue() {return myQueue.remove();}
 
     @Override
     public T remove(T theVal) throws NoSuchElementException, IllegalArgumentException {

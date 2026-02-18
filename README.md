@@ -25,7 +25,13 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 ---
 
 ## Analysis Section
-## Analysis Section
+Size,Structure,Operation,Avg Time (ms)
+50,ArrayStack,Push/Pop,0.0236
+50,LinkedQueue,Enq/Deq,0.0200
+500,ArrayStack,Push/Pop,0.0402
+500,LinkedQueue,Enq/Deq,0.0329
+5000,ArrayStack,Push/Pop,0.1376
+5000,LinkedQueue,Enq/Deq,0.1441
 
 1. Explain why Undo is a stack problem (LIFO)
     - Undo is a stack problem because the order in which we undo actions is Last-In-First-Out
