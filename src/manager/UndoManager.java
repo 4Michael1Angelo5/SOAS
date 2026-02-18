@@ -9,6 +9,25 @@ import util.Stack;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+/**
+ * Manages an undo history using a Stack (LIFO) data structure.
+ *
+ * <p>This manager allows recording administrative actions (player updates,
+ * stat changes, roster modifications) and undoing them in reverse order.
+ * The most recently recorded action is always undone first, following
+ * Last-In-First-Out (LIFO) semantics.</p>
+ *
+ * <p><strong>Example usage:</strong></p>
+ * <pre>
+ * UndoManager mgr = new UndoManager(() -> new ArrayStack<>(Action.class));
+ * mgr.recordAction(new Action(..., "Add Smith", ...));
+ * mgr.recordAction(new Action(..., "Update Brown", ...));
+ * mgr.undo();  // Undoes "Update Brown" first
+ * </pre>
+ *
+ * @author Chris Chun, Ayush
+ * @version 1.0
+ */
 public class UndoManager extends  DataManager<Action>{
 
     private static final Logger LOGGER = Logger.getLogger(UndoManager.class.getName());

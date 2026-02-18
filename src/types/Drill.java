@@ -10,12 +10,24 @@ import java.util.Objects;
  */
 public record Drill(int drill_id,
                     String name,
-                    int urgency) implements DataType {
+                    int urgency,
+                    int duration_min,
+                    int fatigue_cost,
+                    int install_by_day
+) implements DataType {
 
-    public Drill(int drill_id, String name, int urgency) {
+    public Drill(int drill_id,
+                 String name,
+                 int urgency,
+                 int duration_min,
+                 int fatigue_cost,
+                 int install_by_day){
         this.drill_id = drill_id;
         this.name = name;
         this.urgency = urgency;
+        this.duration_min = duration_min;
+        this.fatigue_cost = fatigue_cost;
+        this.install_by_day = install_by_day;
         validate();
     }
 

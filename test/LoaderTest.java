@@ -1,5 +1,6 @@
 
 import loader.DataLoader;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import types.*;
 import util.*;
@@ -53,117 +54,97 @@ public class LoaderTest {
     }
 
     @Test
-    public void testDataLoading() {
-        assertAll("Loading Test",
-
+    @DisplayName("Player Data Loading Tests")
+    void testPlayerLoading() {
+        assertAll("Player Integrity",
                 () -> {
-
-                    DataLoader<Player> loader =
-                            new DataLoader<>(Player.class, getSupplier(Player.class, "array"));
-
-                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_players.csv"),
-                            "Should not throw errors for valid CSV file path");
+                    DataLoader<Player> loader = new DataLoader<>(Player.class, getSupplier(Player.class, "array"));
+                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_players.csv"));
+                    assertNotNull(loader.loadData("data/seahawks_players.csv"), "Player data should not be null");
                 },
                 () -> {
-
-                    DataLoader<Player> loader =
-                            new DataLoader<>(Player.class, getSupplier(Player.class, "sll"));
-
-                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_players.csv"),
-                            "Should not throw errors for valid CSV file path");
-                },
-                () -> {
-
-                    DataLoader<Drill> loader =
-                            new DataLoader<>(Drill.class, getSupplier(Drill.class, "array"));
-
-                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_drills.csv"),
-                            "Should not throw errors for valid CSV file path");
-                },
-                () -> {
-
-                    DataLoader<Drill> loader =
-                            new DataLoader<>(Drill.class, getSupplier(Drill.class, "sll"));
-
-                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_drills.csv"),
-                            "Should not throw errors for valid CSV file path");
-                },
-                () -> {
-                    DataLoader<Transaction> loader =
-                            new DataLoader<>(Transaction.class, getSupplier(Transaction.class, "array"));
-
-                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_transactions.csv"),
-                            "Should not throw errors for valid CSV file path");
-                },
-                () -> {
-                    DataLoader<Transaction> loader =
-                            new DataLoader<>(Transaction.class, getSupplier(Transaction.class, "sll"));
-
-                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_transactions.csv"),
-                            "Should not throw errors for valid CSV file path");
-                },
-                () -> {
-                    DataLoader<Player> loader =
-                            new DataLoader<>(Player.class, getSupplier(Player.class, "array"));
-                    assertNotNull(loader.loadData("data/seahawks_players.csv"),
-                            "the player data should not be null");
-                },
-                () -> {
-                    DataLoader<Drill> loader =
-                            new DataLoader<>(Drill.class, getSupplier(Drill.class, "sll"));
-                    assertNotNull(loader.loadData("data/seahawks_drills.csv"),
-                            "the drill data should not be null");
-                },
-                () -> {
-                    DataLoader<Drill> loader =
-                            new DataLoader<>(Drill.class, getSupplier(Drill.class, "sll"));
-                    assertNotNull(loader.loadData("data/seahawks_drills.csv"),
-                            "the drill data should not be null");
-                },
-                () -> {
-                    DataLoader<Transaction> loader =
-                            new DataLoader<>(Transaction.class, getSupplier(Transaction.class, "queue"));
-                    assertNotNull(loader.loadData("data/seahawks_transactions.csv"),
-                            "the transaction data should not be null");
-                },
-                () -> {
-                    DataLoader<Action> loader =
-                            new DataLoader<>(Action.class, getSupplier(Action.class, "stack"));
-                            assertDoesNotThrow(()-> loader.loadData(undo50));
-                },
-                () -> {
-                    DataLoader<Action> loader =
-                            new DataLoader<>(Action.class, getSupplier(Action.class, "array"));
-                    assertDoesNotThrow(()-> loader.loadData(undo500));
-                },
-                () -> {
-                    DataLoader<Action> loader =
-                            new DataLoader<>(Action.class, getSupplier(Action.class, "sll"));
-                    assertDoesNotThrow(()->loader.loadData(undo5000));
-                },
-                () -> {
-                    DataLoader<FanRequest> loader =
-                            new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "stack"));
-                    assertThrows(IllegalArgumentException.class ,()-> loader.loadData(undo50));
-                },
-                () -> {
-                    DataLoader<FanRequest> loader =
-                            new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "array"));
-                    assertThrows(IllegalArgumentException.class ,()-> loader.loadData(undo500));
-                },
-                () -> {
-                    DataLoader<FanRequest> loader =
-                            new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "sll"));
-                    assertThrows(IllegalArgumentException.class ,()-> loader.loadData(undo5000));
-                },
-                () -> {
-                    DataLoader<FanRequest> loader =
-                            new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "array"));
-                    assertDoesNotThrow(()-> loader.loadData(fan5000));
+                    DataLoader<Player> loader = new DataLoader<>(Player.class, getSupplier(Player.class, "sll"));
+                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_players.csv"));
                 }
-
         );
+    }
 
+    @Test
+    @DisplayName("Drill Data Loading Tests")
+    void testDrillLoading() {
+        assertAll("Drill Integrity",
+                () -> {
+                    DataLoader<Drill> loader = new DataLoader<>(Drill.class, getSupplier(Drill.class, "array"));
+                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_drills_50.csv"));
+                },
+                () -> {
+                    DataLoader<Drill> loader = new DataLoader<>(Drill.class, getSupplier(Drill.class, "sll"));
+                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_drills_50.csv"));
+                    assertNotNull(loader.loadData("data/seahawks_drills_50.csv"), "Drill data should not be null");
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("Transaction Data Loading Tests")
+    void testTransactionLoading() {
+        assertAll("Transaction Integrity",
+                () -> {
+                    DataLoader<Transaction> loader = new DataLoader<>(Transaction.class, getSupplier(Transaction.class, "array"));
+                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_transactions.csv"));
+                },
+                () -> {
+                    DataLoader<Transaction> loader = new DataLoader<>(Transaction.class, getSupplier(Transaction.class, "sll"));
+                    assertDoesNotThrow(() -> loader.loadData("data/seahawks_transactions.csv"));
+                },
+                () -> {
+                    DataLoader<Transaction> loader = new DataLoader<>(Transaction.class, getSupplier(Transaction.class, "queue"));
+                    assertNotNull(loader.loadData("data/seahawks_transactions.csv"), "Transaction data should not be null");
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("Action (Undo) Data Loading Tests")
+    void testActionLoading() {
+        assertAll("Action Integrity",
+                () -> {
+                    DataLoader<Action> loader = new DataLoader<>(Action.class, getSupplier(Action.class, "stack"));
+                    assertDoesNotThrow(() -> loader.loadData(undo50));
+                },
+                () -> {
+                    DataLoader<Action> loader = new DataLoader<>(Action.class, getSupplier(Action.class, "array"));
+                    assertDoesNotThrow(() -> loader.loadData(undo500));
+                },
+                () -> {
+                    DataLoader<Action> loader = new DataLoader<>(Action.class, getSupplier(Action.class, "sll"));
+                    assertDoesNotThrow(() -> loader.loadData(undo5000));
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("FanRequest Data Loading Tests")
+    void testFanRequestLoading() {
+        assertAll("FanRequest Integrity",
+                () -> {
+                    DataLoader<FanRequest> loader = new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "array"));
+                    assertDoesNotThrow(() -> loader.loadData(fan5000));
+                },
+                // Negative tests: Ensuring FanRequest loader rejects Action data
+                () -> {
+                    DataLoader<FanRequest> loader = new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "stack"));
+                    assertThrows(IllegalArgumentException.class, () -> loader.loadData(undo50));
+                },
+                () -> {
+                    DataLoader<FanRequest> loader = new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "array"));
+                    assertThrows(IllegalArgumentException.class, () -> loader.loadData(undo500));
+                },
+                () -> {
+                    DataLoader<FanRequest> loader = new DataLoader<>(FanRequest.class, getSupplier(FanRequest.class, "sll"));
+                    assertThrows(IllegalArgumentException.class, () -> loader.loadData(undo5000));
+                }
+        );
     }
 
     @Test
@@ -208,8 +189,6 @@ public class LoaderTest {
                     // Cycle through containers so we don't just test 'array' every time
                     String containerType = containers[path.length() % containers.length];
 
-                    // We can use FanRequest.class as a generic proxy for size testing
-                    // IF the file matches. For strictness, let's determine type from path:
                     Class<? extends DataType> targetClass = determineClassFromPath(path);
 
                     DataLoader loader = new DataLoader(targetClass, getSupplier(targetClass, containerType));
@@ -220,6 +199,12 @@ public class LoaderTest {
                 }
             }
         });
+    }
+
+    private <T extends DataType> DataLoader<T>  // return type
+    createDataLoader(Class<T> theDataClass,
+                     Supplier<DataContainer<T>> theSupplier) {
+        return new DataLoader<>(theDataClass, theSupplier);
     }
 
     /** Helper to match the file path to the correct record type */
