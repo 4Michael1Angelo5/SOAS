@@ -6,10 +6,20 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public final class BinaryHeapPQ<T> implements Heap<T>, DataContainer<T> {
+/**
+ * A heap back priority queue. User has the option
+ * to provide a custom comparator for sorting. Defaults
+ * to the underlying objects natural ordering.
+ * @author Chris Chun, Ayush.
+ * @version 1.1
+ * @param <T> The object type stored in the PQ.
+ */
+public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap<T>, DataContainer<T> {
+    // notes: T extends Comparable<? super T> means the object must be comparable to itself or any of its parent types
+    // this is called a lower bounded wild card.
 
     private final ArrayStore<T> myArray;
-    private final Comparator<T> myComparator;
+    private Comparator<T> myComparator;
 
     /**
      * Initializes a new priority queue backed by a binary heap.
@@ -19,6 +29,15 @@ public final class BinaryHeapPQ<T> implements Heap<T>, DataContainer<T> {
     public BinaryHeapPQ(Class<T> theClass, Comparator<T> theComparator){
         myArray = new ArrayStore<>(theClass,16);
         myComparator = theComparator;
+    }
+
+    /**
+     * Initializes a new priority queue backed by a binary heap sorting elements
+     * by their natural order as defined by how the objects implement Comparable<T>
+     * @param theClass The class type of elements to be stored (used for array instantiation).
+     */
+    public BinaryHeapPQ(Class<T> theClass) {
+        this(theClass, Comparator.naturalOrder());
     }
 
 
@@ -61,59 +80,111 @@ public final class BinaryHeapPQ<T> implements Heap<T>, DataContainer<T> {
         return myArray.get(0);
     }
 
+    // ================= util methods ======================
+
+    /**
+     * Allows user to reorder the heap using a new comparator.
+     * Assumes the heap is already built.
+     * @param theNewComparator the new comparator for sorting.
+     */
+    public void reorder(Comparator<T> theNewComparator) {
+        myComparator = theNewComparator;
+        buildHeap();
+    }
+
+    /**
+     * builds a heap in O(n) efficiency. Assumes
+     * the current heap is already filled.
+     */
+    public void buildHeap() {
+        if (myArray.isEmpty()) return;
+
+        int lastLeaf = myArray.size()-1;
+        int parentIdx = (lastLeaf -1)/2;
+
+        for (int i = parentIdx; i >=  0; i--) {
+            heapifyDown(i);
+        }
+    }
+
+    /**
+     * builds a heap from an array in O(n) efficiency maintaining
+     * the heap property.
+     * @param theArray the array to build the heap from.
+     */
+    public void buildHeap(ArrayStore<T> theArray) {
+        if (theArray.isEmpty()) return;
+        for (T item: theArray) {
+            myArray.add(item);
+        }
+        buildHeap();
+
+    }
+
+    // ================ private helper methods ===================
+
     /**
      * Restores the heap property by moving the last element up the tree
      * until it is in its correct priority position relative to its parent.
      */
-    @Override
-    public void heapifyUp() {
+    private void heapifyUp() {
 
-        int i = myArray.size()-1;
+        // the element we just added
+        int childIdx = myArray.size()-1;
 
-        while (i > 0) {
-            T current = myArray.get(i);
-            T parent = myArray.get((i-1)/2);
+        while (childIdx > 0) {
 
-            int priority = myComparator.compare(current, parent);
-            // if negative then current comes before parent -> swap
-            if (priority < 0) {
-                swap(i, (i-1)/2);
-                i = (i-1)/2;
+            int parentIdx = (childIdx -1) / 2;
+
+            T child = myArray.get(childIdx);
+            T parent = myArray.get(parentIdx);
+
+            int priority = myComparator.compare(parent, child);
+
+            // if positive then child comes before parent -> swap
+            if (priority > 0) {
+                swap(childIdx, parentIdx);
+                childIdx = parentIdx;
             }else {
                 break;
             }
         }
     }
 
+    private void heapifyDown() {
+        heapifyDown(0);
+    }
+
     /**
      * Restores the heap property by moving the root element down the tree
      * until it is in its correct priority position relative to its children.
      */
-    @Override
-    public void heapifyDown() {
+    private void heapifyDown(int theStartIdx) {
 
         // no need to heapify down if empty;
         if (myArray.isEmpty()) return;
 
-        int i = 0;
+        int parentIdx = theStartIdx;
 
         while (true) {
 
-            int left = 2*(i+1) - 1;
-            int right = 2*(i+1);
+            int left = 2 * (parentIdx +1) - 1;
+            int right = 2 * (parentIdx +1);
 
             // 1) reached the bottom of the heap
             if (left >= myArray.size()) break;
 
-            int idx = max(left, right);
+            int highestPriorityIdx = getHighestPriorityIndex(left, right);
 
-            T maxChild = myArray.get(idx);
-            int priority = myComparator.compare(myArray.get(i), maxChild);
+            T bestChild = myArray.get(highestPriorityIdx);
+            T parent = myArray.get(parentIdx);
 
-            // if the max child should come before the current
+            int priority = myComparator.compare(parent, bestChild);
+
+            // if the bestChild should come before the current parent
             if (priority > 0) {
-                swap(i, idx);
-                i = idx;
+                swap(parentIdx, highestPriorityIdx);
+                parentIdx = highestPriorityIdx;
 
             }else {
                 break;
@@ -127,7 +198,7 @@ public final class BinaryHeapPQ<T> implements Heap<T>, DataContainer<T> {
      * @param right The right child index.
      * @return The index of the child that should come before the other.
      */
-    private int max(int left, int right) {
+    private int getHighestPriorityIndex(int left, int right) {
 
         // no right child
         if (right >= myArray.size()) {
@@ -337,23 +408,6 @@ public final class BinaryHeapPQ<T> implements Heap<T>, DataContainer<T> {
         return sb.toString();
     }
 
-    public static void main(String[] args) {
-        Heap<Integer> myHeap = new BinaryHeapPQ<>(Integer.class, (a,b) -> a-b );
-
-        myHeap.insert(9);
-        myHeap.insert(8);
-        myHeap.insert(7);
-        myHeap.insert(6);
-        myHeap.insert(5);
-        myHeap.insert(4);
-        myHeap.insert(3);
-        myHeap.insert(2);
-        myHeap.insert(1);
-
-        System.out.println(myHeap);
-        myHeap.extract();
-        System.out.println(myHeap);
-    }
 
 }
 

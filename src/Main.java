@@ -1,11 +1,14 @@
+import manager.DrillManager;
 import manager.FanTicketQueue;
 import manager.UndoManager;
 import results.FanTicketResults;
 import results.UndoResults;
 import simulator.Simulator;
 import types.Action;
+import types.Drill;
 import types.FanRequest;
 import util.ArrayStack;
+import util.BinaryHeapPQ;
 import util.DataContainer;
 import util.LinkedQueue;
 
@@ -63,11 +66,8 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        UndoManager undoManager = new UndoManager(ACTION_STACK);
-        FanTicketQueue fanRequestManager = new FanTicketQueue(FAN_QUEUE);
-
-        UndoResults undoResults = new UndoResults(undoManager,ACTION_STACK);
-        FanTicketResults fanTicketResults = new FanTicketResults(fanRequestManager, FAN_QUEUE);
+        Supplier<DataContainer<Drill>> drillContSup = ()->new BinaryHeapPQ<>(Drill.class);
+        DrillManager DM = new DrillManager(drillContSup);
 
         boolean running = true;
 
@@ -78,52 +78,16 @@ public class Main {
             switch (choice) {
                 case "1" -> {
                     // load actions
-                    undoManager.loadCsvData(ACTIONS50);
-                    logger.info(ANSI_GREEN+ "Successfully loaded actions" + ANSI_RESET);
+                    DM.loadCsvData("data/seahawks_drills_50.csv");
+                    DM.printData();
+
                 }
                 case "2" -> {
-                    // load fan requests
-                    fanRequestManager.loadCsvData(FAN50);
-                    logger.info(ANSI_GREEN+ "Successfully loaded fan requests " + ANSI_RESET);
-                }
-                case "3" -> {
-                    //  Undo Action (pop)
-                    int size = undoManager.getData().size();
+                    // update comparator
+                    DM.upDateComparator(DM.fairSort());
+                    DM.printData();
 
-                    int numRemoves = 0;
-                    while(numRemoves < size/2) {
-                        undoManager.removeData();
-                        numRemoves++;
-                    }
-
-                    logger.info(ANSI_GREEN+ "Successfully undid "
-                            +  numRemoves + " actions from the actions stack" + ANSI_RESET);
                 }
-                case "4" -> {
-                    // Dequeue Request
-                    int fanRequestsProcessed = 0;
-                    int size = fanRequestManager.getData().size();
-
-                    while (fanRequestsProcessed < size/2){
-                        fanRequestManager.processRequest();
-                        fanRequestsProcessed++;
-                    }
-                    logger.info(ANSI_GREEN+ "Successfully dequeued "
-                            +  fanRequestsProcessed + " fan requests from the fan request queue" + ANSI_RESET);
-                }
-                case "5" -> {
-
-                    undoManager.printData();
-                }
-                case "6" -> {
-                    fanRequestManager.printData();
-                }
-                case "7" -> {
-                    // run all experiments
-                    undoResults.runAllExperiments();
-                    fanTicketResults.runAllExperiments();
-                }
-                case "8" -> mySimulator.runSimulation();
                 case "0" -> running = false;
                 default -> {
                     logger.info("""
@@ -139,14 +103,8 @@ public class Main {
         logger.info("""
                 Seahawks Data Options
                 =====================
-                1. Load Actions
-                2. Load Fan Request
-                3. Undo 50% (pop)
-                4. Process 50% (dequeue)
-                5. Print Actions
-                6. Print Fan Queue
-                7. Run benchmark
-                8. Bonus! Run Simulation.
+                1. Load Drills
+                2. Update Comparator
                 0. Exit
                 """);
     }

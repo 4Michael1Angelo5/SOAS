@@ -1,16 +1,15 @@
 package results;
 
 import benchmark.BenchmarkRunner;
+import manager.DrillManager;
 import manager.RosterManager;
 import manager.TransactionFeed;
 import manager.UndoManager;
 import types.Action;
+import types.Drill;
 import types.Transaction;
-import util.ArrayStack;
-import util.DataContainer;
+import util.*;
 import types.Player;
-import util.ArrayStore;
-import util.SinglyLinkedList;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -161,6 +160,10 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         UndoResults undoResultsStack = new UndoResults(undoManager, undoStack);
         undoResultsStack.runAllExperiments();
+
+        Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
+        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq) ;
+        dr.runAllExperiments();
 
 
     }

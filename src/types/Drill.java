@@ -31,6 +31,23 @@ public record Drill(int drill_id,
         validate();
     }
 
+    /**
+     * Baseline comparison method used for determining
+     * natural order - sorts by highest urgency.
+     * @param theOther the object to be compared.
+     */
+    @Override
+    public int compareTo(DataType theOther) {
+        if (theOther instanceof Drill) {
+            // Integer.compareTo(a,b)
+            // performs (a-b). If negative then a should come first.
+            // if positive then b should come first.
+            return Integer.compare(((Drill) theOther).urgency, this.urgency);
+        }
+        // otherwise use default comparison between id's
+        return DataType.super.compareTo(theOther);
+    }
+
     @Override
     public int id() {
         return drill_id;
@@ -42,14 +59,6 @@ public record Drill(int drill_id,
 
         if (name.isBlank()) {
             throw new IllegalArgumentException("Drill name cannot be blank");
-        }
-
-        if (drill_id < 0) {
-            throw new IllegalArgumentException("Drill ID cannot be negative");
-        }
-
-        if (urgency < 0) {
-            throw new IllegalArgumentException("Urgency cannot be negative");
         }
     }
 }

@@ -25,11 +25,11 @@ import static java.util.Objects.isNull;
  * <p>Shared functionality provided by this manager includes:</p>
  * <ul>
  * <li>Generic CSV loading via {@link DataLoader}</li>
- * <li>Identity-based searching and removal</li>
+ * <li>Adding and removing data</li>
  * <li>Iterable data access for reporting and logging</li>
  * </ul>
  * * @author Chris Chun, Ayush
- * @version 1.2
+ * @version 2
  * @param <T> The specific {@link DataType} managed (e.g., Player, Transaction, or Drill).
  */
 public abstract class DataManager <T extends DataType> implements Manager<T>{
@@ -39,7 +39,7 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
 
     private static final Logger logger = Logger.getLogger(DataManager.class.getName());
 
-    private final DataLoader<T> myDataLoader;
+    private DataLoader<T> myDataLoader;
 
     /**
      * An array based data structure holding data:
@@ -81,6 +81,16 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     public DataContainer<T> getData() {return myData;}
 
     public Class<T> getDataClass() {return myDataClass;}
+
+    public void setDataLoader(Class<T> theDataClass, Supplier<DataContainer<T>>theSupplier) {
+        if (theSupplier.get().getClass().equals(myData.getClass())){
+            myDataLoader = new DataLoader<>(theDataClass, theSupplier);
+        } else {
+            throw new IllegalArgumentException("Cannot update the DataLoader " +
+                    "because the Manager was instantiated with a different container type");
+        }
+
+    }
 
     // =======================  loading ===========================
 
