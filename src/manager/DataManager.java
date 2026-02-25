@@ -28,7 +28,7 @@ import static java.util.Objects.isNull;
  * <li>Adding and removing data</li>
  * <li>Iterable data access for reporting and logging</li>
  * </ul>
- * * @author Chris Chun, Ayush
+ * @author Chris Chun, Ayush
  * @version 2
  * @param <T> The specific {@link DataType} managed (e.g., Player, Transaction, or Drill).
  */
