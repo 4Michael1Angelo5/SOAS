@@ -48,6 +48,18 @@ public record Drill(int drill_id,
         return DataType.super.compareTo(theOther);
     }
 
+
+    public String toStringZ() {
+        return "{" + "\n" +
+                "   drill_id:" + drill_id + ",\n" +
+                "   name:" + name + ",\n" +
+                "   urgency:" + urgency + ",\n" +
+                "   duration_min:" + duration_min + ",\n" +
+                "   fatigue_cost:" + fatigue_cost + ",\n" +
+                "   install_by_day:" + install_by_day + "\n" +
+                "}";
+    }
+
     @Override
     public int id() {
         return drill_id;

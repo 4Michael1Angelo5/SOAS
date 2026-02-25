@@ -118,7 +118,6 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
             myArray.add(item);
         }
         buildHeap();
-
     }
 
     // ================ private helper methods ===================

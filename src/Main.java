@@ -1,9 +1,6 @@
 import manager.DrillManager;
-import manager.FanTicketQueue;
-import manager.UndoManager;
-import results.FanTicketResults;
-import results.UndoResults;
-import simulator.Simulator;
+import simulator.DrillSimulator;
+import simulator.UndoSimulator;
 import types.Action;
 import types.Drill;
 import types.FanRequest;
@@ -58,11 +55,7 @@ public class Main {
      */
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    private static final Simulator mySimulator = new Simulator();
-
-    public static final String ACTIONS50 = "data/seahawks_undo_actions_50.csv";
-
-    public static final String  FAN50 = "data/seahawks_fan_queue_50.csv";
+    public static final String  DRILLS_50 = "data/seahawks_drills_50.csv";
 
     public static void main(String[] args) throws IOException {
 
@@ -77,16 +70,50 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    // load actions
-                    DM.loadCsvData("data/seahawks_drills_50.csv");
-                    DM.printData();
+                    // load csv
+                    DM.loadCsvData(DRILLS_50);
+                    logger.info(ANSI_GREEN + "Successfully loaded Seahawks data from CSV.\n" + ANSI_RESET);
 
                 }
                 case "2" -> {
-                    // update comparator
-                    DM.upDateComparator(DM.fairSort());
-                    DM.printData();
+                    // Add a drill
+                    Drill newDrill = new Drill(-1,
+                            "Practice Binary Trees",
+                            1000,
+                            60,
+                            100,
+                            1);
+                    DM.addData(newDrill);
+                    logger.info(ANSI_GREEN + "Successfully added new drill: \n" +
+                       newDrill.toStringZ() + ANSI_RESET);
 
+                }
+                case "3" -> {
+                    // peek
+                    Drill nextDrill = DM.peekNextDrill();
+                    logger.info(ANSI_GREEN + "The next drill to run is" + ANSI_RESET);
+                    logger.info(ANSI_GREEN + nextDrill.toString() + ANSI_RESET);
+
+                }
+                case "4" -> {
+                    // run
+                    Drill removed = DM.removeData();
+                    logger.info(ANSI_GREEN + "Successfully processed: " + removed.toString() + "\n" + ANSI_RESET);
+
+                }
+                case "5" -> {
+                    // print
+                    DM.printData();
+                }
+                case "6" -> {
+                    // update comparator to sort by shortest drill first.
+                    DM.upDateComparator((a,b) -> a.duration_min() - b.duration_min());
+                    logger.info(ANSI_GREEN + "Successfully updated comparator\n" + ANSI_RESET);
+                }
+                case "7" -> {
+                    // run simulation:
+                    DrillSimulator drillSimulator = new DrillSimulator();
+                    drillSimulator.runSimulation();
                 }
                 case "0" -> running = false;
                 default -> {
@@ -100,12 +127,16 @@ public class Main {
     }
 
     private static void printMenu(){
-        logger.info("""
+        logger.info( ANSI_GREEN + """ 
                 Seahawks Data Options
                 =====================
-                1. Load Drills
-                2. Update Comparator
-                0. Exit
-                """);
+                1. Load drills from a CSV file
+                2. Add a drill
+                3. Peek next drill (without removing)
+                4. Run next drill (remove)
+                5. Print the next N scheduled drills (simulate “preview”)
+                6. Update Comparator (Shortest Drill First)
+                7. Run a simulation and output metrics (wait time/fairness)
+                """ + ANSI_RESET);
     }
 }

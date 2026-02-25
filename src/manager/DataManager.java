@@ -83,8 +83,12 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     public Class<T> getDataClass() {return myDataClass;}
 
     public void setDataLoader(Class<T> theDataClass, Supplier<DataContainer<T>>theSupplier) {
-        if (theSupplier.get().getClass().equals(myData.getClass())){
+
+        DataContainer<T> providedContainer = theSupplier.get();
+
+        if (providedContainer.getClass().equals(myData.getClass())){
             myDataLoader = new DataLoader<>(theDataClass, theSupplier);
+
         } else {
             throw new IllegalArgumentException("Cannot update the DataLoader " +
                     "because the Manager was instantiated with a different container type");
