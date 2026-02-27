@@ -1,13 +1,9 @@
 import manager.DrillManager;
+import simulator.SampleSizes;
 import simulator.DrillSimulator;
-import simulator.UndoSimulator;
-import types.Action;
 import types.Drill;
-import types.FanRequest;
-import util.ArrayStack;
 import util.BinaryHeapPQ;
 import util.DataContainer;
-import util.LinkedQueue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,14 +17,14 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.3
+ * @version 1.4
  */
 public class Main {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public static final  Supplier<DataContainer<Action>> ACTION_STACK = () -> new ArrayStack<>(Action.class);
-    public static final Supplier<DataContainer<FanRequest>> FAN_QUEUE = LinkedQueue::new;
+    public static final String ANSI_LAVENDER = "\u001B[38;5;147m";
+
 
     static {
         // attempt to use logging properties file
@@ -59,8 +55,12 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
+        // drill manger setup
         Supplier<DataContainer<Drill>> drillContSup = ()->new BinaryHeapPQ<>(Drill.class);
         DrillManager DM = new DrillManager(drillContSup);
+
+        // simulator set up
+        DrillSimulator drillSimulator = new DrillSimulator();
 
         boolean running = true;
 
@@ -72,7 +72,7 @@ public class Main {
                 case "1" -> {
                     // load csv
                     DM.loadCsvData(DRILLS_50);
-                    logger.info(ANSI_GREEN + "Successfully loaded Seahawks data from CSV.\n" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully loaded Seahawks data from CSV.\n" + ANSI_RESET);
 
                 }
                 case "2" -> {
@@ -84,41 +84,51 @@ public class Main {
                             100,
                             1);
                     DM.addData(newDrill);
-                    logger.info(ANSI_GREEN + "Successfully added new drill: \n" +
-                       newDrill.toStringZ() + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully added new drill: \n" +
+                       newDrill.toStringZ() + "\n" + ANSI_RESET);
 
                 }
                 case "3" -> {
                     // peek
                     Drill nextDrill = DM.peekNextDrill();
-                    logger.info(ANSI_GREEN + "The next drill to run is" + ANSI_RESET);
-                    logger.info(ANSI_GREEN + nextDrill.toString() + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + "\nThe next drill to run is" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + nextDrill.toString() +"\n" + ANSI_RESET);
 
                 }
                 case "4" -> {
                     // run
                     Drill removed = DM.removeData();
-                    logger.info(ANSI_GREEN + "Successfully processed: " + removed.toString() + "\n" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully processed: " + removed.toString() + "\n" + ANSI_RESET);
 
                 }
                 case "5" -> {
                     // print
+                    logger.info(ANSI_LAVENDER
+                            + "\nPrinting next "
+                            + DM.getData().size()
+                            + " drills\n"
+                            +ANSI_RESET);
                     DM.printData();
                 }
                 case "6" -> {
                     // update comparator to sort by shortest drill first.
-                    DM.upDateComparator((a,b) -> a.duration_min() - b.duration_min());
-                    logger.info(ANSI_GREEN + "Successfully updated comparator\n" + ANSI_RESET);
+                    DM.upDateComparator((a,b)-> a.duration_min() - b.duration_min());
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully updated comparator\n" + ANSI_RESET);
                 }
                 case "7" -> {
+
                     // run simulation:
-                    DrillSimulator drillSimulator = new DrillSimulator();
-                    drillSimulator.runSimulation();
+                    drillSimulator.runSimulation(
+                            SampleSizes.LARGE,  // uses csv with 5000 drills
+                            DM.fairSort());     // - Higher urgency first
+                                                // - Earlier install_by_day first
+                                                // - Lower fatigue_cost preferred (tie-breaker)
+                                                // - Shorter duration preferred (final tie-breaker)
                 }
                 case "0" -> running = false;
                 default -> {
                     logger.info("""
-                            Unsupported Option
+                            \nUnsupported Option
                             Options are:
                             """);
                 }
@@ -137,6 +147,7 @@ public class Main {
                 5. Print the next N scheduled drills (simulate “preview”)
                 6. Update Comparator (Shortest Drill First)
                 7. Run a simulation and output metrics (wait time/fairness)
+                0. Exit
                 """ + ANSI_RESET);
     }
 }

@@ -11,6 +11,8 @@ import java.util.function.Predicate;
  */
 public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
+    private static final int DEFAULT_CAPACITY = 16;
+
     private T[] myData;
     final private Class<T> dataClass;
     private int size;
@@ -23,6 +25,10 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
         this.dataClass = theClass;
         this.size = 0;
         this.myData = (T[]) java.lang.reflect.Array.newInstance(theClass,theCapacity);
+    }
+
+    public ArrayStore(Class<T> theClass) {
+        this(theClass, DEFAULT_CAPACITY);
     }
 
     // ================== getting & setting ======================
