@@ -1,10 +1,12 @@
 package manager;
 
+import counter.OperationCounter;
 import loader.DataLoader;
 import types.Drill;
 import util.ArrayStore;
 import util.BinaryHeapPQ;
 import util.DataContainer;
+import util.LinkedQueue;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -26,6 +28,17 @@ public class DrillManager extends DataManager<Drill> {
     public Drill peekNextDrill() {
         return myData.get(0);
     }
+
+    public int getSwaps() {
+        if (myData instanceof BinaryHeapPQ<Drill> ) {}
+        return ((BinaryHeapPQ<Drill>) myData).getSwaps();
+    }
+
+    public int getComparisons() {
+        if (myData instanceof BinaryHeapPQ<Drill> ) {}
+        return ((BinaryHeapPQ<Drill>) myData).getComparisons();
+    }
+
 
     /**
      * Allows modification of the comparator for a Priority Queue and runs side effects.
