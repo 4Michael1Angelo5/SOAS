@@ -25,39 +25,74 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 ---
 
 ## Analysis Section
-Size,Structure,Operation,Avg Time (ms)
-50,ArrayStack,Push/Pop,0.0236
-50,LinkedQueue,Enq/Deq,0.0200
-500,ArrayStack,Push/Pop,0.0402
-500,LinkedQueue,Enq/Deq,0.0329
-5000,ArrayStack,Push/Pop,0.1376
-5000,LinkedQueue,Enq/Deq,0.1441
 
-1. Explain why Undo is a stack problem (LIFO)
-    - Undo is a stack problem because the order in which we undo actions is Last-In-First-Out
-      (LIFO) by nature. If a linear progression of steps is taken from state A to B to C, to
-      get back to state A, I must undo or revert back to state B, then A. The most recent
-      action must be reversed first, which aligns perfectly with how a stack operates—the last
-      item pushed onto the stack is the first item popped off.
 
-2. Explain why Fan lines are a queue problem (FIFO)
-    - Fan lines are a queue problem because they rely on First-In-First-Out (FIFO) behavior.
-      Generally speaking, we try to establish a meritocracy when processing requests, and that
-      system of merit is built around the philosophy that the first request received should be
-      the first one honored. Just like when we stand in line at a coffee shop, if someone cuts
-      in front of you, you may be upset because you were in line first. Additionally, if both
-      you and the person behind you are ordering the same thing, then you may be upset when
-      they are served before you. Processing requests in this way not only satisfies the client
-      but also provides a predictable format for systems to ensure that all requests are
-      handled.
+1) **Why does a heap-based PQ support efficient scheduling?**
 
-3. Compare your measured performance trends across dataset sizes.
-    - In general, the results from our benchmark testing with data sample sizes of 50, 500,
-      and 5,000 reveal that stacks and queues are incredibly efficient at the problems of
-      undoing and processing requests. These operations have $O(1)$ time complexity, making them
-      well-suited for processing large data sizes. We observed that a maximum peak stack depth of
-      5,000 undo actions required, on average, only 0.25 milliseconds for push and pop
-      operations. This efficiency is the signature hallmark of these data structures.  
+A heap-based priority queue supports efficient scheduling in $O(\log n)$ time. Each insertion and removal of an element in the priority queue must, in the worst case, compare each of its children for removal, or compare the element being added to its parent for insertion. The number of comparisons scales linearly with the height of the tree, and the tree height is given by $\log_2(n)$. Therefore, the cost of $n$ insertions is $n \log(n)$. However, insertion efficiency can be improved to $O(n)$ using the build heap procedure by building the entire heap from an array in one pass, performing heapify-down when necessary, instead of adding one element at a time.
+
+The priority queue's main strength is that it can retrieve the element with the highest priority in $O(1)$ constant time. This supports efficient scheduling by organizing which task should be performed first without the need to search the heap for what should come next. The trade-off is that, to maintain this efficiency, we pay the price of $O(\log n)$ insertion and removal.
+
+2) **Compare FIFO vs Priority scheduling: what is gained, what is lost?**
+
+In a regular queue that processes items in first-in-first-out (FIFO) order, we gain back the $O(1)$ efficiency lost in a priority queue in the insertion and removal operations, but we lose the ability to retrieve the item with the highest priority in constant time.
+
+3) **How did comparisons/swaps scale from 50 → 5000?**
+
+Our benchmark testing results revealed that the number of comparisons and swaps scales in $n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
+
+| Operations | 50 | 500 | 5000 |
+|------------|----|-----|------|
+| Swaps | | | |
+| Comparisons | | | |
+
+Using curve fitting software, it reveals that the number of swaps roughly fits in line with the equation …. Which in big O notation can be simplified to .... The number of comparisons roughly fits the equation …. Which in big O notation can be simplified to ....
+
+4) **Did you observe any evidence of starvation?**
+
+We observed significant starvation — drills being continuously denied to be processed because they had a lower priority. We conducted simulations on sample sizes of 50, 500, and 5000, using the following sorting logic to prioritize drills:
+- Higher urgency first
+- Earlier `install_by_day` first
+- Lower `fatigue_cost` preferred (tie-breaker)
+- Shorter duration preferred (final tie-breaker)
+
+The simulation compared wait times required to process Seahawks drills between FIFO behavior Queues and Priority Queues. The results from the sample size of 5000 revealed that the average wait time for the Queue was 34,797.50 minutes. The average wait time for the Priority Queue was 34,816.91 minutes, so on average, each drill in the Priority Queue experienced a longer wait time compared to the Queue.
+
+For example, the drill that suffered the most was:
+```json
+{
+  "drill_id": 2091,
+  "name": "Run Fits 91",
+  "urgency": 1,
+  "duration_min": 12,
+  "fatigue_cost": 7,
+  "install_by_day": 7
+}
+```
+
+"Run Fits 91" was processed 67,792 minutes later than it would have been processed in a regular queue. This drill was pushed back 4,863 places in line, meaning it was originally in line at position 91, but instead, 4,953 other drills were processed before this drill. It had a Z-time-score of -2.39, meaning this drill's wait time was 2.39 standard deviations worse than the average change in wait time. It had a Z-position-score of -2.39, meaning this drill's change in position was 2.39 standard deviations worse than the average change in position.
+
+However, the biggest winner was:
+```json
+{
+  "drill_id": 6927,
+  "name": "Screen Defense 4927",
+  "urgency": 5,
+  "duration_min": 20,
+  "fatigue_cost": 1,
+  "install_by_day": 1
+}
+```
+
+"Screen Defense 4927" was processed 68,397 minutes sooner than it would have been processed in a regular queue. This drill was able to skip 4,912 places in line, meaning it was originally in line at position 4,927, but because it had a high priority, it jumped to position 15! It had a Z-time-score of 2.41, meaning this drill's wait time was 2.41 standard deviations better than the average change in wait time. It had a Z-position-score of 2.41, meaning this drill's change in position was 2.41 standard deviations better than the average change in position.
+
+Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected drills. Meaning that the top 1% of drills that experienced the greatest change in wait time/position, the decrease/increase in wait time/position grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change in wait times. This result is statistically significant because it indicates that as the input size tends to infinity, the most affected drills' change in position and time grows without bound.
+
+**What would you change in your priority rule to improve fairness?**
+
+The results demonstrated that the sorting strategy results in significant starvation of lower-priority drills. To counteract this, an effective strategy would be to introduce aging. As a drill which gets continually pushed further down the queue, we could introduce another field in the `Drills` class that keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, its priority increases, preventing the drill from being skipped indefinitely. This would effectively balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
+
+> **Note:** Fairness means lower-priority items eventually get scheduled, not blocked forever. Two easy fairness strategies are: **Aging** — increase effective priority the longer a drill waits; and **Priority with a "quota"** — run mostly high-priority drills but guarantee occasional low-priority selection.Want to be notified when Claude responds?
 
 # Reflection: Code Architecture Improvements for PA3
 
