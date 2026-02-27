@@ -2,9 +2,9 @@
 The SOAS app is a simple CLI stats analysis application that parses Seahawks data from CSV files and provides the user with interesting ways to interact with the data.
 
 ## Features
-* The app tracks how many operations the CSV parsing algorithm performs and generates a report.
+* The app tracks how many operations the Heapify parsing algorithm performs and generates a report.
 * Benchmark timer tracks algorithm run time in milliseconds.
-* CLI-driven menu to navigate application options for improved UX.
+* CLI-driven menu to navigate application options and stylized logger for improved UX.
 * CSV parsing optimized using a `BufferedReader`.
 
 
@@ -19,9 +19,9 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 | Role | Member(s) | Primary Responsibilities |
 | :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris, Ayush | Chris and Ayush designed the `UndoManager` and `FanTicketQueue`, and Chris implemented the core ADTs `LinkedQueue` and `ArrayStack`, and scaffolded out the dependency injection strategy. |
-| **Tester: JUnit Tests** | Chris, Ayush | Ayush designed the Junit 5 test suite for the `UndoManager`, and `FanTicketQueue` class|
-| **Analyst: Benchmark + Analysis** | Chris | Took charge of implementing the results for the `UndoManager` and the `FanTicketQueue`|
+| **Implementer: Core Logic** | Chris | Implemented the `DrillManager`, `BinaryHeapPQ`, and `DrillSimulator` |
+| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `DrillManager`, and `BinaryHeapPQ` class|
+| **Analyst: Benchmark + Analysis** | Chris and Ayush | Ayush implemented the Results and `OperationCounter`. Chris drew on these results and reported them in the README and the `DrillSimulator`|
 ---
 
 ## Analysis Section
@@ -88,69 +88,65 @@ However, the biggest winner was:
 
 Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected drills. Meaning that the top 1% of drills that experienced the greatest change in wait time/position, the decrease/increase in wait time/position grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change in wait times. This result is statistically significant because it indicates that as the input size tends to infinity, the most affected drills' change in position and time grows without bound.
 
-**What would you change in your priority rule to improve fairness?**
+5) **What would you change in your priority rule to improve fairness?**
 
-The results demonstrated that the sorting strategy results in significant starvation of lower-priority drills. To counteract this, an effective strategy would be to introduce aging. As a drill which gets continually pushed further down the queue, we could introduce another field in the `Drills` class that keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, its priority increases, preventing the drill from being skipped indefinitely. This would effectively balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
+The results demonstrated that the sorting strategy results in significant starvation of lower-priority drills. To counteract this, an effective strategy would be to introduce aging. As a drill that gets continually pushed further down the queue, we could introduce another field in the `Drills` class that keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, its priority increases, preventing the drill from being skipped indefinitely. This would effectively balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
 
-> **Note:** Fairness means lower-priority items eventually get scheduled, not blocked forever. Two easy fairness strategies are: **Aging** — increase effective priority the longer a drill waits; and **Priority with a "quota"** — run mostly high-priority drills but guarantee occasional low-priority selection.Want to be notified when Claude responds?
+# Reflection and Team Process
 
-# Reflection: Code Architecture Improvements for PA3
+The design choices the team implemented in PA3, using a dependency injection strategy into the
+`DataManager` proved to be worth its weight in gold. This decoupled the `DataManager` from its
+Data Structure storage strategy, allowing it to be `DataContainer` agnostic and flexible. This
+meant the team did not need to implement two different drill managers, one backed by a queue and
+one backed by a priority queue, to conduct benchmark testing. We simply were able to instantiate
+two different instances of the same manager, one supplied with a queue and one supplied with a
+priority queue. This saved the team time and expedited iteration and collaboration, freeing up
+the team to tackle more interesting statistical analysis.
 
-Chris and Ayush made significant improvements to the code base for PA3. The team utilized
-inheritance by creating a generic abstract parent class `DataManager<T>`. The DataManager
-centralizes shared behavior of all the concrete `Manager` classes, e.g., `RosterManager`,
-`TransactionFeed`. The team built upon this design for PA3 by scaffolding out a dependency
-injection strategy into the `DataManagers`, making them not only `DataType` agnostic but also
-`DataContainer` agnostic - meaning each concrete child of the DataManager class can easily swap
-different DataContainers to test the efficiency and suitability of different data structures for
-managing the data they are responsible for.
+The team used the extra time to pursue interdisciplinary collaboration. Chris and Ayush
+collaborated with Chris's Statistics professor, Dr. Kmail, to draw more insights into how to
+make sense of the simulation results. Chris and Ayush felt that the average wait time was not
+statistically interesting. Dr. Kmail showed us that a more statistically significant metric
+would be to compare the changes in the average wait times using a Z-score, which tracks how
+many standard deviations an individual drill was from the mean wait time. This allowed us to
+standardize the data so that when we compared changes in wait time, differences were normalized.
+For example, if a drill waits 40 minutes, it is hard to tell by itself if that is statistically
+significant. Transforming the changes to a Z-score shows directly how significant the change
+was. While we did not observe any extreme outliers of z-scores above 3, we did notice
+significant volatile changes in the wait time of z-scores for the top and bottom 1%.
 
-The dependency injection strategy was achieved by modifying the constructors of the DataManager
-to accept a `Supplier<DataContainer<T>>`, and by changing the method signature of DataManager to
-implement a shared abstract interface `Manager<T>`. This design direction was chosen because it
-allowed the team to treat the DataContainers as independent variables for benchmark testing.
-Essentially, the team built a benchmark testing framework for data structures disguised as a
-Seahawks Data Analysis app!
+Using the Z-score revealed that our data showed signs of a typical normal distribution. For
+every drill that experienced an extreme negative change in wait time, there was a corresponding
+positive change in wait time. These results showed us that although it does not change the total
+time to process all the drills, it redistributes fairness, causing huge swings in wait time, so
+For every drill that is rewarded, there is a corresponding drill that was punished.
 
-The team did not stop here. The team carried out this strategy at all levels of the application,
-including the `Results` classes, mirroring the same dependency injection and abstract parent
-hierarchy of `Manager` classes. The team decoupled the DataContainer and DataType from the
-Results classes and enforced strict type safety by tying each instance of its child classes to a
-`DataType<T>` and `Manager<T>` of type `M`.
-```java
-public abstract class Results<T extends DataType, M extends Manager<T>>
-```
+Another great aspect of the team's architectural choices was to design the `DrillManager` and
+the `PriorityQueue` to accept a comparator to reorder the heap. The benefit of this was that
+the team could compare and contrast different sorting strategies to see how average wait time
+and z-scores were affected.
 
-This design allowed us to fluidly test each Manager class with different data structures. A
-RosterManager could use a SinglyLinkedList, an Array, or a HashMap, etc, all while being type-safe
-and predictable.
+While designing a `PriorityQueue` that supports a custom comparator was straightforward,
+integrating it into the `DrillManager` presented structural challenges. Because the
+`DrillManager` is decoupled from its `DataContainer`; the specific implementation type is not
+known at compile time. We implemented type-safety 'guard rails' to verify the container type
+before exposing APIs that would otherwise risk runtime errors.
 
-Of course, with such a design, there were and still are significant challenges and drawbacks. For
-example, for us to do this, it meant creating a common interface for all manager classes
-to use. All managers need the ability to add data and remove data. So the obvious thing to do was
-to create a method called addData and removeData. The trouble with this is that we started to
-lose the semantic meaning of what adding or removing data actually did! It pushes the
-responsibility and cognitive load on the developer to understand that when I am removing from a
-stack, removeData means remove from the top of the stack; when removing from a min heap,
-removeData means remove the root node and perform heapify down, etc. With so much abstraction,
-there are several layers the developer needs to think through just to understand what they are
-doing.
+Furthermore, since the abstract `DataManager` owns the `DataLoader`, we had to ensure the
+`Comparator` remained synchronized across both. Without updating the `PriorityQueue` supplier
+within the `DataLoader`, subsequent CSV imports would have reverted the `DrillManager` to its
+initial default sorting logic rather than respecting the newly assigned comparator.
 
-Additionally, there are several imperfect details about the abstraction that still bother the
-team - and that is the leaky abstraction between the DataTypes and DataManagers. The DataManagers
-cannot be truly data container agnostic. They need to be able to do specific things to manage
-their data, which demands certain data structures. For example, a RosterManager needs to be able
-to search and update players in the roster, but a stack does not provide this functionality. This
-required the data structures to reveal implementation details to the managers by having flags
-such as `needsIndexedAccess()` and `supportsIndexedAccess()`. In this way, the application can
-guard against a developer configuring a RosterManager with a stack.
-
-Although there were several cons for this design approach, the team felt that the benefits
-outweighed the drawbacks. This design approach allows the team to be incredibly flexible and
-reduces code redundancy. Next week, when we need to design a min stack, the hardest part will be
-implementing the data structure logic, but incorporating that data structure into our existing
-framework and ecosystem will be frictionless - zero code repeat, just plug and play. 
-
+With the machinery in place, the team eagerly tested the flexibility of their new design.
+Perhaps one of the most fascinating discoveries was that while most sorting strategies resulted
+in longer average wait time, there was one sorting strategy that absolutely dominated in terms
+of throughput efficiency — sorting by shortest duration first. By scheduling drills by lowest
+duration, the team observed for sample sizes of 5000, the average wait time for the Queue was
+34,797.50 minutes, but the average wait time for the `PriorityQueue` was 28,787.27 minutes.
+Meaning by scheduling drills by shortest duration, the priority queue saved roughly 6,010
+minutes — or 4 days, 4 hours, and 10 minutes in average wait time! These results are
+fascinating because while the total time to process all the drills remained unchanged, the
+average wait time was vastly improved by scheduling shortest-job-first.
 
 
 ---
@@ -174,7 +170,8 @@ The project is organized with separate source and test roots to maintain clean c
       * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
       * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
       * `UndoManager`:  concrete child class of `DataManager` that brings specific functionality needed to undo actions from the other managers.
-      * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line. 
+      * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line.
+      * `DrillManager`: concrete child class of the `DataManager` that brings specific functionality needed to manage Seahawks Drills.
     * results/
         * `ExperimentResults.java`: A simple Record class used to report a specific result from a benchmark test. 
         * `Results.java`: Abstract parent class defining all common behavior to concrete Benchmark Results classes: `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`. It automates experiments across 50, 500, and 5000 records,
@@ -184,16 +181,23 @@ The project is organized with separate source and test roots to maintain clean c
           calculating the average execution time (ms) for Add, Remove, and Search operations.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
-        * `Player.java`, `Drill.java`, `Transaction.java`, `Action`, `UndoRecord`: Data models.
+        * `Player.java`, `Drill.java`, `Transaction.java`, `Action.java`, `FanRequest.java`: Data models.
+        * `UndoRecord.java`: Record class that links an `Action` to its corresponding inverse operation/previous state. 
+        * `ActionType.java`: An Enum class that lists all of the supported  `Action` types, e.g., `ADD_PLAYER`, `REMOVE_PLAYER.`
     * simulator/
-      * `Simulator.java`: A Java class that simulates processing 5000 requests in the `TransactionFeed` and `RosterManager`, then undoing those actions with the `UndoManager`. 
+      * `UndoSimulator.java`: A Java class that simulates processing 5000 requests in the `TransactionFeed` and `RosterManager`, then undoing those actions with the `UndoManager`.
+      * `DrillSimulator`: Simulates drill scheduling using a FIFO order queue and a Priority Queue using the `DrillManager`. Compares wait time metrics and reports results.
+      * `DrillStats.java`: Mutable container for storing statistics associated with a `Drill` as it moves through a scheduling simulation.
+      * `DrillReport.java`: An immutable Java record class that stores the drill's wait time and order processed.
+      * `SampleSizes.java`: An Enum class that stores sample size options to allow users to easily choose which CSV dataset to run simulations on. 
     * util/
       * `SinglyLinkedList.java`: A generic, low-level utility class that manages a raw Singly Linked List (`SinglyLinkedList<T>`). 
       * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`). 
       It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
-      * `ArrayStack`: An array-based implementation of a stack.
-      * `LinkedQueue`: A singly linked list implementation of a Queue. 
-    * `Main` - CLI-driven menu interface for interacting with the SOASS application.
+      * `ArrayStack.java`: An array-based implementation of a stack.
+      * `LinkedQueue.java`: A singly linked list implementation of a Queue.
+      * `BinaryHeapPQ.java`: A Binary Heap based implemenation of a Priority Queue.
+    * `Main` - CLI-driven menu interface for interacting with the SOAS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
     * `badFormatPlayers.csv`: Resource for testing error handling.
