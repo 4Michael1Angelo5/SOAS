@@ -5,9 +5,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import types.*;
-import util.ArrayStore;
 import util.DataContainer;
-import util.SinglyLinkedList;
 
 /**
  * DataLoader is a universal, type-agnostic engine responsible for parsing
@@ -48,7 +46,10 @@ public class DataLoader <T extends DataType> {
         if (!theSupplier.get().isEmpty()){
             throw new IllegalArgumentException("Supplier returned a non empty container");
         }
+    }
 
+    public Class<? extends DataContainer> getContainerType() {
+        return myContainerSupplier.get().getClass();
     }
 
     /**
