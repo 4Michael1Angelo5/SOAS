@@ -29,34 +29,53 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 1) **Why does a heap-based PQ support efficient scheduling?**
 
-A heap-based priority queue supports efficient scheduling in $O(\log n)$ time. Each insertion and removal of an element in the priority queue must, in the worst case, compare each of its children for removal, or compare the element being added to its parent for insertion. The number of comparisons scales linearly with the height of the tree, and the tree height is given by $\log_2(n)$. Therefore, the cost of $n$ insertions is $n \log(n)$. However, insertion efficiency can be improved to $O(n)$ using the build heap procedure by building the entire heap from an array in one pass, performing heapify-down when necessary, instead of adding one element at a time.
+A heap-based priority queue supports efficient scheduling in $O(\log n)$ time. Each insertion 
+and removal of an element in the priority queue must, in the worst case, compare each of its children 
+for removal, or compare the element being added to its parent for insertion. The number of comparisons 
+scales linearly with the height of the tree, and the tree height is given by $\log_2(n)$. Therefore,
+the cost of $n$ insertions is $n \log(n)$. However, insertion efficiency can be improved to $O(n)$ 
+using the build heap procedure by building the entire heap from an array in one pass, performing 
+heapify-down when necessary, instead of adding one element at a time.
 
-The priority queue's main strength is that it can retrieve the element with the highest priority in $O(1)$ constant time. This supports efficient scheduling by organizing which task should be performed first without the need to search the heap for what should come next. The trade-off is that, to maintain this efficiency, we pay the price of $O(\log n)$ insertion and removal.
+The priority queue's main strength is that it can retrieve the element with the highest priority 
+in $O(1)$ constant time. This supports efficient scheduling by organizing which task should be 
+performed first without the need to search the heap for what should come next. The trade-off 
+is that, to maintain this efficiency, we pay the price of $O(\log n)$ insertion and removal.
 
 2) **Compare FIFO vs Priority scheduling: what is gained, what is lost?**
 
-In a regular queue that processes items in first-in-first-out (FIFO) order, we gain back the $O(1)$ efficiency lost in a priority queue in the insertion and removal operations, but we lose the ability to retrieve the item with the highest priority in constant time.
+In a regular queue that processes items in first-in-first-out (FIFO) order, we gain back the $O(1)$ 
+efficiency lost in a priority queue in the insertion and removal operations, but we lose the ability 
+to retrieve the item with the highest priority in constant time.
 
 3) **How did comparisons/swaps scale from 50 → 5000?**
 
-Our benchmark testing results revealed that the number of comparisons and swaps scales in $n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
+Our benchmark testing results revealed that the number of comparisons and swaps scales in 
+$n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
 
 | Operations | 50 | 500 | 5000 |
 |------------|----|-----|------|
 | Swaps | | | |
 | Comparisons | | | |
 
-Using curve fitting software, it reveals that the number of swaps roughly fits in line with the equation …. Which in big O notation can be simplified to .... The number of comparisons roughly fits the equation …. Which in big O notation can be simplified to ....
+Using curve fitting software, it reveals that the number of swaps roughly fits in line with the 
+equation …. Which in big O notation can be simplified to .... The number of comparisons roughly 
+fits the equation …. Which in big O notation can be simplified to ....
 
 4) **Did you observe any evidence of starvation?**
 
-We observed significant starvation — drills being continuously denied to be processed because they had a lower priority. We conducted simulations on sample sizes of 50, 500, and 5000, using the following sorting logic to prioritize drills:
+We observed significant starvation — drills being continuously denied to be processed because they 
+had a lower priority. We conducted simulations on sample sizes of 50, 500, and 5000, using the 
+following sorting logic to prioritize drills:
 - Higher urgency first
 - Earlier `install_by_day` first
 - Lower `fatigue_cost` preferred (tie-breaker)
 - Shorter duration preferred (final tie-breaker)
 
-The simulation compared wait times required to process Seahawks drills between FIFO behavior Queues and Priority Queues. The results from the sample size of 5000 revealed that the average wait time for the Queue was 34,797.50 minutes. The average wait time for the Priority Queue was 34,816.91 minutes, so on average, each drill in the Priority Queue experienced a longer wait time compared to the Queue.
+The simulation compared wait times required to process Seahawks drills between FIFO behavior Queues 
+and Priority Queues. The results from the sample size of 5000 revealed that the average wait time for
+the Queue was 34,797.50 minutes. The average wait time for the Priority Queue was 34,816.91 minutes,
+so on average, each drill in the Priority Queue experienced a longer wait time compared to the Queue.
 
 For example, the drill that suffered the most was:
 ```json
@@ -70,7 +89,12 @@ For example, the drill that suffered the most was:
 }
 ```
 
-"Run Fits 91" was processed 67,792 minutes later than it would have been processed in a regular queue. This drill was pushed back 4,863 places in line, meaning it was originally in line at position 91, but instead, 4,953 other drills were processed before this drill. It had a Z-time-score of -2.39, meaning this drill's wait time was 2.39 standard deviations worse than the average change in wait time. It had a Z-position-score of -2.39, meaning this drill's change in position was 2.39 standard deviations worse than the average change in position.
+"Run Fits 91" was processed 67,792 minutes later than it would have been processed in a regular 
+queue. This drill was pushed back 4,863 places in line, meaning it was originally in line at position
+91, but instead, 4,953 other drills were processed before this drill. It had a Z-time-score of -2.39,
+meaning this drill's wait time was 2.39 standard deviations worse than the average change in wait time.
+It had a Z-position-score of -2.39, meaning this drill's change in position was 2.39 standard 
+deviations worse than the average change in position.
 
 However, the biggest winner was:
 ```json
@@ -84,13 +108,29 @@ However, the biggest winner was:
 }
 ```
 
-"Screen Defense 4927" was processed 68,397 minutes sooner than it would have been processed in a regular queue. This drill was able to skip 4,912 places in line, meaning it was originally in line at position 4,927, but because it had a high priority, it jumped to position 15! It had a Z-time-score of 2.41, meaning this drill's wait time was 2.41 standard deviations better than the average change in wait time. It had a Z-position-score of 2.41, meaning this drill's change in position was 2.41 standard deviations better than the average change in position.
+"Screen Defense 4927" was processed 68,397 minutes sooner than it would have been processed in a regular
+queue. This drill was able to skip 4,912 places in line, meaning it was originally in line at position 
+4,927, but because it had a high priority, it jumped to position 15! It had a Z-time-score of 2.41, 
+meaning this drill's wait time was 2.41 standard deviations better than the average change in wait time.
+It had a Z-position-score of 2.41, meaning this drill's change in position was 2.41 standard deviations 
+better than the average change in position.
 
-Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected drills. Meaning that the top 1% of drills that experienced the greatest change in wait time/position, the decrease/increase in wait time/position grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change in wait times. This result is statistically significant because it indicates that as the input size tends to infinity, the most affected drills' change in position and time grows without bound.
+Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its 
+Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a 
+linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected 
+drills. Meaning that the top 1% of drills that experienced the greatest change in wait time, their deltas
+grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change
+in wait times. This result is statistically significant because it suggests that as the input size tends 
+to infinity, the most affected drills' change in position and time grows without bound.
 
 5) **What would you change in your priority rule to improve fairness?**
 
-The results demonstrated that the sorting strategy results in significant starvation of lower-priority drills. To counteract this, an effective strategy would be to introduce aging. As a drill that gets continually pushed further down the queue, we could introduce another field in the `Drills` class that keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, its priority increases, preventing the drill from being skipped indefinitely. This would effectively balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
+The results demonstrated that the sorting strategy results in significant starvation of lower-priority 
+drills. To counteract this, an effective strategy would be to introduce aging. As a drill that gets 
+continually pushed further down the queue, we could introduce another field in the `Drills` class that 
+keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, 
+its priority increases, preventing the drill from being skipped indefinitely. This would effectively 
+balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
 
 # Reflection and Team Process
 
