@@ -27,6 +27,10 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
         this.myData = (T[]) java.lang.reflect.Array.newInstance(theClass,theCapacity);
     }
 
+    /**
+     * Initializes a new array with default initial capacity = 16.
+     * @param theClass the object class the ArrayStore will contain.
+     */
     public ArrayStore(Class<T> theClass) {
         this(theClass, DEFAULT_CAPACITY);
     }
@@ -233,5 +237,23 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
         }
 
         return sb.toString();
+    }
+
+    //=================== operation counting =========================
+    //@TODO need to implement these methods and integrate counter.
+
+    @Override
+    public int getSwaps() {
+        return 0;
+    }
+
+    @Override
+    public int getComparisons() {
+        return 0;
+    }
+
+    @Override
+    public void resetCounter() {
+
     }
 }

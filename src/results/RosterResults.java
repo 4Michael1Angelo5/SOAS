@@ -29,7 +29,8 @@ public class RosterResults extends Results<Player, RosterManager> {
     public RosterResults(
             RosterManager theManager,
             Supplier<DataContainer<Player>> theSupplier){
-        super(Player.class, theManager, theSupplier);
+        super(Player.class, theManager, theSupplier,
+                ExperimentFormat.BENCHMARK_NO_OPS); //<--- hard code for now and provide functionality later.
     }
 
     // =======================   loading ================================
@@ -42,45 +43,42 @@ public class RosterResults extends Results<Player, RosterManager> {
 
     // runnable
     private void removeFromFrontNTimes() {
-        if (myManager.getPlayerData().isEmpty()) {
-            throw new RuntimeException(
-                    "Misconfigured ExperimentResult, please ensure " +
-                            "to loadData before running this experiment"
-            );
+        while (!myManager.getData().isEmpty()) {
+            myManager.removeAt(0);
         }
-        while (!containerForRemove.isEmpty()) {
-            containerForRemove.removeAt(0);
-        }
-    }
-    // gather results
-    private ExperimentResult testRemoveFromFrontNTimes() {
-        double avgTime = benchmarkRunner.runSpeedTestWithSetup(
-                TRIAL_RUNS,
-                this::setUpForRemove,
-                this::removeFromFrontNTimes);
-
-        String operation = "remove front";
-        int inputSize = myManager.getPlayerData().size();
-
-        return new ExperimentResult(inputSize, operation, avgTime);
     }
 
     // =======================   searching ================================
 
     // runnable
     private void searchByNameNTimes() {
-        int inputSize = myManager.getData().size();
 
-        // O(n^2)
-        for (int i = 0; i < inputSize; i++){
+        int N = myManager.getData().size();
+
+        for (int i = 0; i < N; i++) {
 
             myManager.findByName("NOT FINDABLE");
 
         }
     }
 
+    // =======================   Benchmark Testing ================================
+
     // gather results
-    private ExperimentResult testSearchByNameNTimes() {
+    private BenchmarkResult testRemoveFromFrontNTimes() {
+        String operation = "remove front";
+        int inputSize = myManager.getPlayerData().size();
+        double avgTime = benchmarkRunner.runSpeedTestWithSetup(
+                TRIAL_RUNS,
+                this::setUpForRemove,
+                this::removeFromFrontNTimes);
+
+        return new BenchmarkResult(inputSize, operation, avgTime, getOpCounts());
+    }
+
+    private BenchmarkResult testSearchByNameNTimes() {
+
+        setUpForSearch();
 
         final String operation = "Search";
 
@@ -88,7 +86,7 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         final double avgTime = benchmarkRunner.runSpeedTest(TRIAL_RUNS, this::searchByNameNTimes);
 
-        return new ExperimentResult(inputSize, operation, avgTime);
+        return new BenchmarkResult(inputSize, operation, avgTime, getOpCounts());
     }
 
 
@@ -118,7 +116,7 @@ public class RosterResults extends Results<Player, RosterManager> {
         addExperimentResult(testRemoveFromFrontNTimes());
         addExperimentResult(testSearchByNameNTimes());
 
-        printResults(false);
+        printResults();
     }
 
     public static void main(String[] args) throws IOException{
@@ -162,7 +160,7 @@ public class RosterResults extends Results<Player, RosterManager> {
         undoResultsStack.runAllExperiments();
 
         Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
-        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq) ;
+        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq, ExperimentFormat.BENCHMARK_NO_OPS) ;
         dr.runAllExperiments();
 
     }

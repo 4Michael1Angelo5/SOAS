@@ -74,5 +74,12 @@ public interface Manager<T extends DataType> {
      */
     void clearData();
 
+    // =====================  operation counting =======================
+
+    int getSwaps();
+
+    int getComparisons();
+
+    void resetCounter();
 
 }

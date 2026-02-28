@@ -1,4 +1,4 @@
-package util;
+package exceptions;
 
 /**
  * An Error that occurs when a DataManager is

@@ -116,6 +116,7 @@ public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
     }
     // =========================  searching ============================
 
+    // @TODO: maybe this should allow 'searching' just the front of the queue.
     @Override
     public int findBy(Predicate<T> thePredicate) throws IllegalArgumentException {
         throw new IllegalArgumentException(ILLEGAL_ARG_ERR);
@@ -136,5 +137,23 @@ public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
     @Override
     public Iterator<T> iterator() {
         return myQueue.iterator();
+    }
+
+    //=================== operation counting =========================
+    //@TODO need to implement these methods and integrate counter.
+
+    @Override
+    public int getSwaps() {
+        return 0;
+    }
+
+    @Override
+    public int getComparisons() {
+        return 0;
+    }
+
+    @Override
+    public void resetCounter() {
+
     }
 }

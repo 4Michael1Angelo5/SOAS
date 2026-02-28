@@ -25,7 +25,8 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
             TransactionFeed theManger,
             Supplier<DataContainer<Transaction>> theSupplier) {
 
-        super(Transaction.class, theManger, theSupplier);
+        super(Transaction.class, theManger, theSupplier,
+                ExperimentFormat.BENCHMARK_NO_OPS); //<--- hard code for now and provide functionality later.);
     }
 
     // =======================   loading ================================
@@ -48,27 +49,41 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
      */
     // runnable
     public void addFrontNTimes() {
-        if (myManager.getData().isEmpty()) {
+        myManager.resetCounter();
+
+        if (myTestContainer.isEmpty()) {
             throw new RuntimeException(
                     "Misconfigured ExperimentResult, please ensure " +
                             "to loadData before running this experiment"
             );
         }
+
+        if (!myManager.getData().isEmpty()) {
+            throw new RuntimeException(
+                    """
+                            Misconfigured Experiment:
+                            Please ensure to clear the DataManager's
+                            DataContainer between each trial.
+      
+                            """
+            );
+        }
         DataContainer<Transaction> temp = mySupplier.get();
-        for (Transaction theTransction: myManager.getData()) {
-            temp.add(0, theTransction);
+        for (Transaction theTransction: myTestContainer) {
+            myManager.addTransactionFront(theTransction);
         }
     }
 
     // gather results
-    public ExperimentResult testAddFrontNTimes() {
-        double avgTime = myBenchmarkRunner.runSpeedTest(
+    public BenchmarkResult testAddFrontNTimes() {
+        double avgTime = myBenchmarkRunner.runSpeedTestWithSetup(
                 TRIAL_RUNS,
+                this::setUpForAdd,
                 this::addFrontNTimes);
         String operationName = "add front";
         int inputSize = myManager.getTransactionData().size();
 
-        return new ExperimentResult(inputSize, operationName, avgTime);
+        return new BenchmarkResult(inputSize, operationName, avgTime, getOpCounts());
     }
 
     /**
@@ -77,26 +92,36 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
      */
     // runnable
     public void addRearNTimes() {
-        if (myManager.getData().isEmpty()) {
+        if (myTestContainer.isEmpty()) {
             throw new RuntimeException(
                     "Misconfigured ExperimentResult, please ensure " +
                             "to loadData before running this experiment"
             );
         }
-        DataContainer<Transaction> temp = mySupplier.get();
-        for (Transaction transaction:myManager.getTransactionData()) {
-            temp.add(temp.size(),transaction);
+
+        if (!myManager.getData().isEmpty()) {
+            throw new RuntimeException(
+                    """
+                            Misconfigured Experiment:
+                            Please ensure to clear the DataManager's
+                            DataContainer between each trial.
+      
+                            """
+            );
+        }
+        for (Transaction transaction: myTestContainer) {
+            myManager.addTransactionRear(transaction);
         }
     }
 
     // gather results
-    public ExperimentResult testAddRearNTimes() {
+    public BenchmarkResult testAddRearNTimes() {
         int inputSize = myManager.getTransactionData().size();
         String operation = "add rear";
         double avgTime =
                 myBenchmarkRunner.runSpeedTest(TRIAL_RUNS, this::addRearNTimes);
 
-        return new ExperimentResult(inputSize, operation, avgTime);
+        return new BenchmarkResult(inputSize, operation, avgTime, getOpCounts());
 
     }
 
@@ -108,20 +133,29 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
      */
     // runnable
     public void removeFromFrontNTimes() {
-        if (myManager.getData().isEmpty()) {
+        if (myTestContainer.isEmpty()) {
             throw new RuntimeException(
                     "Misconfigured ExperimentResult, please ensure " +
                             "to loadData before running this experiment"
             );
         }
 
-        while (!containerForRemove.isEmpty()) {
-            containerForRemove.removeAt(0);
+        if (myManager.getData().isEmpty()){
+            throw new RuntimeException(
+                    """
+                    Misconfigured Experiment, please ensure
+                    to call setUpForRemove before conducting
+                    removal expereiments.
+                    """);
+        }
+
+        while (!myManager.getData().isEmpty()) {
+            myManager.removeFront();
         }
     }
 
     // gather results
-    public ExperimentResult testRemoveFrontNTimes() {
+    public BenchmarkResult testRemoveFrontNTimes() {
         final int inputSize = myManager.getTransactionData().size();
         final String operationName = "remove front";
         final double avgTime =
@@ -129,7 +163,7 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
                         TRIAL_RUNS,
                         this::setUpForRemove,
                         this::removeFromFrontNTimes);
-        return new ExperimentResult(inputSize, operationName, avgTime);
+        return new BenchmarkResult(inputSize, operationName, avgTime, getOpCounts());
     }
 
     // =======================   searching ================================
@@ -142,14 +176,18 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
     }
 
     // gather results
-    public ExperimentResult testSearchNTimes() {
+    public BenchmarkResult testSearchNTimes() {
+
+        setUpForSearch();
         int inputSize = myManager.getTransactionData().size();
         String operationName = "search";
         final double avgTime =
                 myBenchmarkRunner.runSpeedTest(
                         TRIAL_RUNS,
                         this::searchListNTimes);
-        return new ExperimentResult(inputSize, operationName, avgTime);
+
+        return new BenchmarkResult(inputSize, operationName, avgTime,
+                new OperationCounts(myManager.getSwaps(), myExperiments.getComparisons()));
     }
 
 
@@ -173,7 +211,7 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
         addExperimentResult(testRemoveFrontNTimes());
         addExperimentResult(testSearchNTimes());
 
-        printResults(false);
+        printResults();
 
     }
 

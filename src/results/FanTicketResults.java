@@ -22,7 +22,8 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
             FanTicketQueue theFanTicketManger,
             Supplier<DataContainer<FanRequest>> theSupplier) {
 
-        super(FanRequest.class, theFanTicketManger, theSupplier);
+        super(FanRequest.class, theFanTicketManger, theSupplier,
+                ExperimentFormat.BENCHMARK_NO_OPS); //<--- hard code for now and provide functionality later.);
     }
 
     /**
@@ -32,15 +33,17 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
      * their combined average.
      * @return ExperimentResult of Pushing and Popping N times.
      */
-    public ExperimentResult testEnqueueDequeue() {
-     ExperimentResult enqueue = this.testAdd("Enqueue");
-     ExperimentResult dequeue = this.testRemove("Dequeue");
+    public BenchmarkResult testEnqueueDequeue() {
+     BenchmarkResult enqueue = this.testAdd("Enqueue");
+     BenchmarkResult dequeue = this.testRemove("Dequeue");
+
 
      int inputSize = myManager.getData().size();
-     String testTitle = enqueue.operation() + "/" + dequeue.operation();
+     String testTitle = enqueue.method() + "/" + dequeue.method();
      double avgTime = (enqueue.avgTime() + dequeue.avgTime()) / 2.0;
 
-     return new ExperimentResult(inputSize, testTitle, avgTime);
+     //@TODO: maybe we should be taking the average of the two operations counts?
+     return new BenchmarkResult(inputSize, testTitle, avgTime, enqueue.operationCounts());
     }
 
     @Override
@@ -55,7 +58,8 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
         // ===========   Fan Requests 5000 =============
         myManager.loadCsvData(FAN_5000);
         myExperiments.add(testEnqueueDequeue());
-        printResults(false);
+        printResults();
 
     }
+
 }

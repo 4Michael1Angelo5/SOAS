@@ -5,11 +5,12 @@ import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import counter.OperationCounter;
 import loader.DataLoader;
-import util.DataContainer;
+import util.*;
 import types.DataType;
-import util.ManagerConfigException;
-import util.MismatchedContainerFromLoaderException;
+import exceptions.ManagerConfigException;
+import exceptions.MismatchedContainerFromLoaderException;
 
 import static java.util.Objects.isNull;
 
@@ -121,14 +122,15 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
 
     /**
      * <p>
-     * Adds an element to the DataContainer using the <u>most efficient
+     * Adds an element to the {@link DataContainer} using the <u>most efficient
      * method</u> for the underlying data structure.
      * </P>
      * <ul>
-     * <li>ArrayStore  -> adds at end</li>
-     * <li>SinglyLinkedList ->  adds at tail (end)</li>
-     * <li>Stack  ->  adds at end (push)</li>
-     * <li>Queue -> adds at end (enqueue)</li>
+     * <li>{@link ArrayStore}  -> adds at end</li>
+     * <li>{@link SinglyLinkedList} ->  adds at tail (end)</li>
+     * <li>{@link ArrayStack} ->  adds at end (push)</li>
+     * <li>{@link LinkedQueue} -> adds at end (enqueue)</li>
+     * <li>{@link BinaryHeapPQ} -> heapifyUp procedure</li>
      * </ul>
      * @param theData the object to add to the DataContainer.
      */
@@ -144,18 +146,18 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
 
     /**
      * <p>
-     * Removes an element from the DataContainer using the <u>most efficient
+     * Removes an element from the {@link DataContainer} using the <u>most efficient
      * method</u> for the underlying data structure.
      * </P>
      * <ul>
-     * <li>ArrayStore  -> removes from end</li>
-     * <li>SinglyLinkedList ->  removes head (front)</li>
-     * <li>Stack  ->  removes from end (pop)</li>
-     * <li>Queue -> removes from front (dequeue)</li>
+     * <li>{@link ArrayStore} -> removes from end</li>
+     * <li>{@link SinglyLinkedList} -> removes head (front)</li>
+     * <li>{@link ArrayStack} ->  removes from end (pop)</li>
+     * <li>{@link LinkedQueue} -> removes from front (dequeue)</li>
+     * <li>{@link BinaryHeapPQ} -> heapifyDown procedure</li>
      * </ul>
      * @return the removed object from the Data Storage Container.
-     * @throws NoSuchElementException if the object is not present
-     * in the container or the DataContainer is empty.
+     * @throws NoSuchElementException if the DataContainer is empty.
      */
     // ======================= removing  ===========================
     @Override
@@ -167,7 +169,8 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     // =======================  utility ===========================
 
     /**
-     * Prints data parsed from a csv file.
+     * Prints the {@link DataType} objects contained in the
+     * {@link DataContainer}
      */
     public void printData(){
         for (T data: myData) {
@@ -179,5 +182,34 @@ public abstract class DataManager <T extends DataType> implements Manager<T>{
     public void clearData() {
         myData.clear();
     }
+
+    // =======================  operation counting ===========================
+
+    /**
+     *
+     * @return the number of swaps performed
+     * since initiation of a sequence of commands.
+     */
+    @Override
+    public int getSwaps() {
+        return myData.getSwaps();
+    }
+
+    /**
+     *
+     * @return the number of comparisons performed
+     * since initiation of a sequence of commands.
+     */
+    @Override
+    public int getComparisons() {
+        return myData.getComparisons();
+    }
+
+    /**
+     * resets the {@link OperationCounter}
+     */
+    @Override
+    public void resetCounter(){myData.resetCounter();}
+
 
 }

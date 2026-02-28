@@ -401,6 +401,23 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
         };
     }
 
+    //=================== operation counting =========================
+    //@TODO need to implement these methods and integrate counter.
+    @Override
+    public int getSwaps() {
+        return 0;
+    }
+
+    @Override
+    public int getComparisons() {
+        return 0;
+    }
+
+    @Override
+    public void resetCounter() {
+
+    }
+
     // ================== utility class ========================
 
     /**

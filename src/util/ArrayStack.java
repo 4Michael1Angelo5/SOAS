@@ -190,4 +190,20 @@ public final class ArrayStack<T> implements Stack<T>, DataContainer<T>{
         return sb.toString();
     }
 
+    //=================== operation counting =========================
+    //@TODO need to implement these methods and integrate counter.
+
+    @Override
+    public int getSwaps() {
+        return 0;
+    }
+
+    @Override
+    public int getComparisons() {
+        return 0;
+    }
+
+    @Override
+    public void resetCounter() {
+    }
 }

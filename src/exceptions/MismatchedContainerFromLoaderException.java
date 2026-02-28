@@ -1,4 +1,4 @@
-package util;
+package exceptions;
 
 /**
  * Thrown when the data loader returns

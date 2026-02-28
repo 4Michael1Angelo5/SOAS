@@ -1,15 +1,11 @@
 package results;
 
 import manager.DrillManager;
-import manager.Manager;
-import manager.UndoManager;
-import types.Action;
 import types.Drill;
 import util.BinaryHeapPQ;
 import util.DataContainer;
 
 import java.io.IOException;
-import java.util.PriorityQueue;
 import java.util.function.Supplier;
 
 public class DrillResults extends Results<Drill, DrillManager> {
@@ -19,8 +15,8 @@ public class DrillResults extends Results<Drill, DrillManager> {
 
     public DrillResults(
             DrillManager theManager,
-            Supplier<DataContainer<Drill>> theSupplier) {
-        super(Drill.class, theManager, theSupplier);
+            Supplier<DataContainer<Drill>> theSupplier, ExperimentFormat theExperimentFormatType) {
+        super(Drill.class, theManager, theSupplier, theExperimentFormatType);
     }
 
 
@@ -28,25 +24,30 @@ public class DrillResults extends Results<Drill, DrillManager> {
     public void runAllExperiments() throws IOException {
 
         // Drill 50;
-        myManager.loadCsvData(DRILL_50);
+        loadData(DRILL_50);
+        myManager.printData();
         addExperimentResult(testAdd("add/enqueue"));
         addExperimentResult(testRemove("remove/dequeue"));
         // Drill 500;
-        myManager.loadCsvData(DRILL_500);
+        loadData(DRILL_500);
         addExperimentResult(testAdd("add/enqueue"));
         addExperimentResult(testRemove("remove/dequeue"));
         // Drill 5000;
-        myManager.loadCsvData(DRILL_5000);
+        loadData(DRILL_5000);
         addExperimentResult(testAdd("add/enqueue"));
         addExperimentResult(testRemove("remove/dequeue"));
 
-        printResults(false);
-
+        printResults();
     }
 
     public static void main(String[] args) throws IOException {
-        Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
-        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq) ;
+
+        Supplier<DataContainer<Drill>> supPq =
+                () -> new BinaryHeapPQ<>(Drill.class, (a,b)->b.urgency()- a.urgency());
+
+        DrillResults dr = new DrillResults(new DrillManager(supPq),
+                supPq,
+                ExperimentFormat.BENCHMARK_W_OPS) ;
         dr.runAllExperiments();
 
     }

@@ -30,16 +30,6 @@ public class DrillManager extends DataManager<Drill> {
         return myData.get(0);
     }
 
-    public int getSwaps() {
-        if (myData instanceof BinaryHeapPQ<Drill> ) {}
-        return ((BinaryHeapPQ<Drill>) myData).getSwaps();
-    }
-
-    public int getComparisons() {
-        if (myData instanceof BinaryHeapPQ<Drill> ) {}
-        return ((BinaryHeapPQ<Drill>) myData).getComparisons();
-    }
-
 
     /**
      * Allows modification of the comparator for a Priority Queue and runs side effects.
@@ -85,7 +75,7 @@ public class DrillManager extends DataManager<Drill> {
         }else {
 
             // create temp array supplier
-            Supplier<DataContainer<Drill>> tempSup = () -> new ArrayStore<>(Drill.class, 16);
+            Supplier<DataContainer<Drill>> tempSup = () -> new ArrayStore<>(Drill.class);
 
             // create temp loader
             DataLoader<Drill> tempLoader = new DataLoader<>(Drill.class, tempSup);

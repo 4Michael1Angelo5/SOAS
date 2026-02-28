@@ -23,18 +23,6 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
     private Comparator<T> myComparator;
     private final OperationCounter myCounter =  new OperationCounter();
 
-    public int getComparisons() {
-        return myCounter.getCount("comparisons");
-    }
-
-    public int getSwaps() {
-        return myCounter.getCount("swaps");
-    }
-
-    public void resetCounts() {
-        myCounter.resetAll();
-    }
-
     /**
      * Initializes a new priority queue backed by a binary heap.
      * @param theClass The class type of elements to be stored (used for array instantiation).
@@ -425,6 +413,21 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
 
         return sb.toString();
     }
+
+    //=================== operation counting =========================
+
+    public int getComparisons() {
+        return myCounter.getCount("comparisons");
+    }
+
+    public int getSwaps() {
+        return myCounter.getCount("swaps");
+    }
+
+    public void resetCounter() {
+        myCounter.resetAll();
+    }
+
 
 
 }
