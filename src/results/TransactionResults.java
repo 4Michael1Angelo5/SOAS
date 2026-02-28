@@ -173,7 +173,7 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
         addExperimentResult(testRemoveFrontNTimes());
         addExperimentResult(testSearchNTimes());
 
-        printResults();
+        printResults(false);
 
     }
 

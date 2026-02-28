@@ -55,7 +55,7 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
         // ===========   Fan Requests 5000 =============
         myManager.loadCsvData(FAN_5000);
         myExperiments.add(testEnqueueDequeue());
-        printResults();
+        printResults(false);
 
     }
 }

@@ -23,6 +23,7 @@ public class DrillResults extends Results<Drill, DrillManager> {
         super(Drill.class, theManager, theSupplier);
     }
 
+
     @Override
     public void runAllExperiments() throws IOException {
 
@@ -39,7 +40,7 @@ public class DrillResults extends Results<Drill, DrillManager> {
         addExperimentResult(testAdd("add/enqueue"));
         addExperimentResult(testRemove("remove/dequeue"));
 
-        printResults();
+        printResults(false);
 
     }
 

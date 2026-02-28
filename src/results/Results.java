@@ -64,7 +64,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * Internal storage for the results
      * of various experiments.
      */
-    DataContainer<ExperimentResult> myExperiments = new ArrayStore<>(ExperimentResult.class, 16);
+    DataContainer<ExperimentInterface> myExperiments = new ArrayStore<>(ExperimentInterface.class, 16);
 
     /**
      * A temporary container
@@ -78,6 +78,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * of the target DataContainer.
      */
     Supplier<DataContainer<T>> mySupplier;
+    
 
     /**
      * Constructs a Results controller to manage benchmarks for a specific data type.
@@ -219,9 +220,31 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * Helper method to format and print a single row of the results table.
      * * @param theResult The result to display.
      */
-    public void logExperiment(ExperimentResult theResult) {
-        String row = String.format("%-10s %-15s %-15.6f", theResult.inputSize(), theResult.operation(), theResult.avgTime());
-        logger.info(ANSI_GREEN + row + ANSI_RESET);
+    public void logExperiment(ExperimentInterface theResult) {
+        if (theResult instanceof ExperimentResWithOps) {
+
+            String row = String.format("%-10s %-15s %-15.6f %-15s %-10s",
+                    theResult.getInputSize(),
+                    theResult.getOperation(),
+                    theResult.getAvgTime(),
+                    ((ExperimentResWithOps) theResult).getComparison(),
+                    ((ExperimentResWithOps) theResult).getSwaps()
+                    );
+            logger.info(ANSI_GREEN + row + ANSI_RESET);
+
+
+        } else {
+
+
+            String row = String.format("%-10s %-15s %-15.6f",
+                    theResult.getInputSize(),
+                    theResult.getOperation(),
+                    theResult.getAvgTime());
+            logger.info(ANSI_GREEN + row + ANSI_RESET);
+
+
+        }
+
     }
 
     private String getTestResultsTitle(){
@@ -236,13 +259,22 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * Prints the final summary table of all stored experiments to the console.
      * Includes a header, data rows, and a footer.
      */
-    public void printResults() {
+    public void printResults(boolean withOps) {
         logger.info(ANSI_GREEN + getTestResultsTitle() + " " + getManagerTitle() + ANSI_RESET);
         logger.info(ANSI_GREEN + "========== Benchmark Results ==========" + ANSI_RESET);
-        String divider = String.format("%-10s %-15s %-15s%n", "Size", "Operation", "Avg Time (ms)");
+        String divider;
+        if (withOps) {
+
+            divider = String.format("%-10s %-15s %-15s%n %-10s %-10s", "Size", "Operation", "Avg Time (ms)", "comparisons", "swaps");
+
+        }else {
+            divider = String.format("%-10s %-15s %-15s%n", "Size", "Operation", "Avg Time (ms)");
+
+        }
+
         logger.info(ANSI_GREEN + divider + ANSI_RESET);
         logger.info(ANSI_GREEN + "----------------------------------------" + ANSI_RESET);
-        for (ExperimentResult result: myExperiments) {
+        for (ExperimentInterface result: myExperiments) {
             logExperiment(result);
         }
         logger.info(ANSI_GREEN + "========================================\n" + ANSI_RESET);

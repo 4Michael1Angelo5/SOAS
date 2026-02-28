@@ -66,6 +66,6 @@ public class UndoResults extends Results<Action, UndoManager> {
         loadActions(UNDO_5000);
         addExperimentResult(testPushPop());
 
-        printResults();
+        printResults(false);
     }
 }

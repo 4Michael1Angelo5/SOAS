@@ -1,9 +1,15 @@
 package results;
 
-public record ExperimentResult(
+public record ExperimentResWithOps(
         int inputSize,
         String operation,
-        double avgTime) implements ExperimentInterface {
+        double avgTime,
+        int comparisons,
+        int swaps
+
+) implements ExperimentInterface {
+
+
     @Override
     public int getInputSize() {
         return inputSize;
@@ -17,5 +23,13 @@ public record ExperimentResult(
     @Override
     public double getAvgTime() {
         return avgTime;
+    }
+
+    public int getComparison() {
+        return comparisons;
+    }
+
+    public int getSwaps() {
+        return swaps; 
     }
 }

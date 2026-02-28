@@ -118,7 +118,7 @@ public class RosterResults extends Results<Player, RosterManager> {
         addExperimentResult(testRemoveFromFrontNTimes());
         addExperimentResult(testSearchByNameNTimes());
 
-        printResults();
+        printResults(false);
     }
 
     public static void main(String[] args) throws IOException{
@@ -164,7 +164,6 @@ public class RosterResults extends Results<Player, RosterManager> {
         Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
         DrillResults dr = new DrillResults(new DrillManager(supPq), supPq) ;
         dr.runAllExperiments();
-
 
     }
 
