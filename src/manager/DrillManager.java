@@ -30,6 +30,17 @@ public class DrillManager extends DataManager<Drill> {
         return myData.get(0);
     }
 
+    public int getSwaps() {
+        if (myData instanceof BinaryHeapPQ<Drill> ) {}
+        return ((BinaryHeapPQ<Drill>) myData).getSwaps();
+    }
+
+    public int getComparisons() {
+        if (myData instanceof BinaryHeapPQ<Drill> ) {}
+        return ((BinaryHeapPQ<Drill>) myData).getComparisons();
+    }
+
+
     /**
      * Allows modification of the comparator for a Priority Queue and runs side effects.
      * This method is only allowed when the DrillManager is instantiated with a BinaryHeapPQ<Drill>

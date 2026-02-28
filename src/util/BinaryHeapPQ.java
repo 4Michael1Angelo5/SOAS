@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import counter.OperationCounter;
 import java.util.function.Predicate;
 
 /**
@@ -20,6 +21,19 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
 
     private final ArrayStore<T> myArray;
     private Comparator<T> myComparator;
+    private final OperationCounter myCounter =  new OperationCounter();
+
+    public int getComparisons() {
+        return myCounter.getCount("comparisons");
+    }
+
+    public int getSwaps() {
+        return myCounter.getCount("swaps");
+    }
+
+    public void resetCounts() {
+        myCounter.resetAll();
+    }
 
     /**
      * Initializes a new priority queue backed by a binary heap.
@@ -138,6 +152,7 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
             T child = myArray.get(childIdx);
             T parent = myArray.get(parentIdx);
 
+            myCounter.increment("comparisons");
             int priority = myComparator.compare(parent, child);
 
             // if positive then child comes before parent -> swap
@@ -173,6 +188,7 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
             // 1) reached the bottom of the heap
             if (left >= myArray.size()) break;
 
+            myCounter.increment("comparisons");
             int highestPriorityIdx = getHighestPriorityIndex(left, right);
 
             T bestChild = myArray.get(highestPriorityIdx);
@@ -203,6 +219,8 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
         if (right >= myArray.size()) {
             return left;
         }
+
+        myCounter.increment("comparisons");
         // if the left should come before right
         int priority = myComparator.compare(myArray.get(left), myArray.get(right));
         if(priority < 0) {
@@ -219,6 +237,7 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
      * @param b The second index.
      */
     private void swap(int a, int b) {
+        myCounter.increment("swaps");
         T temp = myArray.get(a);
         myArray.set(a, myArray.get(b));
         myArray.set(b, temp);
