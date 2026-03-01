@@ -1,13 +1,10 @@
 package manager;
 
-import counter.OperationCounter;
 import loader.DataLoader;
 import types.Drill;
 import util.ArrayStore;
 import util.BinaryHeapPQ;
 import util.DataContainer;
-import util.LinkedQueue;
-
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.function.Supplier;
@@ -27,20 +24,6 @@ public class DrillManager extends DataManager<Drill> {
     // -------------------------------- getter ------------------------------
     public Drill peekNextDrill() {
         return myData.get(0);
-    }
-
-    public int getSwaps() {
-        if (!(myData instanceof BinaryHeapPQ<?>)) {
-            return 0;
-        }
-        return ((BinaryHeapPQ<Drill>) myData).getSwaps();
-    }
-
-    public int getComparisons() {
-        if (!(myData instanceof BinaryHeapPQ<?>)) {
-            return 0;
-        }
-        return ((BinaryHeapPQ<Drill>) myData).getComparisons();
     }
 
 
@@ -88,7 +71,7 @@ public class DrillManager extends DataManager<Drill> {
         }else {
 
             // create temp array supplier
-            Supplier<DataContainer<Drill>> tempSup = () -> new ArrayStore<>(Drill.class, 16);
+            Supplier<DataContainer<Drill>> tempSup = () -> new ArrayStore<>(Drill.class);
 
             // create temp loader
             DataLoader<Drill> tempLoader = new DataLoader<>(Drill.class, tempSup);
@@ -161,7 +144,7 @@ public class DrillManager extends DataManager<Drill> {
 
     @Override
     public Class<?> getManagerClass() {
-        return null;
+        return DrillManager.class;
     }
 
 }

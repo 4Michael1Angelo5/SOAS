@@ -1,5 +1,12 @@
 package util;
 
+/**
+ * A simple Stack interface, defining common
+ * methods to all stacks: push, pop, peek.
+ * @param <T> the object type the stack will store.
+ * @version 1.1
+ * @author Chris Chun, Ayush.
+ */
 public interface Stack<T> {
 
     /**

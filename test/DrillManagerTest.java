@@ -103,9 +103,9 @@ public class DrillManagerTest {
         drillManager.addData(d3);
 
         assertAll("Drills with same urgency",
-                () -> assertEquals(d2, drillManager.removeData(), "First drill should be d2 (install_by_day: 7)"),
-                () -> assertEquals(d1, drillManager.removeData(), "Second drill should be d1 (install_by_day: 12)"),
-                () -> assertEquals(d3, drillManager.removeData(), "Third drill should be d3 (install_by_day: 15)"),
+                () -> assertEquals(d2, drillManager.removeData(), "First drill should be d2 (urgency 87)"),
+                () -> assertEquals(d1, drillManager.removeData(), "Second drill should be d3 (urgency 56)"),
+                () -> assertEquals(d3, drillManager.removeData(), "Third drill should be d1 (urgency 23)"),
                 () -> assertTrue(heap.isEmpty(), "Heap should be empty after removing all")
         );
     }

@@ -7,7 +7,7 @@ public record Action(
         int action_id,
         ActionType action_type,
         String target,
-        String timestamp) implements DataType, Undoable {
+        String timestamp) implements DataType {
 
     public Action(int action_id, ActionType action_type, String target, String timestamp) {
         this.action_id = action_id;

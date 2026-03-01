@@ -1,15 +1,12 @@
 package results;
 
 import manager.DrillManager;
-import manager.Manager;
-import manager.UndoManager;
-import types.Action;
 import types.Drill;
 import util.BinaryHeapPQ;
 import util.DataContainer;
+import util.LinkedQueue;
 
 import java.io.IOException;
-import java.util.PriorityQueue;
 import java.util.function.Supplier;
 
 public class DrillResults extends Results<Drill, DrillManager> {
@@ -19,33 +16,46 @@ public class DrillResults extends Results<Drill, DrillManager> {
 
     public DrillResults(
             DrillManager theManager,
-            Supplier<DataContainer<Drill>> theSupplier) {
-        super(Drill.class, theManager, theSupplier);
+            Supplier<DataContainer<Drill>> theSupplier, ExperimentFormat theExperimentFormatType) {
+        super(Drill.class, theManager, theSupplier, theExperimentFormatType);
     }
+
 
     @Override
     public void runAllExperiments() throws IOException {
 
         // Drill 50;
-        myManager.loadCsvData(DRILL_50);
-        addExperimentResult(testAdd("add/enqueue"));
-        addExperimentResult(testRemove("remove/dequeue"));
+        loadData(DRILL_50);
+        myManager.printData();
+        addExperimentResult(testAdd("enqueue"));
+        addExperimentResult(testRemove("dequeue"));
         // Drill 500;
-        myManager.loadCsvData(DRILL_500);
-        addExperimentResult(testAdd("add/enqueue"));
-        addExperimentResult(testRemove("remove/dequeue"));
+        loadData(DRILL_500);
+        addExperimentResult(testAdd("enqueue"));
+        addExperimentResult(testRemove("dequeue"));
         // Drill 5000;
-        myManager.loadCsvData(DRILL_5000);
-        addExperimentResult(testAdd("add/enqueue"));
-        addExperimentResult(testRemove("remove/dequeue"));
+        loadData(DRILL_5000);
+        addExperimentResult(testAdd("enqueue"));
+        addExperimentResult(testRemove("dequeue"));
 
         printResults();
-
     }
 
     public static void main(String[] args) throws IOException {
-        Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
-        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq) ;
+
+        Supplier<DataContainer<Drill>> supPq =
+                () -> new BinaryHeapPQ<>(Drill.class,
+                        (a,b)->Integer.compare(b.urgency(), a.urgency()));
+
+        DrillResults dr = new DrillResults(new DrillManager(supPq),
+                supPq,
+                ExperimentFormat.BENCHMARK_W_OPS) ;
         dr.runAllExperiments();
+
+        Supplier<DataContainer<Drill>> supQ = LinkedQueue::new;
+        DrillResults drQ = new DrillResults(new DrillManager(supQ),
+                supQ, ExperimentFormat.BENCHMARK_W_OPS);
+        drQ.runAllExperiments();
+
     }
 }

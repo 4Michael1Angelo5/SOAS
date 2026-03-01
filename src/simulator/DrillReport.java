@@ -1,7 +1,5 @@
 package simulator;
 
-import types.Drill;
-
 /**
  * A simple Record object to report statistics on Drill wait times.
  * @param waitTime how long the drill waited before being processed
