@@ -30,12 +30,16 @@ public class DrillManager extends DataManager<Drill> {
     }
 
     public int getSwaps() {
-        if (myData instanceof BinaryHeapPQ<Drill> ) {}
+        if (!(myData instanceof BinaryHeapPQ<?>)) {
+            return 0;
+        }
         return ((BinaryHeapPQ<Drill>) myData).getSwaps();
     }
 
     public int getComparisons() {
-        if (myData instanceof BinaryHeapPQ<Drill> ) {}
+        if (!(myData instanceof BinaryHeapPQ<?>)) {
+            return 0;
+        }
         return ((BinaryHeapPQ<Drill>) myData).getComparisons();
     }
 
