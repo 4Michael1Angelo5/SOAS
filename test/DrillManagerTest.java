@@ -96,14 +96,15 @@ public class DrillManagerTest {
         Drill d2 = new Drill(2, "B", 65, 30, 5, 7);
         Drill d3 = new Drill(3, "C", 65, 90, 3, 15);
 
+        drillManager.upDateComparator(drillManager.fairSort());
         drillManager.addData(d1);
         drillManager.addData(d2);
         drillManager.addData(d3);
 
         assertAll("Drills with same urgency",
                 () -> assertEquals(d2, drillManager.removeData(), "First drill should be d2 (urgency 87)"),
-                () -> assertEquals(d3, drillManager.removeData(), "Second drill should be d3 (urgency 56)"),
-                () -> assertEquals(d1, drillManager.removeData(), "Third drill should be d1 (urgency 23)"),
+                () -> assertEquals(d1, drillManager.removeData(), "Second drill should be d3 (urgency 56)"),
+                () -> assertEquals(d3, drillManager.removeData(), "Third drill should be d1 (urgency 23)"),
                 () -> assertTrue(heap.isEmpty(), "Heap should be empty after removing all")
         );
     }

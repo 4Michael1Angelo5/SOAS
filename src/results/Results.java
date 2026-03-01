@@ -4,12 +4,10 @@ import benchmark.BenchmarkRunner;
 import loader.DataLoader;
 import manager.Manager;
 import types.DataType;
-import types.UndoRecord;
 import util.ArrayStore;
 import util.DataContainer;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -71,12 +69,6 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
     public DataContainer<BenchmarkResult> myExperiments = new ArrayStore<>(BenchmarkResult.class);
 
     /**
-     * A temporary container
-     * used specifically for destructive removal benchmarks.
-     */
-//    public DataContainer<T> containerForRemove;
-
-    /**
      * A functional supplier
      * that provides fresh instances
      * of the target DataContainer.
@@ -87,10 +79,6 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * Experiment format -> determines if we should include operation counting or not.
      */
     private final ExperimentFormat myExperimentFormat;
-
-//    public HashMap<String,Integer> operationCounts = new HashMap<>();
-
-//    public DataContainer<T> containerForAdd;
 
     public DataContainer<T> myTestContainer;
     public DataLoader<T> myDataLoader;
@@ -111,8 +99,6 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
         myManager = theManager;
         mySupplier = theContainerSupplier;
         myExperimentFormat = theExperimentFormat;
-//        containerForRemove = theContainerSupplier.get();
-//        containerForAdd = theContainerSupplier.get();
         myTestContainer = new ArrayStore<>(theDataClass);
         myDataLoader = new DataLoader<>(theDataClass, ()-> new ArrayStore<>(theDataClass));
         verifyConfiguration();
@@ -387,21 +373,71 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
         return columnHeader;
     }
 
+    private String getTableHeaderDivider() {
+        switch (myExperimentFormat) {
+            case BENCHMARK_NO_OPS -> {
+                return "========== Benchmark Results ==========";
+            }
+            case BENCHMARK_W_OPS -> {
+                return "====================== Benchmark Results ======================";
+            }
+            case null, default -> {
+                throw new RuntimeException("Encounterred Runtime error: Experiment format type cannot be null.");
+            }
+        }
+    }
+
+    private String getTableDivider() {
+
+        switch (myExperimentFormat) {
+            case BENCHMARK_NO_OPS -> {
+                return "----------------------------------------";
+            }
+            case BENCHMARK_W_OPS -> {
+                return "---------------------------------------------------------------";
+            }
+            case null, default -> {
+                throw new RuntimeException("Encounterred Runtime error: Experiment format type cannot be null.");
+            }
+        }
+
+    }
+
+    // ===============================================================
+    // ---------------------------------------------------------------
+    // ====================== Benchmark Results ======================
+
+    private String getTableFooterDivider() {
+        switch (myExperimentFormat) {
+
+            case BENCHMARK_NO_OPS -> {
+                return "========================================\n";
+            }
+            case BENCHMARK_W_OPS -> {
+                return "===============================================================";
+            }
+            case null, default -> {
+                throw new RuntimeException("Encounterred Runtime error: Experiment format type cannot be null.");
+            }
+        }
+    }
+
     /**
      * Prints the final summary table of all stored experiments to the console.
      * Includes a header, data rows, and a footer.
      */
     public void printResults() {
-        logger.info(ANSI_GREEN + getTestResultsTitle() + " " + getManagerTitle() + ANSI_RESET);
-        logger.info(ANSI_GREEN + "========== Benchmark Results ==========" + ANSI_RESET);
+        logger.info(ANSI_GREEN + "\n"+ getTestResultsTitle() + " " + getManagerTitle() + ANSI_RESET);
+
+        logger.info(ANSI_GREEN + getTableHeaderDivider() + ANSI_RESET);
 
         logger.info(ANSI_GREEN + getExperimentResultHeader() + ANSI_RESET);
 
-        logger.info(ANSI_GREEN + "----------------------------------------" + ANSI_RESET);
+        logger.info(ANSI_GREEN + getTableDivider() + ANSI_RESET);
         for (BenchmarkResult result: myExperiments) {
             logExperiment(result);
         }
-        logger.info(ANSI_GREEN + "========================================\n" + ANSI_RESET);
+        logger.info(ANSI_GREEN + getTableFooterDivider() + ANSI_RESET);
     }
 
 }

@@ -1,5 +1,6 @@
 package util;
 
+import counter.OperationCounter;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -14,9 +15,11 @@ import java.util.function.Predicate;
  */
 public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
 
-    private SinglyLinkedList<T> myQueue = new SinglyLinkedList<>();
+    private final SinglyLinkedList<T> myQueue = new SinglyLinkedList<>();
 
     private final String ILLEGAL_ARG_ERR = "Queues do not support indexed based access beyond the front";
+
+    private final OperationCounter myCounter = new OperationCounter();
 
     public LinkedQueue(){
         super();
@@ -96,6 +99,7 @@ public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
 
     @Override
     public T remove(T theVal) throws NoSuchElementException, IllegalArgumentException {
+        myCounter.increment("comparisons", 1);
         if (!Objects.equals(front(),theVal)){
             throw new IllegalArgumentException(ILLEGAL_ARG_ERR);
         }
@@ -144,16 +148,17 @@ public final class LinkedQueue<T> implements DataContainer<T>, Queue<T> {
 
     @Override
     public int getSwaps() {
-        return 0;
+        return myQueue.getSwaps() + myCounter.getCount("swaps");
     }
 
     @Override
     public int getComparisons() {
-        return 0;
+
+        return myCounter.getCount("comparisons")
+                + myQueue.getComparisons();
+
     }
 
     @Override
-    public void resetCounter() {
-
-    }
+    public void resetCounter() {myQueue.resetCounter(); myCounter.resetAll();}
 }

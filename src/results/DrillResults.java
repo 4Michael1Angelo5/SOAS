@@ -4,6 +4,7 @@ import manager.DrillManager;
 import types.Drill;
 import util.BinaryHeapPQ;
 import util.DataContainer;
+import util.LinkedQueue;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -26,16 +27,16 @@ public class DrillResults extends Results<Drill, DrillManager> {
         // Drill 50;
         loadData(DRILL_50);
         myManager.printData();
-        addExperimentResult(testAdd("add/enqueue"));
-        addExperimentResult(testRemove("remove/dequeue"));
+        addExperimentResult(testAdd("enqueue"));
+        addExperimentResult(testRemove("dequeue"));
         // Drill 500;
         loadData(DRILL_500);
-        addExperimentResult(testAdd("add/enqueue"));
-        addExperimentResult(testRemove("remove/dequeue"));
+        addExperimentResult(testAdd("enqueue"));
+        addExperimentResult(testRemove("dequeue"));
         // Drill 5000;
         loadData(DRILL_5000);
-        addExperimentResult(testAdd("add/enqueue"));
-        addExperimentResult(testRemove("remove/dequeue"));
+        addExperimentResult(testAdd("enqueue"));
+        addExperimentResult(testRemove("dequeue"));
 
         printResults();
     }
@@ -43,12 +44,18 @@ public class DrillResults extends Results<Drill, DrillManager> {
     public static void main(String[] args) throws IOException {
 
         Supplier<DataContainer<Drill>> supPq =
-                () -> new BinaryHeapPQ<>(Drill.class, (a,b)->b.urgency()- a.urgency());
+                () -> new BinaryHeapPQ<>(Drill.class,
+                        (a,b)->Integer.compare(b.urgency(), a.urgency()));
 
         DrillResults dr = new DrillResults(new DrillManager(supPq),
                 supPq,
                 ExperimentFormat.BENCHMARK_W_OPS) ;
         dr.runAllExperiments();
+
+        Supplier<DataContainer<Drill>> supQ = LinkedQueue::new;
+        DrillResults drQ = new DrillResults(new DrillManager(supQ),
+                supQ, ExperimentFormat.BENCHMARK_W_OPS);
+        drQ.runAllExperiments();
 
     }
 }

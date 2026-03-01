@@ -28,9 +28,10 @@ public class RosterResults extends Results<Player, RosterManager> {
 
     public RosterResults(
             RosterManager theManager,
-            Supplier<DataContainer<Player>> theSupplier){
+            Supplier<DataContainer<Player>> theSupplier,
+            ExperimentFormat theExperimentFormat){
         super(Player.class, theManager, theSupplier,
-                ExperimentFormat.BENCHMARK_NO_OPS); //<--- hard code for now and provide functionality later.
+                theExperimentFormat);
     }
 
     // =======================   loading ================================
@@ -53,7 +54,7 @@ public class RosterResults extends Results<Player, RosterManager> {
     // runnable
     private void searchByNameNTimes() {
 
-        int N = myManager.getData().size();
+        int N = myTestContainer.size();
 
         for (int i = 0; i < N; i++) {
 
@@ -138,8 +139,8 @@ public class RosterResults extends Results<Player, RosterManager> {
         TransactionFeed transactionFeedSLL = new TransactionFeed(sllListSupplierTransaction);
 
         // roster manager results (array/sll)
-        RosterResults results = new RosterResults(rosterMangerArray, arraySupplierPlayer);
-        RosterResults resultsSLL = new RosterResults(rosterMangerSLL, sllSupplierPlayer);
+        RosterResults results = new RosterResults(rosterMangerArray, arraySupplierPlayer, ExperimentFormat.BENCHMARK_NO_OPS);
+        RosterResults resultsSLL = new RosterResults(rosterMangerSLL, sllSupplierPlayer, ExperimentFormat.BENCHMARK_W_OPS);
 
         // transaction results (array/sll)
         TransactionResults trResults = new TransactionResults(transactionFeedArray, arraySupplierTransaction);
@@ -160,7 +161,7 @@ public class RosterResults extends Results<Player, RosterManager> {
         undoResultsStack.runAllExperiments();
 
         Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
-        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq, ExperimentFormat.BENCHMARK_NO_OPS) ;
+        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq, ExperimentFormat.BENCHMARK_W_OPS) ;
         dr.runAllExperiments();
 
     }

@@ -8,6 +8,7 @@ import util.DataContainer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Comparator;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -24,7 +25,6 @@ public class Main {
     public static final String ANSI_RESET = "\u001B[0m";
 
     public static final String ANSI_LAVENDER = "\u001B[38;5;147m";
-
 
     static {
         // attempt to use logging properties file
@@ -111,11 +111,11 @@ public class Main {
                     DM.printData();
                 }
                 case "6" -> {
-                    // update comparator to sort by shortest drill first.
-                    DM.upDateComparator((a,b)-> a.duration_min() - b.duration_min());
+                    // update comparator to sort by highest id number (reverse the list)
+                    DM.upDateComparator((a,b) -> b.id() - a.id());
                     logger.info(ANSI_LAVENDER + "\nSuccessfully updated comparator\n" + ANSI_RESET);
                 }
-                case "7" -> {
+                case "7" ->
 
                     // run simulation:
                     drillSimulator.runSimulation(
@@ -124,14 +124,14 @@ public class Main {
                                                 // - Earlier install_by_day first
                                                 // - Lower fatigue_cost preferred (tie-breaker)
                                                 // - Shorter duration preferred (final tie-breaker)
-                }
+
                 case "0" -> running = false;
-                default -> {
+                default ->
                     logger.info("""
                             \nUnsupported Option
                             Options are:
                             """);
-                }
+
             }
         }
     }

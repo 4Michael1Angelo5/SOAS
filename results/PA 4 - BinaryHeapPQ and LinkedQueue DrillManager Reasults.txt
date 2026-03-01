@@ -1,0 +1,23 @@
+BinaryHeapPQ DrillManager
+====================== Benchmark Results ======================
+Size       Operation       Avg Time (ms)   comparisons     swaps     
+---------------------------------------------------------------
+50         insert          0.042163        84              36        
+50         extract         0.050867        301             173       
+500        insert          0.102023        874             376       
+500        extract         0.323800        5447            2938      
+5000       insert          0.367923        9054            4058      
+5000       extract         1.581247        78381           41387 
+
+
+LinkedQueue DrillManager
+====================== Benchmark Results ======================
+Size       Operation       Avg Time (ms)   comparisons     swaps     
+---------------------------------------------------------------
+50         enqueue         0.016587        0               0         
+50         dequeue         0.009737        0               0         
+500        enqueue         0.034677        0               0         
+500        dequeue         0.021397        0               0         
+5000       enqueue         0.030383        0               0         
+5000       dequeue         0.017763        0               0         
+===============================================================
