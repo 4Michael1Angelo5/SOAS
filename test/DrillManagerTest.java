@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import types.Drill;
 import util.BinaryHeapPQ;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
@@ -96,14 +97,15 @@ public class DrillManagerTest {
         Drill d2 = new Drill(2, "B", 65, 30, 5, 7);
         Drill d3 = new Drill(3, "C", 65, 90, 3, 15);
 
+        drillManager.upDateComparator(drillManager.fairSort());
         drillManager.addData(d1);
         drillManager.addData(d2);
         drillManager.addData(d3);
 
         assertAll("Drills with same urgency",
-                () -> assertEquals(d2, drillManager.removeData(), "First drill should be d2 (urgency 87)"),
-                () -> assertEquals(d3, drillManager.removeData(), "Second drill should be d3 (urgency 56)"),
-                () -> assertEquals(d1, drillManager.removeData(), "Third drill should be d1 (urgency 23)"),
+                () -> assertEquals(d2, drillManager.removeData(), "First drill should be d2 (install_by_day: 7)"),
+                () -> assertEquals(d1, drillManager.removeData(), "Second drill should be d1 (install_by_day: 12)"),
+                () -> assertEquals(d3, drillManager.removeData(), "Third drill should be d3 (install_by_day: 15)"),
                 () -> assertTrue(heap.isEmpty(), "Heap should be empty after removing all")
         );
     }
@@ -194,4 +196,51 @@ public class DrillManagerTest {
                 () -> assertTrue(heap.isEmpty(), "Heap should be empty at end")
         );
     }
+
+    @Test
+    void testUpdateComparatorEarliestInstallByDay() {
+        Comparator<Drill> earliestInstallByDay = (a, b) ->
+                Integer.compare(a.install_by_day(), b.install_by_day());
+        drillManager.upDateComparator(earliestInstallByDay);
+
+        for (int i = 1; i <= 100; i++) {
+            drillManager.addData(makeDrill(i, "D" + i, 50, 30, 5, 101 - i));
+            int expectedInstallDay = 1;
+        }
+
+        int expectedInstallDay = 1;
+        while (!heap.isEmpty()) {
+            Drill actual = drillManager.removeData();
+            assertEquals(expectedInstallDay, actual.install_by_day(),
+                    "Drills should come out in earliest install_by_day order");
+            expectedInstallDay++;
+        }
+    }
+
+    @Test
+    void testComparatorMatchesAfterCSVLoad() throws IOException {
+        Comparator<Drill> earliestInstallByDay = (a, b) ->
+                Integer.compare(a.install_by_day(), b.install_by_day());
+        drillManager.upDateComparator(earliestInstallByDay);
+
+        // capture comparator behavior before load
+        drillManager.addData(makeDrill(1, "A", 50, 30, 5, 10));
+        drillManager.addData(makeDrill(2, "B", 50, 30, 5, 1));
+        assertEquals(1, drillManager.peekNextDrill().install_by_day(),
+                "Before load: earliest install_by_day should be at root");
+
+        // reload csv
+        drillManager.loadCsvData("data/seahawks_drills_50.csv");
+
+        assertFalse(drillManager.getData().isEmpty(), "After load: heap should not be empty");
+
+        Drill prev = drillManager.removeData();
+        while (!drillManager.getData().isEmpty()) {
+            Drill current = drillManager.removeData();
+            assertTrue(current.install_by_day() >= prev.install_by_day(),
+                    "After CSV load, comparator should still sort by earliest install_by_day");
+            prev = current;
+        }
+    }
+
 }
