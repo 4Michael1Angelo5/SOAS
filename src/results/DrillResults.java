@@ -47,6 +47,5 @@ public class DrillResults extends Results<Drill, DrillManager> {
         Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
         DrillResults dr = new DrillResults(new DrillManager(supPq), supPq) ;
         dr.runAllExperiments();
-
     }
 }

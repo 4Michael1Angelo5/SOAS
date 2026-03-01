@@ -129,7 +129,6 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
             );
         }
         DataContainer<T> temp = mySupplier.get();
-        int inputSize = myManager.getData().size();
         for (T dataObj : myManager.getData()) {
             temp.add(dataObj);
         }

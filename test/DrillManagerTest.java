@@ -199,13 +199,11 @@ public class DrillManagerTest {
 
     @Test
     void testUpdateComparatorEarliestInstallByDay() {
-        Comparator<Drill> earliestInstallByDay = (a, b) ->
-                Integer.compare(a.install_by_day(), b.install_by_day());
+        Comparator<Drill> earliestInstallByDay = Comparator.comparingInt(Drill::install_by_day);
         drillManager.upDateComparator(earliestInstallByDay);
 
         for (int i = 1; i <= 100; i++) {
             drillManager.addData(makeDrill(i, "D" + i, 50, 30, 5, 101 - i));
-            int expectedInstallDay = 1;
         }
 
         int expectedInstallDay = 1;
@@ -219,8 +217,7 @@ public class DrillManagerTest {
 
     @Test
     void testComparatorMatchesAfterCSVLoad() throws IOException {
-        Comparator<Drill> earliestInstallByDay = (a, b) ->
-                Integer.compare(a.install_by_day(), b.install_by_day());
+        Comparator<Drill> earliestInstallByDay = Comparator.comparingInt(Drill::install_by_day);
         drillManager.upDateComparator(earliestInstallByDay);
 
         // capture comparator behavior before load
