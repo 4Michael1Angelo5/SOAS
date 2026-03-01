@@ -52,7 +52,7 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
     @Override
     public void insert(T item) {
         myArray.add(item);
-        heapifyUp();
+        heapifyUp(myArray.size() - 1);
     }
 
     /**
@@ -128,14 +128,13 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
      * Restores the heap property by moving the last element up the tree
      * until it is in its correct priority position relative to its parent.
      */
-    private void heapifyUp() {
 
-        // the element we just added
-        int childIdx = myArray.size()-1;
+
+    public void heapifyUp(int index) {
+        int childIdx = index;
 
         while (childIdx > 0) {
-
-            int parentIdx = (childIdx -1) / 2;
+            int parentIdx = (childIdx - 1) / 2;
 
             T child = myArray.get(childIdx);
             T parent = myArray.get(parentIdx);
@@ -147,53 +146,48 @@ public final class BinaryHeapPQ<T extends Comparable<? super T>> implements Heap
             if (priority > 0) {
                 swap(childIdx, parentIdx);
                 childIdx = parentIdx;
-            }else {
+            } else {
                 break;
             }
         }
     }
 
-    private void heapifyDown() {
-        heapifyDown(0);
-    }
+    private void heapifyDown() {heapifyDown(0);}
 
     /**
      * Restores the heap property by moving the root element down the tree
      * until it is in its correct priority position relative to its children.
      */
-    private void heapifyDown(int theStartIdx) {
 
-        // no need to heapify down if empty;
+    public void heapifyDown(int theStartIdx) {
         if (myArray.isEmpty()) return;
 
         int parentIdx = theStartIdx;
 
         while (true) {
-
-            int left = 2 * (parentIdx +1) - 1;
-            int right = 2 * (parentIdx +1);
+            int left = 2 * (parentIdx + 1) - 1;
+            int right = 2 * (parentIdx + 1);
 
             // 1) reached the bottom of the heap
             if (left >= myArray.size()) break;
 
-            myCounter.increment("comparisons");
             int highestPriorityIdx = getHighestPriorityIndex(left, right);
 
             T bestChild = myArray.get(highestPriorityIdx);
             T parent = myArray.get(parentIdx);
 
+            myCounter.increment("comparisons");
             int priority = myComparator.compare(parent, bestChild);
 
-            // if the bestChild should come before the current parent
             if (priority > 0) {
                 swap(parentIdx, highestPriorityIdx);
                 parentIdx = highestPriorityIdx;
-
-            }else {
+            } else {
                 break;
             }
         }
     }
+
 
     /**
      * Returns the index of the child that has higher priority based on the comparator.

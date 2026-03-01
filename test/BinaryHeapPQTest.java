@@ -135,4 +135,29 @@ class BinaryHeapPQTest {
             assertEquals(expected, heap.extract(), "Extraction should follow sorted order.");
         }
     }
+
+    // ================= heapifyUp =================
+
+    @Test
+    void testHeapifyUpCalledDirectly() {
+        // Manually trigger heapifyUp from last index
+        heap.insert(50);
+        heap.insert(40);
+        heap.insert(30);
+        // heap should be [30, 50, 40] or valid min-heap shape
+        // call heapifyUp on index 0 (root) — should be a no-op
+        heap.heapifyUp(0);
+        assertEquals(30, heap.peek(), "heapifyUp on root should be a no-op");
+    }
+
+    // ================= heapifyDown =================
+
+    @Test
+    void testHeapifyDownCalledDirectly() {
+        heap.insert(5);
+        heap.insert(15);
+        heap.insert(10);
+        heap.heapifyDown(0);
+        assertEquals(5, heap.peek(), "heapifyDown on valid root should be a no-op");
+    }
 }
