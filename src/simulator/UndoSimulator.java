@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 
-public class Simulator {
+public class UndoSimulator {
 
     // logger color formatting
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -102,7 +102,7 @@ public class Simulator {
     private int successfulRosterUndos;
     private int successfulTransactionUndos;
 
-    public Simulator() {
+    public UndoSimulator() {
         super();
     }
 
@@ -320,7 +320,7 @@ public class Simulator {
     }
 
     public static void main(String[] args) throws IOException{
-        Simulator sim = new Simulator();
+        UndoSimulator sim = new UndoSimulator();
 
         BenchmarkRunner br = new BenchmarkRunner();
 

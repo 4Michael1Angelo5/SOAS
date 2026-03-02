@@ -2,7 +2,6 @@ package manager;
 
 import types.Action;
 import types.ActionType;
-import types.Undoable;
 import util.DataContainer;
 import util.Stack;
 

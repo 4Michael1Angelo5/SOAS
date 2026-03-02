@@ -4,17 +4,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A utility class that stores the number of times
+ * a given operation was performed using a HashMap.
  * @author Chris Chun, Ayush
- * @version 1.1
- *
+ * @version 1.2
  */
 public class OperationCounter implements Counter {
+
+    // @NOTE maybe String is too flexible as a key for tracking operations.
+    // Maybe we should declare an Enum of the supported operation types
+    // that way if the developer does something like put("add",5) vs put("Add",5)
+    // they do not get treated as different operations.
+    // Although this can be solved by scrubbing the key before insertion into the set
+    // it doesn't prevent say (Add data) being treated differently then add.
+    // just for consideration. 
 
     /**
      * Map containing operation, ie "comparison", or "swap" and their
      * corresponding count.
      */
     final private Map<String, Integer> counts;
+
 
     public OperationCounter() {
         counts = new HashMap<>();
@@ -95,4 +105,5 @@ public class OperationCounter implements Counter {
         }
         return total;
     }
+
 }

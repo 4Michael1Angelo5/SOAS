@@ -17,7 +17,7 @@ public class UndoResults extends Results<Action, UndoManager> {
     public UndoResults(
             UndoManager theManager,
             Supplier<DataContainer<Action>> theSupplier) {
-        super(Action.class, theManager, theSupplier);
+        super(Action.class, theManager, theSupplier, ExperimentFormat.BENCHMARK_NO_OPS);
     }
 
     // =======================   loading ================================
@@ -35,16 +35,16 @@ public class UndoResults extends Results<Action, UndoManager> {
      * their combined average.
      * @return ExperimentResult of Pushing and Popping N times.
      */
-    public ExperimentResult testPushPop() {
+    public BenchmarkResult testPushPop() {
 
-        ExperimentResult push = this.testAdd("push");
-        ExperimentResult pop = this.testRemove("pop");
+        BenchmarkResult push = this.testAdd("push");
+        BenchmarkResult pop = this.testRemove("pop");
 
-        String title = pop.operation() + "/" + push.operation();
-        double avgTime = (push.avgTime() + pop.avgTime() )/ 2.0;
+        String title = pop.method() + "/" + push.method();
+        double avgTime = (push.avgTime() + pop.avgTime())/ 2.0;
         int inputSize = myManager.getData().size();
 
-        return new ExperimentResult(inputSize, title, avgTime);
+        return new BenchmarkResult(inputSize, title, avgTime, getOpCounts());
     }
 
     @Override

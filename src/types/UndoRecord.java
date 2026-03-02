@@ -6,7 +6,7 @@ public record UndoRecord(
         Action action,
         DataType previousState,
         Integer index
-) implements Undoable {
+) implements DataType {
 
     public UndoRecord(Action action, DataType previousState, Integer index) {
         this.action = action;

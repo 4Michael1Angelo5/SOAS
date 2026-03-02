@@ -1,16 +1,15 @@
 package results;
 
 import benchmark.BenchmarkRunner;
+import manager.DrillManager;
 import manager.RosterManager;
 import manager.TransactionFeed;
 import manager.UndoManager;
 import types.Action;
+import types.Drill;
 import types.Transaction;
-import util.ArrayStack;
-import util.DataContainer;
+import util.*;
 import types.Player;
-import util.ArrayStore;
-import util.SinglyLinkedList;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -29,8 +28,10 @@ public class RosterResults extends Results<Player, RosterManager> {
 
     public RosterResults(
             RosterManager theManager,
-            Supplier<DataContainer<Player>> theSupplier){
-        super(Player.class, theManager, theSupplier);
+            Supplier<DataContainer<Player>> theSupplier,
+            ExperimentFormat theExperimentFormat){
+        super(Player.class, theManager, theSupplier,
+                theExperimentFormat);
     }
 
     // =======================   loading ================================
@@ -43,45 +44,42 @@ public class RosterResults extends Results<Player, RosterManager> {
 
     // runnable
     private void removeFromFrontNTimes() {
-        if (myManager.getPlayerData().isEmpty()) {
-            throw new RuntimeException(
-                    "Misconfigured ExperimentResult, please ensure " +
-                            "to loadData before running this experiment"
-            );
+        while (!myManager.getData().isEmpty()) {
+            myManager.removeAt(0);
         }
-        while (!containerForRemove.isEmpty()) {
-            containerForRemove.removeAt(0);
-        }
-    }
-    // gather results
-    private ExperimentResult testRemoveFromFrontNTimes() {
-        double avgTime = benchmarkRunner.runSpeedTestWithSetup(
-                TRIAL_RUNS,
-                this::setUpForRemove,
-                this::removeFromFrontNTimes);
-
-        String operation = "remove front";
-        int inputSize = myManager.getPlayerData().size();
-
-        return new ExperimentResult(inputSize, operation, avgTime);
     }
 
     // =======================   searching ================================
 
     // runnable
     private void searchByNameNTimes() {
-        int inputSize = myManager.getData().size();
 
-        // O(n^2)
-        for (int i = 0; i < inputSize; i++){
+        int N = myTestContainer.size();
+
+        for (int i = 0; i < N; i++) {
 
             myManager.findByName("NOT FINDABLE");
 
         }
     }
 
+    // =======================   Benchmark Testing ================================
+
     // gather results
-    private ExperimentResult testSearchByNameNTimes() {
+    private BenchmarkResult testRemoveFromFrontNTimes() {
+        String operation = "remove front";
+        int inputSize = myManager.getPlayerData().size();
+        double avgTime = benchmarkRunner.runSpeedTestWithSetup(
+                TRIAL_RUNS,
+                this::setUpForRemove,
+                this::removeFromFrontNTimes);
+
+        return new BenchmarkResult(inputSize, operation, avgTime, getOpCounts());
+    }
+
+    private BenchmarkResult testSearchByNameNTimes() {
+
+        setUpForSearch();
 
         final String operation = "Search";
 
@@ -89,7 +87,7 @@ public class RosterResults extends Results<Player, RosterManager> {
 
         final double avgTime = benchmarkRunner.runSpeedTest(TRIAL_RUNS, this::searchByNameNTimes);
 
-        return new ExperimentResult(inputSize, operation, avgTime);
+        return new BenchmarkResult(inputSize, operation, avgTime, getOpCounts());
     }
 
 
@@ -141,8 +139,8 @@ public class RosterResults extends Results<Player, RosterManager> {
         TransactionFeed transactionFeedSLL = new TransactionFeed(sllListSupplierTransaction);
 
         // roster manager results (array/sll)
-        RosterResults results = new RosterResults(rosterMangerArray, arraySupplierPlayer);
-        RosterResults resultsSLL = new RosterResults(rosterMangerSLL, sllSupplierPlayer);
+        RosterResults results = new RosterResults(rosterMangerArray, arraySupplierPlayer, ExperimentFormat.BENCHMARK_NO_OPS);
+        RosterResults resultsSLL = new RosterResults(rosterMangerSLL, sllSupplierPlayer, ExperimentFormat.BENCHMARK_W_OPS);
 
         // transaction results (array/sll)
         TransactionResults trResults = new TransactionResults(transactionFeedArray, arraySupplierTransaction);
@@ -162,6 +160,9 @@ public class RosterResults extends Results<Player, RosterManager> {
         UndoResults undoResultsStack = new UndoResults(undoManager, undoStack);
         undoResultsStack.runAllExperiments();
 
+        Supplier<DataContainer<Drill>> supPq = () -> new BinaryHeapPQ<>(Drill.class);
+        DrillResults dr = new DrillResults(new DrillManager(supPq), supPq, ExperimentFormat.BENCHMARK_W_OPS) ;
+        dr.runAllExperiments();
 
     }
 

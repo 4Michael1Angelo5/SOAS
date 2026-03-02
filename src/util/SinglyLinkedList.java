@@ -1,5 +1,7 @@
 package util;
 
+import counter.OperationCounter;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -30,6 +32,8 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
      * How many nodes are in the list.
      */
     private int size;
+
+    private final OperationCounter myCounter = new OperationCounter();
 
     // constructor
     public SinglyLinkedList() {
@@ -248,11 +252,12 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
 
         T itemRemoved;
 
+        myCounter.increment("comparisons");
         // 1) check if list is empty
         if (size == 0) {
             throw new NoSuchElementException(NO_SUCH_ELEMENT_ERR);
         }
-
+        myCounter.increment("comparisons");
         // 2) check if we are removing the head
         Node<T> walker = head;
         if (Objects.equals(item,walker.val)) {
@@ -261,7 +266,7 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
 
         // 3) try to find the item.
         while (walker.next != null) {
-
+            myCounter.increment("comparisons");
             // use Object.equals to guard against null pointer
             if (Objects.equals(item, walker.next.val)){
 
@@ -280,7 +285,7 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
 
             walker = walker.next;
         }
-
+        myCounter.increment("comparisons"); // exit condition
         throw new NoSuchElementException("Can't find item");
     }
 
@@ -288,6 +293,7 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
 
     @Override
     public void set(int theIndex, T theVal){
+        myCounter.increment("comparisons",2);
         if (theIndex >= size || theIndex < 0) {
             throw new IndexOutOfBoundsException(
                     "Cannot insert at index "
@@ -298,7 +304,9 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
         }
         int steps = 0;
         Node<T> walker = head;
+        myCounter.increment("comparisons");
         while(steps < theIndex) {
+            myCounter.increment("comparisons");
             walker = walker.next;
             steps++;
         }
@@ -318,12 +326,15 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
         Node<T> walker = head;
         int idx = 0;
         while(walker != null) {
+            myCounter.increment("comparisons");
             if (Objects.equals(walker.val, theItem)) {
                 return idx;
             }
             idx++;
             walker = walker.next;
         }
+
+        myCounter.increment("comparisons"); // final one that causes loop exit
         return -1;
     }
 
@@ -333,12 +344,14 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
         int i = 0;
 
         while(walker != null) {
+            myCounter.increment("comparisons");
             if (thePredicate.test(walker.val)) {
                 return i;
             }
             i++;
             walker = walker.next;
         }
+        myCounter.increment("comparisons"); // final one that causes loop exit
 
         return -1;
     }
@@ -383,7 +396,7 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
 
     @Override
     public Iterator<T> iterator() {
-        return new Iterator<T>() {
+        return new Iterator<>() {
             private Node<T> current = head;
 
             @Override
@@ -400,6 +413,21 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
             }
         };
     }
+
+    //=================== operation counting =========================
+    //@TODO need to implement these methods and integrate counter.
+    @Override
+    public int getSwaps() {
+        return myCounter.getCount("swaps");
+    }
+
+    @Override
+    public int getComparisons() {
+        return myCounter.getCount("comparisons");
+    }
+
+    @Override
+    public void resetCounter() {myCounter.resetAll();}
 
     // ================== utility class ========================
 

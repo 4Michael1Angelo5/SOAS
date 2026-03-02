@@ -11,6 +11,8 @@ import java.util.function.Predicate;
  */
 public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
+    private static final int DEFAULT_CAPACITY = 16;
+
     private T[] myData;
     final private Class<T> dataClass;
     private int size;
@@ -23,6 +25,14 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
         this.dataClass = theClass;
         this.size = 0;
         this.myData = (T[]) java.lang.reflect.Array.newInstance(theClass,theCapacity);
+    }
+
+    /**
+     * Initializes a new array with default initial capacity = 16.
+     * @param theClass the object class the ArrayStore will contain.
+     */
+    public ArrayStore(Class<T> theClass) {
+        this(theClass, DEFAULT_CAPACITY);
     }
 
     // ================== getting & setting ======================
@@ -227,5 +237,23 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
         }
 
         return sb.toString();
+    }
+
+    //=================== operation counting =========================
+    //@TODO need to implement these methods and integrate counter.
+
+    @Override
+    public int getSwaps() {
+        return 0;
+    }
+
+    @Override
+    public int getComparisons() {
+        return 0;
+    }
+
+    @Override
+    public void resetCounter() {
+
     }
 }

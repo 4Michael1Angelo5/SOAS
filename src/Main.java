@@ -1,17 +1,14 @@
-import manager.FanTicketQueue;
-import manager.UndoManager;
-import results.FanTicketResults;
-import results.UndoResults;
-import simulator.Simulator;
-import types.Action;
-import types.FanRequest;
-import util.ArrayStack;
+import manager.DrillManager;
+import simulator.SampleSizes;
+import simulator.DrillSimulator;
+import types.Drill;
+import util.BinaryHeapPQ;
 import util.DataContainer;
-import util.LinkedQueue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Comparator;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -21,14 +18,13 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.3
+ * @version 1.4
  */
 public class Main {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public static final  Supplier<DataContainer<Action>> ACTION_STACK = () -> new ArrayStack<>(Action.class);
-    public static final Supplier<DataContainer<FanRequest>> FAN_QUEUE = LinkedQueue::new;
+    public static final String ANSI_LAVENDER = "\u001B[38;5;147m";
 
     static {
         // attempt to use logging properties file
@@ -55,19 +51,16 @@ public class Main {
      */
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    private static final Simulator mySimulator = new Simulator();
-
-    public static final String ACTIONS50 = "data/seahawks_undo_actions_50.csv";
-
-    public static final String  FAN50 = "data/seahawks_fan_queue_50.csv";
+    public static final String  DRILLS_50 = "data/seahawks_drills_50.csv";
 
     public static void main(String[] args) throws IOException {
 
-        UndoManager undoManager = new UndoManager(ACTION_STACK);
-        FanTicketQueue fanRequestManager = new FanTicketQueue(FAN_QUEUE);
+        // drill manger setup
+        Supplier<DataContainer<Drill>> drillContSup = ()->new BinaryHeapPQ<>(Drill.class);
+        DrillManager DM = new DrillManager(drillContSup);
 
-        UndoResults undoResults = new UndoResults(undoManager,ACTION_STACK);
-        FanTicketResults fanTicketResults = new FanTicketResults(fanRequestManager, FAN_QUEUE);
+        // simulator set up
+        DrillSimulator drillSimulator = new DrillSimulator();
 
         boolean running = true;
 
@@ -77,77 +70,84 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    // load actions
-                    undoManager.loadCsvData(ACTIONS50);
-                    logger.info(ANSI_GREEN+ "Successfully loaded actions" + ANSI_RESET);
+                    // load csv
+                    DM.loadCsvData(DRILLS_50);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully loaded Seahawks data from CSV.\n" + ANSI_RESET);
+
                 }
                 case "2" -> {
-                    // load fan requests
-                    fanRequestManager.loadCsvData(FAN50);
-                    logger.info(ANSI_GREEN+ "Successfully loaded fan requests " + ANSI_RESET);
+                    // Add a drill
+                    Drill newDrill = new Drill(-1,
+                            "Practice Binary Trees",
+                            1000,
+                            60,
+                            100,
+                            1);
+                    DM.addData(newDrill);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully added new drill: \n" +
+                       newDrill.toStringZ() + "\n" + ANSI_RESET);
+
                 }
                 case "3" -> {
-                    //  Undo Action (pop)
-                    int size = undoManager.getData().size();
+                    // peek
+                    Drill nextDrill = DM.peekNextDrill();
+                    logger.info(ANSI_LAVENDER + "\nThe next drill to run is" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + nextDrill.toString() +"\n" + ANSI_RESET);
 
-                    int numRemoves = 0;
-                    while(numRemoves < size/2) {
-                        undoManager.removeData();
-                        numRemoves++;
-                    }
-
-                    logger.info(ANSI_GREEN+ "Successfully undid "
-                            +  numRemoves + " actions from the actions stack" + ANSI_RESET);
                 }
                 case "4" -> {
-                    // Dequeue Request
-                    int fanRequestsProcessed = 0;
-                    int size = fanRequestManager.getData().size();
+                    // run
+                    Drill removed = DM.removeData();
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully processed: " + removed.toString() + "\n" + ANSI_RESET);
 
-                    while (fanRequestsProcessed < size/2){
-                        fanRequestManager.processRequest();
-                        fanRequestsProcessed++;
-                    }
-                    logger.info(ANSI_GREEN+ "Successfully dequeued "
-                            +  fanRequestsProcessed + " fan requests from the fan request queue" + ANSI_RESET);
                 }
                 case "5" -> {
-
-                    undoManager.printData();
+                    // print
+                    logger.info(ANSI_LAVENDER
+                            + "\nPrinting next "
+                            + DM.getData().size()
+                            + " drills\n"
+                            +ANSI_RESET);
+                    DM.printData();
                 }
                 case "6" -> {
-                    fanRequestManager.printData();
+                    // update comparator to sort by highest id number (reverse the list)
+                    DM.upDateComparator((a,b) -> b.id() - a.id());
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully updated comparator\n" + ANSI_RESET);
                 }
-                case "7" -> {
-                    // run all experiments
-                    undoResults.runAllExperiments();
-                    fanTicketResults.runAllExperiments();
-                }
-                case "8" -> mySimulator.runSimulation();
+                case "7" ->
+
+                    // run simulation:
+                    drillSimulator.runSimulation(
+                            SampleSizes.LARGE,  // uses csv with 5000 drills
+                            DM.fairSort());     // - Higher urgency first
+                                                // - Earlier install_by_day first
+                                                // - Lower fatigue_cost preferred (tie-breaker)
+                                                // - Shorter duration preferred (final tie-breaker)
+
                 case "0" -> running = false;
-                default -> {
+                default ->
                     logger.info("""
-                            Unsupported Option
+                            \nUnsupported Option
                             Options are:
                             """);
-                }
+
             }
         }
     }
 
     private static void printMenu(){
-        logger.info("""
+        logger.info( ANSI_GREEN + """ 
                 Seahawks Data Options
                 =====================
-                1. Load Actions
-                2. Load Fan Request
-                3. Undo 50% (pop)
-                4. Process 50% (dequeue)
-                5. Print Actions
-                6. Print Fan Queue
-                7. Run benchmark
-                8. Bonus! Run Simulation.
+                1. Load drills from a CSV file
+                2. Add a drill
+                3. Peek next drill (without removing)
+                4. Run next drill (remove)
+                5. Print the next N scheduled drills (simulate “preview”)
+                6. Update Comparator (Shortest Drill First)
+                7. Run a simulation and output metrics (wait time/fairness)
                 0. Exit
-                """);
+                """ + ANSI_RESET);
     }
 }
