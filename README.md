@@ -2,9 +2,9 @@
 The SOAS app is a simple CLI stats analysis application that parses Seahawks data from CSV files and provides the user with interesting ways to interact with the data.
 
 ## Features
-* The app tracks how many operations the CSV parsing algorithm performs and generates a report.
+* The app tracks how many operations the Heapify parsing algorithm performs and generates a report.
 * Benchmark timer tracks algorithm run time in milliseconds.
-* CLI-driven menu to navigate application options for improved UX.
+* CLI-driven menu to navigate application options and stylized logger for improved UX.
 * CSV parsing optimized using a `BufferedReader`.
 
 
@@ -19,80 +19,213 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 | Role | Member(s) | Primary Responsibilities |
 | :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris, Ayush | Ayush designed and implemented the `TransactionFeed`, Chris designed and implemented the `SinglyLinkedList` class|
-| **Tester: JUnit Tests** | Chris, Ayush | Ayush designed the Junit 5 test suite for the `TransactionFeed`. Chris created the test suite for the `SinglyLinkedList` class|
-| **Analyst: Benchmark + Analysis** | Ayush | Took charge of displaying the results of the `BenchmarkRunner` for the `TransactionFeed`|
-
+| **Implementer: Core Logic** | Chris | Implemented the `DrillManager`, `BinaryHeapPQ`, and `DrillSimulator` |
+| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `DrillManager`, and `BinaryHeapPQ` class|
+| **Analyst: Benchmark + Analysis** | Chris and Ayush | Ayush implemented the Results and `OperationCounter`. Chris drew on these results and reported them in the README and the `DrillSimulator`|
 ---
 
 ## Analysis Section
-1. Why does addFront differ drastically between arrays and linked lists?
-   - Adding to the front of a linked list is more efficent then adding to the front of an array. This is because
-     adding to the front of the array requires shifting all the elements in the array one index position to the right.
-     Singly linked lists, on the other hand, only require two pointer reassignments: the new head becomes the element we are adding to the list,
-     and the new node's next points to the rest of the list. Because each node in the list contains information about which node
-     comes after it, we do not need to iterate through each node to maintain contiguous memory, whereas with arrays, contiguous memory
-     is maintained by simple arithmetic, by array addressing each element based on where it is located from the front of the list.  
-2. When does a linked list outperform an array?
-   - A linked list outperforms an array when needing to frequently add or remove elements from the front of the list. The time complexity
-     for adding or removing from the front in a linked list is $O(1)$, whereas with an array it is $O(n)$. If, for example, we needed to
-     implement a First In First Out (FIFO) data structure like a Queue to manage user requests, an array would be a poor choice because each update
-     of adding and removing from the array would result in constant shifting of the data elements in the list.  
-3. When is an array better?
-   - An array is superior to a linked list when needing frequent access to the contents of the list, not contained in the front or the end of the list.
-     An array's main advantage over a linked list is that it can retrieve information about the contents anywhere in the list in $O(1)$ constant time, whereas
-     with a singly linked list, it takes $O(n)$ time because each node only knows about what its immediate neighbor's value is. This means that to find the value
-     of a specific indexed position node, we need to iterate over the list until we reach that specific node to figure out what its value is. 
-4. What is the cost of pointer traversal?
-   - The cost of pointer traversal is $O(n)$. If the linked list has 100 elements, and we want to get what is at index position 49.
-     We would need to create a dummy pointer node, `walker`. We set `walker` to point to the head of the linked list, and keep track of how many
-     steps `walker` has taken. We enter a loop and advance `walker` by setting `walker = walker.next`, and increment the step count. Once the step
-     count equals index 49 `walker` is standing on the node, whose value we are interested in retrieving.  
-5. Would this scale to 100,000 transactions?
-   - A linked list data structure would be a good choice if we did not need to frequently retrieve transaction data that was not at the front or end of the list.
-     If managing transaction data requires processing requests in FIFO order, then this data structure is suitable for 100,000 transactions.
-     On the other hand, if the transaction data needs to be updated frequently or modified, the performance will deteriorate. However, in real-world applications
-     "Transactions" are generally considered immutable. If an error occurs with a transaction, a new transaction is appended or enqueued to correct the error. Example:
-     User A pays user B $50. Error: user A should have paid user B $60. Result new transaction: user A pays user B $10 - Not lets go back and change the ledger of the transaction
-     histories. So in my opinion, a singly linked list is acceptable for managing transactions, provided a transaction for the domain business logic is expected to be
-     an immutable history of all transactions that have taken place.   
 
-## Reflection & Team Process
-Ayush and Chris worked more efficiently this sprint. Last week, Chris and Ayush felt overwhelmed because they didn't dedicate enough time during the week 
-to finish sprint deliverables for PA1, resulting in them having to spend all day Sunday and Sunday night to meet project deadlines. This week, Chris worked 
-ahead of schedule, and as soon as PA1 was finished, Chris designed the `SinglyLinkedList` class for PA2. Ayush commited working extra time to work on Friday 
-and quickly implemented the `TransactionFeed` class utilizing the `SinglyLinkedList` class Chris designed. This made Friday's work meeting more productive 
-because the lowest-level data structure was already complete, so the team could work on introducing the core project features.
 
-Both Chris and Ayush realized that there was some growing inefficiency in the code base, but the team decided to defer dealing with it until after the completion of 
-The sprint deliverables for PA2. Currently, the `BenchmarkRunner` class is not designed to be flexible. Additionally, while the team made a good 
-effort at designing a flexible abstract `DataLoader` class and an abstract `DataManager` class, there is still room for improvement. For example, the `DataLoader` is 
-data-type agnostic. It does not care if it has loading `Player` data, `Drills` data, or `Transaction` data. It knows how to gracefully handle each data type and parse
-CSV data into the correct `Player`, `Drills`, or `Transaction` data object. All the `DataLoader` cares about is that whoever is the caller of the `DataLoader` specifies 
-up front which type of data it needs to load. However, the `DataLoader` and `DataManager` are not **data container agnostic**. Each one of those classes can only manage
-and load data using an array-based data structure. 
+1) **Why does a heap-based PQ support efficient scheduling?**
 
-This is where the problem is. With every new sprint, we will be tasked with adding functionality for a new type of data structure to act as our "data container". 
-This means our `DataLoader` and `DataManager` will always create an array list of the CSV data objects, and creation of the proper data structure to contain and manipulate
-those objects will be left as a chore to its children. This design is inefficient. No matter what data structure acts as our container, we have certain guarantees upfront about
-what the container should be able to do. It should be able to modify the contents inside the container via `add()`, `remove()`, and `update()`, 
-and it should expose an easy way to iterate over those objects. The better design would be create a sealed interface for all the supported data structures 
-that will act as storage containers for `Player`, `Drills`, and `Transaction` data. Then it becomes the responsibility of the caller to specify what data objects we are
-dealing with, `Player`, `Drills`, or `Transaction`, and which type of storage container they want to use to manage that data: `ArrayList`, `SinglyLinkedList`, `HashMap`, `Stack`,
-`Queue` etc. This design is superior because then the concrete child classes that extend `DataManager` only need to connsern them selves with methods that are specific to managing
-`Player`, `Drills`, or `Transaction` objects.
+A heap-based priority queue supports efficient scheduling in $O(\log n)$ time. Each insertion 
+and removal of an element in the priority queue must, in the worst case, compare each of its children 
+for removal, or compare the element being added to its parent for insertion. The number of comparisons 
+scales linearly with the height of the tree, and the tree height is given by $\log_2(n)$. Therefore,
+the cost of $n$ insertions is $n \log(n)$. However, insertion efficiency can be improved to $O(n)$ 
+using the build heap procedure by building the entire heap from an array in one pass, performing 
+heapify-down when necessary, instead of adding one element at a time.
 
-Similarly, the `Results` class that utilizes the `Benchmarkrunner` is not flexible enough. To complete this sprint deliverable of displaying the benchmark 
-results of adding, removing, and updating with the new `SinglyLinkedList` data structure, we duplicated the same logic as the `Results` class for PA1, but swapped
-the data structure to a `SinglyLinkedList` and used the new `TransactionFeed` instead of `RosterManager` to gather the test results. This is an inefficient design.
-The `Results` class's job is to display results. It should not be opinionated about displaying results for a `TransactionFeed`, or a `RosterManager`, or a `DrillsManager`;
-It should just be to format and gather results from the `BenchMarkrunner` - that's it! 
+The priority queue's main strength is that it can retrieve the element with the highest priority 
+in $O(1)$ constant time. This supports efficient scheduling by organizing which task should be 
+performed first without the need to search the heap for what should come next. The trade-off 
+is that, to maintain this efficiency, we pay the price of $O(\log n)$ insertion and removal.
 
-Unfortunately, although the team realized there was some inefficiency, we ultimately decided to move forward with the current design in favor of meeting project deadlines. 
-We weighed out the pros and cons of introducing these changes into PA2. Although implementing the changes would result in a more robust, flexible, and scalable application, 
-doing so would mean introducing breaking changes to the current code base and result in a substantial code refactor, which would take more time than simply duplicating the logic.
-The team decided that for PA3, these features would be introduced. 
+2) **Compare FIFO vs Priority scheduling: what is gained, what is lost?**
 
+In a regular queue that processes items in first-in-first-out (FIFO) order, we gain back the $O(1)$ 
+efficiency lost in a priority queue in the insertion and removal operations, but we lose the ability 
+to retrieve the item with the highest priority in constant time.
+
+3) **How did comparisons/swaps scale from 50 → 5000?**
+
+Our benchmark testing results revealed that the number of comparisons and swaps scales in 
+$n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
+
+| Size  | Operation | Avg Time (ms) | Comparisons       | swaps   |
+|-------|-----------|---------------|-------------------|---------|
+| 50    | insert    | 0.042163      | 84                | 36      |
+| 50    | extract   | 0.050867      | 301               | 173     |
+| 500   | insert    | 0.102023      | 874               | 376     |
+| 500   | extract   | 0.323800      | 5447              | 2938    |
+| 5000  | insert    | 0.367923      | 9054              | 4058    |
+| 5000  | extract   | 1.581247      | 78381             | 41387   |
+
+These results are consitent with the expeceted $n\log(n)$ behavior for insertion and extraction.
+If the time complexity is $O(n \log n)$, then when the input size grows, the work should grow by about the same ratio as:
+
+$\frac{n_2 \log n_2}{n_1 \log n_1}$
+
+We compared expected growth vs actual operation growth.
+
+50 → 500
+
+Expected (from $n \log n$):
+
+$\frac{500 \log_2 500}{50 \log_2 50} = \frac{4485}{282} \approx 15.9$
+
+Actual:
+- Insert comparisons: $874 / 84 \approx 10.4$
+- Extract comparisons: $5447 / 301 \approx 18.1$
+
+These are in the same general range as 15.9, so that matches the $n \log n$ pattern. 
+Insert consistently runs better than the predicted ratio, this is likely because 
+insertions often don't travel all the way up the tree, so the average case is better 
+than the theoretical bound suggests.
+
+500 → 5000
+
+Expected:
+
+$\frac{5000 \log_2 5000}{500 \log_2 500} = \frac{61450}{4485} \approx 13.7$
+
+Actual:
+- Insert comparisons: $9054 / 874 \approx 10.4$
+- Extract comparisons: $78381 / 5447 \approx 14.4$
+
+Again, the numbers are close to the expected 13.7. So overall, the operation counts grow close to what $n \log n$ predicts. 
+So we can say that insert and extract do follow $O(n \log n)$.
+
+Also, operation counts give a clearer picture than time because runtime 
+can change depending on JVM warmup or other background factors, but 
+comparisons and swaps directly measure the actual work the heap is doing.
+
+4) **Did you observe any evidence of starvation?**
+
+We observed significant starvation — drills being continuously denied to be processed because they 
+had a lower priority. We conducted simulations on sample sizes of 50, 500, and 5000, using the 
+following sorting logic to prioritize drills:
+- Higher urgency first
+- Earlier `install_by_day` first
+- Lower `fatigue_cost` preferred (tie-breaker)
+- Shorter duration preferred (final tie-breaker)
+
+The simulation compared wait times required to process Seahawks drills between FIFO behavior Queues 
+and Priority Queues. The results from the sample size of 5000 revealed that the average wait time for
+the Queue was 34,797.50 minutes. The average wait time for the Priority Queue was 34,816.91 minutes,
+so on average, each drill in the Priority Queue experienced a longer wait time compared to the Queue.
+
+For example, the drill that suffered the most was:
+```json
+{
+  "drill_id": 2091,
+  "name": "Run Fits 91",
+  "urgency": 1,
+  "duration_min": 12,
+  "fatigue_cost": 7,
+  "install_by_day": 7
+}
+```
+
+"Run Fits 91" was processed 67,792 minutes later than it would have been processed in a regular 
+queue. This drill was pushed back 4,863 places in line, meaning it was originally in line at position
+91, but instead, 4,953 other drills were processed before this drill. It had a Z-time-score of -2.39,
+meaning this drill's wait time was 2.39 standard deviations worse than the average change in wait time.
+It had a Z-position-score of -2.39, meaning this drill's change in position was 2.39 standard 
+deviations worse than the average change in position.
+
+However, the biggest winner was:
+```json
+{
+  "drill_id": 6927,
+  "name": "Screen Defense 4927",
+  "urgency": 5,
+  "duration_min": 20,
+  "fatigue_cost": 1,
+  "install_by_day": 1
+}
+```
+
+"Screen Defense 4927" was processed 68,397 minutes sooner than it would have been processed in a regular
+queue. This drill was able to skip 4,912 places in line, meaning it was originally in line at position 
+4,927, but because it had a high priority, it jumped to position 15! It had a Z-time-score of 2.41, 
+meaning this drill's wait time was 2.41 standard deviations better than the average change in wait time.
+It had a Z-position-score of 2.41, meaning this drill's change in position was 2.41 standard deviations 
+better than the average change in position.
+
+Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its 
+Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a 
+linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected 
+drills. Meaning that the top 1% of drills that experienced the greatest change in wait time, their deltas
+grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change
+in wait times. This result is statistically significant because it suggests that as the input size tends 
+to infinity, the most affected drills' change in position and time grows without bound.
+
+5) **What would you change in your priority rule to improve fairness?**
+
+The results demonstrated that the sorting strategy results in significant starvation of lower-priority 
+drills. To counteract this, an effective strategy would be to introduce aging. As a drill that gets 
+continually pushed further down the queue, we could introduce another field in the `Drills` class that 
+keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, 
+its priority increases, preventing the drill from being skipped indefinitely. This would effectively 
+balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
+
+# Reflection and Team Process
+
+The design choices the team implemented in PA3, using a dependency injection strategy into the
+`DataManager` proved to be worth its weight in gold. This decoupled the `DataManager` from its
+Data Structure storage strategy, allowing it to be `DataContainer` agnostic and flexible. This
+meant the team did not need to implement two different drill managers, one backed by a queue and
+one backed by a priority queue, to conduct benchmark testing. We simply were able to instantiate
+two different instances of the same manager, one supplied with a queue and one supplied with a
+priority queue. This saved the team time and expedited iteration and collaboration, freeing up
+the team to tackle more interesting statistical analysis.
+
+The team used the extra time to pursue interdisciplinary collaboration. Chris and Ayush
+collaborated with Chris's Statistics professor, Dr. Kmail, to draw more insights into how to
+make sense of the simulation results. Chris and Ayush felt that the average wait time was not
+statistically interesting. Dr. Kmail showed us that a more statistically significant metric
+would be to compare the changes in the average wait times using a Z-score, which tracks how
+many standard deviations an individual drill was from the mean wait time. This allowed us to
+standardize the data so that when we compared changes in wait time, differences were normalized.
+For example, if a drill waits 40 minutes, it is hard to tell by itself if that is statistically
+significant. Transforming the changes to a Z-score shows directly how significant the change
+was. While we did not observe any extreme outliers of z-scores above 3, we did notice
+significant volatile changes in the wait time of z-scores for the top and bottom 1%.
+
+Using the Z-score revealed that our data showed signs of a typical normal distribution. For
+every drill that experienced an extreme negative change in wait time, there was a corresponding
+positive change in wait time. These results showed us that although it does not change the total
+time to process all the drills, it redistributes fairness, causing huge swings in wait time, so
+For every drill that is rewarded, there is a corresponding drill that was punished.
+
+Another great aspect of the team's architectural choices was to design the `DrillManager` and
+the `PriorityQueue` to accept a comparator to reorder the heap. The benefit of this was that
+the team could compare and contrast different sorting strategies to see how average wait time
+and z-scores were affected.
+
+While designing a `PriorityQueue` that supports a custom comparator was straightforward,
+integrating it into the `DrillManager` presented structural challenges. Because the
+`DrillManager` is decoupled from its `DataContainer`; the specific implementation type is not
+known at compile time. We implemented type-safety 'guard rails' to verify the container type
+before exposing APIs that would otherwise risk runtime errors.
+
+Furthermore, since the abstract `DataManager` owns the `DataLoader`, we had to ensure the
+`Comparator` remained synchronized across both. Without updating the `PriorityQueue` supplier
+within the `DataLoader`, subsequent CSV imports would have reverted the `DrillManager` to its
+initial default sorting logic rather than respecting the newly assigned comparator.
+
+With the machinery in place, the team eagerly tested the flexibility of their new design.
+Perhaps one of the most fascinating discoveries was that while most sorting strategies resulted
+in longer average wait time, there was one sorting strategy that absolutely dominated in terms
+of throughput efficiency — sorting by shortest duration first. By scheduling drills by lowest
+duration, the team observed for sample sizes of 5000, the average wait time for the Queue was
+34,797.50 minutes, but the average wait time for the `PriorityQueue` was 28,787.27 minutes.
+Meaning by scheduling drills by shortest duration, the priority queue saved roughly 6,010
+minutes — or 4 days, 4 hours, and 10 minutes in average wait time! These results are
+fascinating because while the total time to process all the drills remained unchanged, the
+average wait time was vastly improved by scheduling shortest-job-first.
 
 
 ---
@@ -114,18 +247,36 @@ The project is organized with separate source and test roots to maintain clean c
       * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction 
             Manager/ TransactionFeed, etc.
       * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
-      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions. 
+      * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
+      * `UndoManager`:  concrete child class of `DataManager` that brings specific functionality needed to undo actions from the other managers.
+      * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line.
+      * `DrillManager`: concrete child class of the `DataManager` that brings specific functionality needed to manage Seahawks Drills.
     * results/
-        * `Results.java`: The benchmarking suite. It automates experiments across 50, 500, and 5000 records,
+        * `ExperimentResults.java`: A simple Record class used to report a specific result from a benchmark test. 
+        * `Results.java`: Abstract parent class defining all common behavior to concrete Benchmark Results classes: `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`. It automates experiments across 50, 500, and 5000 records,
+        * `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`: Concrete child classes of the `Results` class that handle specific testing needed for managing their respective `DataTypes`.
+        * `Experiment.java`: Interface defining contract for all Results classes.
+        * 
           calculating the average execution time (ms) for Add, Remove, and Search operations.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
-        * `Player.java`, `Drill.java`, `Transaction.java`: Data models.
+        * `Player.java`, `Drill.java`, `Transaction.java`, `Action.java`, `FanRequest.java`: Data models.
+        * `UndoRecord.java`: Record class that links an `Action` to its corresponding inverse operation/previous state. 
+        * `ActionType.java`: An Enum class that lists all of the supported  `Action` types, e.g., `ADD_PLAYER`, `REMOVE_PLAYER.`
+    * simulator/
+      * `UndoSimulator.java`: A Java class that simulates processing 5000 requests in the `TransactionFeed` and `RosterManager`, then undoing those actions with the `UndoManager`.
+      * `DrillSimulator`: Simulates drill scheduling using a FIFO order queue and a Priority Queue using the `DrillManager`. Compares wait time metrics and reports results.
+      * `DrillStats.java`: Mutable container for storing statistics associated with a `Drill` as it moves through a scheduling simulation.
+      * `DrillReport.java`: An immutable Java record class that stores the drill's wait time and order processed.
+      * `SampleSizes.java`: An Enum class that stores sample size options to allow users to easily choose which CSV dataset to run simulations on. 
     * util/
       * `SinglyLinkedList.java`: A generic, low-level utility class that manages a raw Singly Linked List (`SinglyLinkedList<T>`). 
       * `ArrayStore.java`: A generic, low-level utility class that manages a raw array (`T[]`). 
       It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
-    * `Main` - CLI-driven menu interface for interacting with the SOASS application.
+      * `ArrayStack.java`: An array-based implementation of a stack.
+      * `LinkedQueue.java`: A singly linked list implementation of a Queue.
+      * `BinaryHeapPQ.java`: A Binary Heap based implemenation of a Priority Queue.
+    * `Main` - CLI-driven menu interface for interacting with the SOAS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
     * `badFormatPlayers.csv`: Resource for testing error handling.
@@ -142,7 +293,7 @@ The project is organized with separate source and test roots to maintain clean c
 
 ## Tools Used
 * Gemini, ChatGPT
-    - Syntax clarification, Javadocs, architecture brainstorming, and readme.md template
+    - Syntax clarification, Javadocs, architecture brainstorming, readme.md template, and to generate a graph of our benchmark results,
 
 
 

@@ -12,6 +12,7 @@ public interface Benchmark {
      * @param theTimesToRun the number of times to repeat the task.
      * @param theTask the task/ method to be executed a specific number of times.
      */
-    void runSpeedTest(int theTimesToRun, Runnable theTask);
+    double runSpeedTest(int theTimesToRun, Runnable theTask);
 
+    double runSpeedTestWithSetup(int theTimesToRun, Runnable theSetUpTask, Runnable theTask);
 }

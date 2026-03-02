@@ -1,0 +1,51 @@
+fan_id,name,service_type,arrival_time
+1,Fan1,Will Call,09:00:15
+2,Fan2,Ticket Purchase,09:00:30
+3,Fan3,Will Call,09:00:45
+4,Fan4,Merchandise,09:01:00
+5,Fan5,Will Call,09:01:15
+6,Fan6,Merchandise,09:01:30
+7,Fan7,Will Call,09:01:45
+8,Fan8,Info Desk,09:02:00
+9,Fan9,Merchandise,09:02:15
+10,Fan10,Info Desk,09:02:30
+11,Fan11,Merchandise,09:02:45
+12,Fan12,Will Call,09:03:00
+13,Fan13,Ticket Purchase,09:03:15
+14,Fan14,Will Call,09:03:30
+15,Fan15,Will Call,09:03:45
+16,Fan16,Will Call,09:04:00
+17,Fan17,Ticket Purchase,09:04:15
+18,Fan18,Will Call,09:04:30
+19,Fan19,Merchandise,09:04:45
+20,Fan20,Will Call,09:05:00
+21,Fan21,Ticket Purchase,09:05:15
+22,Fan22,Merchandise,09:05:30
+23,Fan23,Merchandise,09:05:45
+24,Fan24,Merchandise,09:06:00
+25,Fan25,Ticket Purchase,09:06:15
+26,Fan26,Merchandise,09:06:30
+27,Fan27,Will Call,09:06:45
+28,Fan28,Will Call,09:07:00
+29,Fan29,Merchandise,09:07:15
+30,Fan30,Merchandise,09:07:30
+31,Fan31,Info Desk,09:07:45
+32,Fan32,Ticket Purchase,09:08:00
+33,Fan33,Info Desk,09:08:15
+34,Fan34,Will Call,09:08:30
+35,Fan35,Ticket Purchase,09:08:45
+36,Fan36,Info Desk,09:09:00
+37,Fan37,Ticket Purchase,09:09:15
+38,Fan38,Ticket Purchase,09:09:30
+39,Fan39,Will Call,09:09:45
+40,Fan40,Merchandise,09:10:00
+41,Fan41,Ticket Purchase,09:10:15
+42,Fan42,Merchandise,09:10:30
+43,Fan43,Will Call,09:10:45
+44,Fan44,Ticket Purchase,09:11:00
+45,Fan45,Will Call,09:11:15
+46,Fan46,Merchandise,09:11:30
+47,Fan47,Merchandise,09:11:45
+48,Fan48,Merchandise,09:12:00
+49,Fan49,Will Call,09:12:15
+50,Fan50,Info Desk,09:12:30

@@ -1,10 +1,12 @@
 import manager.TransactionFeed;
+import util.DataContainer;
 import types.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.SinglyLinkedList;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +22,8 @@ class TransactionFeedTest {
 
     @BeforeEach
     void setUp() {
-        manager = new TransactionFeed();
+        Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+        manager = new TransactionFeed(supplier);
         t1 = new Transaction(101, "Injury", "Smith", "2025-01-03");
         t2 = new Transaction(102, "Trade", "Brown", "2025-01-05");
         t3 = new Transaction(103, "Activation", "Jones", "2025-01-08");
@@ -30,7 +33,8 @@ class TransactionFeedTest {
     // ============= loading data =============
     @Test
     public void testLoadTransactions() throws IOException {
-        TransactionFeed tFeed = new TransactionFeed();
+        Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+        TransactionFeed tFeed = new TransactionFeed(supplier);
         tFeed.loadTransactionData("data/seahawks_transactions_50.csv");
         assertAll("Test Transaction Loading",
                 () -> assertEquals(50, tFeed.getTransactionData().size()),
@@ -95,8 +99,8 @@ class TransactionFeedTest {
         manager.addTransactionRear(t2);
         manager.addTransactionRear(t4);
 
-        manager.getTransactionData().remove(2);
-        manager.getTransactionData().addAtIndex(2, t3);
+        manager.getTransactionData().removeAt(2);
+        manager.getTransactionData().add(2, t3);
 
         var transactions = manager.getTransactionData();
 
@@ -137,7 +141,7 @@ class TransactionFeedTest {
         manager.addTransactionRear(t2);
         manager.addTransactionRear(t3);
 
-        Transaction removed = manager.getTransactionData().remove(0);
+        Transaction removed = manager.getTransactionData().removeAt(0);
 
         assertEquals(t1, removed,
                 "Removing index 0 should remove the head");
@@ -153,7 +157,7 @@ class TransactionFeedTest {
         manager.addTransactionRear(t3);
 
         int last = manager.getTransactionData().size() - 1;
-        Transaction removed = manager.getTransactionData().remove(last);
+        Transaction removed = manager.getTransactionData().removeAt(last);
 
         assertEquals(t3, removed,
                 "Removing last index should remove the tail");
@@ -168,7 +172,7 @@ class TransactionFeedTest {
         manager.addTransactionRear(t2);
         manager.addTransactionRear(t3);
 
-        Transaction removed = manager.getTransactionData().remove(1);
+        Transaction removed = manager.getTransactionData().removeAt(1);
 
         assertEquals(t2, removed,
                 "Removing index 1 should remove the middle element");
@@ -220,7 +224,7 @@ class TransactionFeedTest {
         manager.addTransactionRear(t2);
         manager.addTransactionFront(t3);
         manager.removeFront();
-        manager.getTransactionData().remove(0);
+        manager.getTransactionData().removeAt(0);
 
         assertEquals(1, manager.getTransactionData().size(),
                 "Size should accurately track all operations");
@@ -248,7 +252,8 @@ class TransactionFeedTest {
 
     @Test
     void testFindBy() throws IOException{
-        TransactionFeed tFeed = new TransactionFeed();
+        Supplier<DataContainer<Transaction>> supplier = SinglyLinkedList::new;
+        TransactionFeed tFeed = new TransactionFeed(supplier);
         tFeed.loadTransactionData("data/seahawks_transactions_50.csv");
         assertAll("Test Transaction Loading",
                 () -> assertEquals(-1, tFeed.findByPlayer("Not a findable player")),
@@ -256,7 +261,7 @@ class TransactionFeedTest {
                     // algorithm correctness.
                     int numComparisons = 0;
                     int n = tFeed.getTransactionData().size();
-                    SinglyLinkedList<Transaction> data = tFeed.getTransactionData();
+                    DataContainer<Transaction> data = tFeed.getTransactionData();
                     for (Transaction transaction: data) {
                         if (transaction.player().equals("Not Findable")) {
                             break;
@@ -276,5 +281,15 @@ class TransactionFeedTest {
                     assertEquals(-1, tFeed.findById(-1010101010));
                 }
         );
+    }
+
+    @Test
+    public void onlyAllowsValidTransactionArguments() {
+
+        assertAll("testing adding null and creating null transactions",
+                ()-> assertThrows(Exception.class, ()-> manager.addData(null)),
+                () -> assertThrows(Exception.class, () -> new Transaction(1,null,null,null))
+                );
+
     }
 }

@@ -1,6 +1,10 @@
 import manager.RosterManager;
 import org.junit.jupiter.api.Test;
 import types.Player;
+import util.ArrayStore;
+import util.DataContainer;
+
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +19,8 @@ public class RosterManagerTest {
 
     @Test
     public void testRosterManagerConstructor(){
-        RosterManager rosterManager = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rosterManager = new RosterManager(supplier);
         assertAll("Test Roster Manager Constructor",
                 () -> assertEquals(0,rosterManager.getPlayerData().size(),
                         "The roster should have no players in it"),
@@ -26,7 +31,8 @@ public class RosterManagerTest {
 
     @Test
     public void testAddPlayer() {
-        RosterManager rosterManager = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rosterManager = new RosterManager(supplier);
         final int playerId = 123;
         final String playerName = "Jerry Rice";
         final String position = "WR";
@@ -60,7 +66,8 @@ public class RosterManagerTest {
     }
 
     @Test void testRemovePlayer() {
-        RosterManager rosterManager = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rosterManager = new RosterManager(supplier);
         final int playerId = 111;
         final String playerName = "Jerry Rice";
         final String position = "WR";
@@ -89,7 +96,8 @@ public class RosterManagerTest {
 
     @Test
     public void testUpdateStats() {
-        RosterManager rosterManager = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rosterManager = new RosterManager(supplier);
         final int playerId = 198;
         final String playerName = "Jerry Rice";
         final String position = "WR";
@@ -103,10 +111,10 @@ public class RosterManagerTest {
             final int index = i;
             assertAll("Test removeByID" ,
                     () -> assertEquals(thePlayer, rosterManager.getPlayerData().get(0),
-                    """
-                            Updating a player's stats should not change equality.
-                            The Player is still the same player.
-                            """),
+                            """
+                                    Updating a player's stats should not change equality.
+                                    The Player is still the same player.
+                                    """),
                     () -> assertEquals(index , rosterManager.getPlayerData().get(0).yards()),
                     () -> assertEquals(playerId, rosterManager.getPlayerData().get(0).id()),
                     () -> assertEquals(playerName, rosterManager.getPlayerData().get(0).name()),
@@ -129,21 +137,22 @@ public class RosterManagerTest {
     }
 
     private void helperTestFindBy(String theComparator) {
-        RosterManager roster = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rosterManager = new RosterManager(supplier);
 
         for (int index = 0; index < TEST_TRIALS; index++) {
             Player player = new Player(index, index + "", index + "", index, index);
-            roster.addPlayer(player);
+            rosterManager.addPlayer(player);
         }
 
         for (int i = 0; i < TEST_TRIALS; i++) {
             final int index = i;
             int found;
             switch (theComparator) {
-                case "id" -> found = roster.findById(index);
-                case "name" -> found = roster.findByName(index + "");
-                case "position" -> found = roster.findByPosition(index +"");
-                case "jersey" -> found = roster.findByJersey(index);
+                case "id" -> found = rosterManager.findById(index);
+                case "name" -> found = rosterManager.findByName(index + "");
+                case "position" -> found = rosterManager.findByPosition(index +"");
+                case "jersey" -> found = rosterManager.findByJersey(index);
                 default -> throw new IllegalArgumentException("comparator options are ");
             }
             int finalFound = found;
@@ -151,12 +160,12 @@ public class RosterManagerTest {
                     ()-> assertEquals(index , finalFound,
                             "Roster Manager does not find player by " + theComparator
                                     + " correctly, Should be " + index + ", but returned "
-                                    + roster.findByName(index + "")),
-                    () -> assertEquals(index + "", roster.getPlayerData().get(finalFound).position()),
-                    () -> assertEquals(index + "", roster.getPlayerData().get(finalFound).name()),
-                    () -> assertEquals(index, roster.getPlayerData().get(finalFound).jersey()),
-                    () -> assertEquals(index, roster.getPlayerData().get(finalFound).yards()),
-                    () -> assertEquals(index, roster.getPlayerData().get(finalFound).id())
+                                    + rosterManager.findByName(index + "")),
+                    () -> assertEquals(index + "", rosterManager.getPlayerData().get(finalFound).position()),
+                    () -> assertEquals(index + "", rosterManager.getPlayerData().get(finalFound).name()),
+                    () -> assertEquals(index, rosterManager.getPlayerData().get(finalFound).jersey()),
+                    () -> assertEquals(index, rosterManager.getPlayerData().get(finalFound).yards()),
+                    () -> assertEquals(index, rosterManager.getPlayerData().get(finalFound).id())
 
             );
         }
@@ -165,7 +174,8 @@ public class RosterManagerTest {
     @Test
     void testNoHoles() {
 
-        RosterManager rm = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rm = new RosterManager(supplier);
         Player p1 = new Player(1, "Player1", "QB", 1, 100);
         Player p2 = new Player(2, "Player2", "WR", 2, 200); // The one to remove
         Player p3 = new Player(3, "Player3", "RB", 3, 300);
@@ -189,7 +199,8 @@ public class RosterManagerTest {
     }
     @Test
     void testEdgeCases() {
-        RosterManager rosterManager = new RosterManager();
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class,16);
+        RosterManager rosterManager = new RosterManager(supplier);
         final int playerId = 198;
         final String playerName = "Jerry Rice";
         final String position = "WR";
@@ -219,9 +230,9 @@ public class RosterManagerTest {
                     rosterManager.addPlayer(player);
                     rosterManager.addPlayer(player);
                     assertEquals(0, rosterManager.findById(playerId),
-                        """
-                                RosterManger should return the first index of the matching player ID.
-                                """);
+                            """
+                                    RosterManger should return the first index of the matching player ID.
+                                    """);
                 },
                 () -> assertEquals(0, rosterManager.findByPosition(position),
                         "RosterManger should return the first index of the matching player position."),
@@ -241,5 +252,122 @@ public class RosterManagerTest {
 
     }
 
+    // added more edge cases (remove missing ID, update missing ID, empty roster behavior, Add Remove Add Again, Update Stats Multiple Times).
+
+    @Test
+    void testRemoveMissingId() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player p1 = new Player(1, "Player1", "QB", 1, 100);
+        Player p2 = new Player(2, "Player2", "WR", 2, 200);
+
+        rosterManager.addPlayer(p1);
+        rosterManager.addPlayer(p2);
+
+        assertAll("Remove missing ID",
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.removeById(999),
+                        "Should throw exception when removing non-existent player"),
+                () -> assertEquals(2, rosterManager.getPlayerData().size(),
+                        "Roster size should remain unchanged after failed removal")
+        );
+    }
+
+    @Test
+    void testUpdateMissingId() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player p1 = new Player(1, "Player1", "QB", 1, 100);
+        rosterManager.addPlayer(p1);
+
+        assertAll("Update missing ID",
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.updateStats(999, 500),
+                        "Should throw exception when updating non-existent player"),
+                () -> assertEquals(100, rosterManager.getPlayerData().get(0).yards(),
+                        "Existing player stats should remain unchanged")
+        );
+    }
+
+    @Test
+    void testEmptyRosterBehavior() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        assertAll("Empty roster operations",
+                () -> assertTrue(rosterManager.getPlayerData().isEmpty(),
+                        "New roster should be empty"),
+                () -> assertEquals(0, rosterManager.getPlayerData().size(),
+                        "Empty roster size should be 0"),
+                () -> assertEquals(-1, rosterManager.findById(1),
+                        "Should return -1 when searching empty roster by ID"),
+                () -> assertEquals(-1, rosterManager.findByName("John"),
+                        "Should return -1 when searching empty roster by name"),
+                () -> assertEquals(-1, rosterManager.findByPosition("QB"),
+                        "Should return -1 when searching empty roster by position"),
+                () -> assertEquals(-1, rosterManager.findByJersey(99),
+                        "Should return -1 when searching empty roster by jersey"),
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.removeById(1),
+                        "Should throw exception when removing from empty roster"),
+                () -> assertThrows(RuntimeException.class, () -> rosterManager.updateStats(1, 100),
+                        "Should throw exception when updating in empty roster")
+        );
+    }
+
+    @Test
+    void testAddRemoveAddAgain() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player p1 = new Player(1, "Player1", "QB", 1, 100);
+        Player p2 = new Player(2, "Player2", "WR", 2, 200);
+
+        assertAll("Add, remove, add again",
+                () -> {
+                    rosterManager.addPlayer(p1);
+                    assertEquals(1, rosterManager.getPlayerData().size());
+                },
+                () -> {
+                    rosterManager.removeById(1);
+                    assertEquals(0, rosterManager.getPlayerData().size());
+                },
+                () -> {
+                    rosterManager.addPlayer(p2);
+                    assertEquals(1, rosterManager.getPlayerData().size());
+                },
+                () -> assertEquals(2, rosterManager.getPlayerData().get(0).id(),
+                        "Should be the new player")
+        );
+    }
+
+    @Test
+    void testUpdateStatsMultipleTimes() {
+        Supplier<DataContainer<Player>> supplier = () -> new ArrayStore<>(Player.class, 16);
+        RosterManager rosterManager = new RosterManager(supplier);
+
+        Player player = new Player(1, "Player1", "QB", 1, 100);
+        rosterManager.addPlayer(player);
+
+        assertAll("Multiple stat updates",
+                () -> {
+                    rosterManager.updateStats(1, 200);
+                    assertEquals(200, rosterManager.getPlayerData().get(0).yards());
+                },
+                () -> {
+                    rosterManager.updateStats(1, 300);
+                    assertEquals(300, rosterManager.getPlayerData().get(0).yards());
+                },
+                () -> {
+                    rosterManager.updateStats(1, 0);
+                    assertEquals(0, rosterManager.getPlayerData().get(0).yards(),
+                            "Should handle zero yards");
+                },
+                () -> {
+                    rosterManager.updateStats(1, -50);
+                    assertEquals(-50, rosterManager.getPlayerData().get(0).yards(),
+                            "Should handle negative yards");
+                }
+        );
+    }
 
 }

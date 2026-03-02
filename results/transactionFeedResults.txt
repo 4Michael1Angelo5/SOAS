@@ -5,13 +5,13 @@ Size       Operation       LinkedList Time (ms)
 50         Add Front       0.0
 50         Add Rear        0.0
 50         Remove          0.0
-50         Search          0.0
-500        Add Front       0.0
+50         Search          0.1
+500        Add Front       0.1
 500        Add Rear        0.0
 500        Remove          0.0
-500        Search          0.0
-5000       Add Front       0.1
-5000       Add Rear        0.1
+500        Search          1.8
+5000       Add Front       0.2
+5000       Add Rear        0.3
 5000       Remove          0.0
-5000       Search          0.1
+5000       Search          189.3
 ===============================================

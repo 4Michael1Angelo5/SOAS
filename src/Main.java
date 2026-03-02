@@ -1,11 +1,15 @@
-import manager.TransactionFeed;
-import results.TransactionResults;
-import types.Transaction;
+import manager.DrillManager;
+import simulator.SampleSizes;
+import simulator.DrillSimulator;
+import types.Drill;
+import util.BinaryHeapPQ;
+import util.DataContainer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.NoSuchElementException;
+import java.util.Comparator;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 
@@ -14,11 +18,13 @@ import java.util.logging.Logger;
  * to interact with different statistics from the Seattle Seahawks.
  * @author Chris Chun
  * @author Ayush
- * @version 1.2
+ * @version 1.4
  */
 public class Main {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
+
+    public static final String ANSI_LAVENDER = "\u001B[38;5;147m";
 
     static {
         // attempt to use logging properties file
@@ -34,22 +40,27 @@ public class Main {
         }
     }
 
-
     /**
      * Reader to read user inputs from the command line.
      */
     private static final BufferedReader reader =
             new BufferedReader( new InputStreamReader(System.in));
 
-
     /**
      * Logger for all your logging needs
      */
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
+    public static final String  DRILLS_50 = "data/seahawks_drills_50.csv";
+
     public static void main(String[] args) throws IOException {
-        TransactionResults tests = new TransactionResults();
-        TransactionFeed transactionFeed = new TransactionFeed();
+
+        // drill manger setup
+        Supplier<DataContainer<Drill>> drillContSup = ()->new BinaryHeapPQ<>(Drill.class);
+        DrillManager DM = new DrillManager(drillContSup);
+
+        // simulator set up
+        DrillSimulator drillSimulator = new DrillSimulator();
 
         boolean running = true;
 
@@ -59,81 +70,84 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    // resets the data back to original csv.
-                    transactionFeed.loadTransactionData("data/seahawks_transactions.csv");
-                    logger.info(ANSI_GREEN+ "Successfully loaded transactions" + ANSI_RESET);
+                    // load csv
+                    DM.loadCsvData(DRILLS_50);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully loaded Seahawks data from CSV.\n" + ANSI_RESET);
+
                 }
                 case "2" -> {
-                    Transaction breakingNews =
-                            new Transaction(1271, "Injury", "Chris C.", "2026-01-14");
-                    // add transaction to the front
-                    transactionFeed.addTransactionFront(breakingNews);
-                    logger.info(ANSI_GREEN+ "Successfully added "
-                            +  breakingNews + " to the front of the transaction feed" + ANSI_RESET);
+                    // Add a drill
+                    Drill newDrill = new Drill(-1,
+                            "Practice Binary Trees",
+                            1000,
+                            60,
+                            100,
+                            1);
+                    DM.addData(newDrill);
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully added new drill: \n" +
+                       newDrill.toStringZ() + "\n" + ANSI_RESET);
+
                 }
                 case "3" -> {
-                    Transaction olderNews =
-                            new Transaction(111, "Trade", "Jerry Rice", "2026-01-10");
-                    // add transaction to the end
-                    transactionFeed.addTransactionRear(olderNews);
-                    logger.info(ANSI_GREEN+ "Successfully added "
-                            +  olderNews + " to the end of the transaction feed" + ANSI_RESET);
+                    // peek
+                    Drill nextDrill = DM.peekNextDrill();
+                    logger.info(ANSI_LAVENDER + "\nThe next drill to run is" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + nextDrill.toString() +"\n" + ANSI_RESET);
+
                 }
                 case "4" -> {
-                    Transaction transaction =
-                            new Transaction(89, "Injury", "Ayush", "2025-01-10");
-                    try {
-
-                        transactionFeed.insertTransaction(3, transaction);
-                        logger.info(ANSI_GREEN+ "Successfully added "
-                                +  transaction + " at index 3 to the transaction feed" + ANSI_RESET);
-
-                    } catch(IllegalArgumentException e) {
-                        logger.warning(e.toString());
-                        logger.warning("Cannot insert at index 3 because the transaction feed only has, "
-                                +  transactionFeed.getTransactionData().size() + " transactions");
-                    }
+                    // run
+                    Drill removed = DM.removeData();
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully processed: " + removed.toString() + "\n" + ANSI_RESET);
 
                 }
                 case "5" -> {
-                    try {
-                        Transaction removed  = transactionFeed.removeFront();
-                        logger.info(ANSI_GREEN+ "Successfully removed "
-                                +  removed + " to the end of the transaction feed" + ANSI_RESET);
-                    } catch (NoSuchElementException e) {
-                        logger.warning(e.toString());
-                        logger.warning(" Cannot remove transaction from the feed because it is empty");
-                    }
+                    // print
+                    logger.info(ANSI_LAVENDER
+                            + "\nPrinting next "
+                            + DM.getData().size()
+                            + " drills\n"
+                            +ANSI_RESET);
+                    DM.printData();
                 }
                 case "6" -> {
-                    transactionFeed.printTransactions();
+                    // update comparator to sort by highest id number (reverse the list)
+                    DM.upDateComparator((a,b) -> b.id() - a.id());
+                    logger.info(ANSI_LAVENDER + "\nSuccessfully updated comparator\n" + ANSI_RESET);
                 }
-                case "7" -> {
-                    tests.runAllExperiments();
-                }
+                case "7" ->
+
+                    // run simulation:
+                    drillSimulator.runSimulation(
+                            SampleSizes.LARGE,  // uses csv with 5000 drills
+                            DM.fairSort());     // - Higher urgency first
+                                                // - Earlier install_by_day first
+                                                // - Lower fatigue_cost preferred (tie-breaker)
+                                                // - Shorter duration preferred (final tie-breaker)
+
                 case "0" -> running = false;
-                default -> {
+                default ->
                     logger.info("""
-                            Unsupported Option
+                            \nUnsupported Option
                             Options are:
                             """);
-                }
+
             }
         }
     }
 
     private static void printMenu(){
-        logger.info("""
+        logger.info( ANSI_GREEN + """ 
                 Seahawks Data Options
                 =====================
-                1. Load transaction feed
-                2. Add breaking news (front)
-                3. Add older update (rear)
-                4. Insert at position
-                5. Remove transaction
-                6. Print first N
-                7. Run benchmark
+                1. Load drills from a CSV file
+                2. Add a drill
+                3. Peek next drill (without removing)
+                4. Run next drill (remove)
+                5. Print the next N scheduled drills (simulate “preview”)
+                6. Update Comparator (Shortest Drill First)
+                7. Run a simulation and output metrics (wait time/fairness)
                 0. Exit
-                """);
+                """ + ANSI_RESET);
     }
 }
