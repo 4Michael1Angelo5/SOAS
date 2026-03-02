@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BinaryHeapPQ Benchmark Results</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --panel: #13161e;
+    --border: #1f2533;
+    --accent1: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff6e;
+    --text: #c8d0e0;
+    --muted: #4a5568;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 32px;
+  }
+
+  header {
+    margin-bottom: 48px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  @media (max-width: 900px) {
+    .charts { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .chart-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .chart-card p.subtitle {
+    color: var(--muted);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  svg text { font-family: 'JetBrains Mono', monospace; }
+
+  .axis-label {
+    fill: var(--muted);
+    font-size: 10px;
+  }
+
+  .grid-line {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+
+  .data-line {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .dot {
+    stroke-width: 2;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BinaryHeapPQ — DrillManager</h1>
+  <p>Benchmark Results · Extract Operation</p>
+</header>
+
+<div class="charts">
+  <!-- Operations Chart -->
+  <div class="chart-card">
+    <h2>Operations vs Input Size</h2>
+    <p class="subtitle">Swaps &amp; Comparisons</p>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#00e5ff"></div>Comparisons</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>Swaps</div>
+    </div>
+    <svg id="ops-chart" viewBox="0 0 520 300" width="100%" height="300"></svg>
+  </div>
+
+  <!-- Time Chart -->
+  <div class="chart-card">
+    <h2>Time vs Input Size</h2>
+    <p class="subtitle">Average Execution Time (ms)</p>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#7fff6e"></div>Avg Time (ms)</div>
+    </div>
+    <svg id="time-chart" viewBox="0 0 520 300" width="100%" height="300"></svg>
+  </div>
+</div>
+
+<script>
+const sizes = [50, 500, 5000];
+const comparisons = [301, 5447, 78381];
+const swaps = [173, 2938, 41387];
+const times = [0.050867, 0.323800, 1.581247];
+
+const PAD = { top: 20, right: 30, bottom: 50, left: 70 };
+const W = 520, H = 300;
+const innerW = W - PAD.left - PAD.right;
+const innerH = H - PAD.top - PAD.bottom;
+
+function lerp(val, inMin, inMax, outMin, outMax) {
+  return outMin + ((val - inMin) / (inMax - inMin)) * (outMax - outMin);
+}
+
+function scaleX(val, data) {
+  const mn = Math.min(...data), mx = Math.max(...data);
+  return PAD.left + lerp(val, mn, mx, 0, innerW);
+}
+
+function scaleY(val, data, flip = true) {
+  const mn = 0, mx = Math.max(...data) * 1.1;
+  const y = lerp(val, mn, mx, 0, innerH);
+  return flip ? PAD.top + innerH - y : PAD.top + y;
+}
+
+function makePath(xs, ys) {
+  return xs.map((x, i) => `${i === 0 ? 'M' : 'L'} ${x} ${ys[i]}`).join(' ');
+}
+
+function drawGrid(svg, yVals, xVals, xData, yData) {
+  // X axis
+  xData.forEach((v, i) => {
+    const x = xVals[i];
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x); line.setAttribute('y1', PAD.top);
+    line.setAttribute('x2', x); line.setAttribute('y2', PAD.top + innerH);
+    line.setAttribute('class', 'grid-line');
+    svg.appendChild(line);
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', x); label.setAttribute('y', PAD.top + innerH + 20);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('class', 'axis-label');
+    label.textContent = v.toLocaleString();
+    svg.appendChild(label);
+  });
+
+  // Y axis ticks
+  const steps = 5;
+  const maxY = Math.max(...yData) * 1.1;
+  for (let i = 0; i <= steps; i++) {
+    const val = (maxY / steps) * i;
+    const y = scaleY(val, yData);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', PAD.left); line.setAttribute('y1', y);
+    line.setAttribute('x2', PAD.left + innerW); line.setAttribute('y2', y);
+    line.setAttribute('class', 'grid-line');
+    svg.appendChild(line);
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', PAD.left - 8); label.setAttribute('y', y + 4);
+    label.setAttribute('text-anchor', 'end');
+    label.setAttribute('class', 'axis-label');
+    label.textContent = val >= 1000 ? (val/1000).toFixed(0)+'k' : val.toFixed(val < 10 ? 3 : 0);
+    svg.appendChild(label);
+  }
+}
+
+function drawLine(svg, xs, ys, color) {
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', makePath(xs, ys));
+  path.setAttribute('class', 'data-line');
+  path.setAttribute('stroke', color);
+  svg.appendChild(path);
+  xs.forEach((x, i) => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x); circle.setAttribute('cy', ys[i]);
+    circle.setAttribute('r', 5);
+    circle.setAttribute('fill', color);
+    circle.setAttribute('stroke', '#0d0f14');
+    circle.setAttribute('class', 'dot');
+    svg.appendChild(circle);
+  });
+}
+
+function axisLabel(svg, text, isX) {
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  if (isX) {
+    label.setAttribute('x', PAD.left + innerW / 2);
+    label.setAttribute('y', H - 5);
+    label.setAttribute('text-anchor', 'middle');
+  } else {
+    label.setAttribute('transform', `rotate(-90)`);
+    label.setAttribute('x', -(PAD.top + innerH / 2));
+    label.setAttribute('y', 14);
+    label.setAttribute('text-anchor', 'middle');
+  }
+  label.setAttribute('class', 'axis-label');
+  label.setAttribute('fill', '#6b7280');
+  label.setAttribute('font-size', '11');
+  label.textContent = text;
+  svg.appendChild(label);
+}
+
+// --- Ops Chart ---
+const opsSVG = document.getElementById('ops-chart');
+const allOps = [...comparisons, ...swaps];
+const xsOps = sizes.map(v => scaleX(v, sizes));
+const ysComp = comparisons.map(v => scaleY(v, allOps));
+const ysSwap = swaps.map(v => scaleY(v, allOps));
+
+drawGrid(opsSVG, ysComp, xsOps, sizes, allOps);
+drawLine(opsSVG, xsOps, ysComp, '#00e5ff');
+drawLine(opsSVG, xsOps, ysSwap, '#ff6b35');
+axisLabel(opsSVG, 'Input Size (n)', true);
+axisLabel(opsSVG, 'Count', false);
+
+// --- Time Chart ---
+const timeSVG = document.getElementById('time-chart');
+const xsTime = sizes.map(v => scaleX(v, sizes));
+const ysTime = times.map(v => scaleY(v, times));
+
+// Draw Y grid for time
+const maxT = Math.max(...times) * 1.1;
+const steps = 5;
+for (let i = 0; i <= steps; i++) {
+  const val = (maxT / steps) * i;
+  const y = scaleY(val, times);
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', PAD.left); line.setAttribute('y1', y);
+  line.setAttribute('x2', PAD.left + innerW); line.setAttribute('y2', y);
+  line.setAttribute('class', 'grid-line');
+  timeSVG.appendChild(line);
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', PAD.left - 8); label.setAttribute('y', y + 4);
+  label.setAttribute('text-anchor', 'end');
+  label.setAttribute('class', 'axis-label');
+  label.textContent = val.toFixed(3);
+  timeSVG.appendChild(label);
+}
+sizes.forEach((v, i) => {
+  const x = xsTime[i];
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x); line.setAttribute('y1', PAD.top);
+  line.setAttribute('x2', x); line.setAttribute('y2', PAD.top + innerH);
+  line.setAttribute('class', 'grid-line');
+  timeSVG.appendChild(line);
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', x); label.setAttribute('y', PAD.top + innerH + 20);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('class', 'axis-label');
+  label.textContent = v.toLocaleString();
+  timeSVG.appendChild(label);
+});
+
+drawLine(timeSVG, xsTime, ysTime, '#7fff6e');
+axisLabel(timeSVG, 'Input Size (n)', true);
+axisLabel(timeSVG, 'Time (ms)', false);
+</script>
+</body>
+</html>
