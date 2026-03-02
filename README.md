@@ -53,14 +53,17 @@ to retrieve the item with the highest priority in constant time.
 Our benchmark testing results revealed that the number of comparisons and swaps scales in 
 $n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
 
-| Operations | 50 | 500 | 5000 |
-|------------|----|-----|------|
-| Swaps | | | |
-| Comparisons | | | |
+| Size  | Operation | Avg Time (ms) | Comparisons       | swaps   |
+|-------|-----------|---------------|-------------------|---------|
+| 50    | insert    | 0.042163      | 84                | 36      |
+| 50    | extract   | 0.050867      | 301               | 173     |
+| 500   | insert    | 0.102023      | 874               | 376     |
+| 500   | extract   | 0.323800      | 5447              | 2938    |
+| 5000  | insert    | 0.367923      | 9054              | 4058    |
+| 5000  | extract   | 1.581247      | 78381             | 41387   |
 
-Using curve fitting software, it reveals that the number of swaps roughly fits in line with the 
-equation …. Which in big O notation can be simplified to .... The number of comparisons roughly 
-fits the equation …. Which in big O notation can be simplified to ....
+These results are consitent with the expeceted $n\log(n)$ behavior for insertion and extraction.
+... [fill in the rest of the math stuff here].
 
 4) **Did you observe any evidence of starvation?**
 
