@@ -63,7 +63,43 @@ $n \log(n)$ time. We observed the following numbers using sample sizes of 50, 50
 | 5000  | extract   | 1.581247      | 78381             | 41387   |
 
 These results are consitent with the expeceted $n\log(n)$ behavior for insertion and extraction.
-... [fill in the rest of the math stuff here].
+If the time complexity is $O(n \log n)$, then when the input size grows, the work should grow by about the same ratio as:
+
+$\frac{n_2 \log n_2}{n_1 \log n_1}$
+
+So I compared expected growth vs actual operation growth.
+
+50 → 500
+
+Expected (from $n \log n$):
+
+$\frac{500 \log_2 500}{50 \log_2 50} = \frac{4485}{282} \approx 15.9$
+
+Actual:
+- Insert comparisons: $874 / 84 \approx 10.4$
+- Extract comparisons: $5447 / 301 \approx 18.1$
+
+These are in the same general range as 15.9, so that matches the $n \log n$ pattern. 
+Insert consistently runs better than the predicted ratio, this is likely because 
+insertions often don't travel all the way up the tree, so the average case is better 
+than the theoretical bound suggests.
+
+500 → 5000
+
+Expected:
+
+$\frac{5000 \log_2 5000}{500 \log_2 500} = \frac{61450}{4485} \approx 13.7$
+
+Actual:
+- Insert comparisons: $9054 / 874 \approx 10.4$
+- Extract comparisons: $78381 / 5447 \approx 14.4$
+
+Again, the numbers are close to the expected 13.7. So overall, the operation counts grow close to what $n \log n$ predicts. 
+So we can say that insert and extract do follow $O(n \log n)$.
+
+Also, operation counts give a clearer picture than time because runtime 
+can change depending on JVM warmup or other background factors, but 
+comparisons and swaps directly measure the actual work the heap is doing.
 
 4) **Did you observe any evidence of starvation?**
 
