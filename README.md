@@ -67,7 +67,7 @@ If the time complexity is $O(n \log n)$, then when the input size grows, the wor
 
 $\frac{n_2 \log n_2}{n_1 \log n_1}$
 
-So I compared expected growth vs actual operation growth.
+We compared expected growth vs actual operation growth.
 
 50 → 500
 
@@ -293,7 +293,7 @@ The project is organized with separate source and test roots to maintain clean c
 
 ## Tools Used
 * Gemini, ChatGPT
-    - Syntax clarification, Javadocs, architecture brainstorming, and readme.md template
+    - Syntax clarification, Javadocs, architecture brainstorming, readme.md template, and to generate a graph of our benchmark results,
 
 
 
