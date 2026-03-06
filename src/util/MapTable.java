@@ -24,7 +24,7 @@ public interface MapTable<K,V> {
      * @return the value of the key for the removed obj if found,
      * or null if the object is not found in the HashTable.
      */
-    V remove(K key);
+    V delete(K key);
 
     /**
      *
@@ -44,4 +44,6 @@ public interface MapTable<K,V> {
      * @return the load factor of the HashTable.
      */
     double loadFactor();
+
+    boolean isEmpty();
 }

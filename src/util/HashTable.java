@@ -1,15 +1,18 @@
 package util;
 
+import counter.OperationCounter;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * A HashTable implementation that uses chaining to resolve collisions.
  * @param <K> the class of the key object.
  * @param <V> the class of the value object.
  */
-public class HashTable<K,V> implements MapTable<K,V> {
+public final class HashTable<K,V> implements MapTable<K,V>, Iterable<Entry<K,V>>, OperationCountable {
 
     /**
      * HashTable key values
@@ -37,6 +40,8 @@ public class HashTable<K,V> implements MapTable<K,V> {
      */
     private int size;
 
+    private final OperationCounter myCounter = new OperationCounter();
+
 
     /**
      * Default constructor.
@@ -45,6 +50,7 @@ public class HashTable<K,V> implements MapTable<K,V> {
      * @param theValueClass the class of the objects value.
      */
     public HashTable(Class<K> theKeyClass, Class<V> theValueClass) {
+
         this(theKeyClass,  theValueClass, 16);
     }
 
@@ -73,9 +79,15 @@ public class HashTable<K,V> implements MapTable<K,V> {
         return size;
     }
 
+
     @Override
     public double loadFactor() {
         return myLoadFactor;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
     }
 
     private void updateLoadLoadFactor() {
@@ -92,8 +104,8 @@ public class HashTable<K,V> implements MapTable<K,V> {
         // if it is not empty iterate over all entries in the bucket
         // and return it if present.
         for (Entry<K,V> entry: bucketList) {
-            if (Objects.equals(entry.key, key)) {
-                return entry.value;
+            if (Objects.equals(entry.key(), key)) {
+                return entry.value();
             }
         }
 
@@ -135,7 +147,7 @@ public class HashTable<K,V> implements MapTable<K,V> {
     // ======================  removing ===========================
 
     @Override
-    public V remove(K key) {
+    public V delete(K key) {
 
         // 1) check if the key exists in the HashTable
         if (!containsKey(key)) {
@@ -147,10 +159,10 @@ public class HashTable<K,V> implements MapTable<K,V> {
 
         //3) remove the key from the bucket list
         Entry<K,V> removed = bucketList.remove(
-                (entry)-> Objects.equals(entry.key, key));
+                (entry)-> Objects.equals(entry.key(), key));
         size--;
         updateLoadLoadFactor();
-        return removed.value;
+        return removed.value();
     }
 
     @Override
@@ -160,14 +172,15 @@ public class HashTable<K,V> implements MapTable<K,V> {
         SinglyLinkedList<Entry<K,V>> bucketList = myTable.get(bucketIndex);
 
         for (Entry<K,V> entry: bucketList) {
-            if (Objects.equals(entry.key, key)) {
+            if (Objects.equals(entry.key(), key)) {
                 return true;
             }
         }
         return false;
     }
 
-    private Iterator<Entry<K,V>> iterator() {
+    @Override
+    public Iterator<Entry<K,V>> iterator() {
 
         return new Iterator<>() {
 
@@ -202,6 +215,27 @@ public class HashTable<K,V> implements MapTable<K,V> {
 
     }
 
+    // ====================  util =====================
+
+    public void clear() {
+        int curCapacity = myTable.size();
+        myTable.clear();
+        initializeHashTable(myTable, curCapacity);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<K, V> entry : this) {
+            sb.append("{");
+            sb.append(entry.toString());
+            sb.append("}, ");
+        }
+
+        return sb.toString();
+    }
+
+
     // ====================   private helper methods =========================
 
     private void initializeHashTable(
@@ -230,8 +264,8 @@ public class HashTable<K,V> implements MapTable<K,V> {
             Entry<K,V> theNewEntry) {
 
         for (Entry<K,V>  currentEntry : tableListEntry) {
-            if (Objects.equals(theNewEntry.key,currentEntry.key)) {
-                currentEntry.setEntry(theNewEntry.value);
+            if (Objects.equals(theNewEntry.key(),currentEntry.key())) {
+                currentEntry.setEntry(theNewEntry.value());
                 return true;
             }
         }
@@ -245,7 +279,7 @@ public class HashTable<K,V> implements MapTable<K,V> {
 
         while(iterator.hasNext()) {
             Entry<K,V> entry = iterator.next();
-            temp.put(entry.key, entry.value);
+            temp.put(entry.key(), entry.value());
         }
 
         myTable = temp.myTable;
@@ -253,23 +287,18 @@ public class HashTable<K,V> implements MapTable<K,V> {
         size = temp.size;
     }
 
-    // ======================  Private inner class ===========================
-    private static class Entry<K,V> {
-        private final K key;
-        private V value;
-        private Entry(K key, V value) {
-            super();
-            this.key = key;
-            this.value = value;
-        }
-        private K key() {
-            return key;
-        }
-        private V value() {
-            return value;
-        }
-        private void setEntry(V theValue) {
-            value = theValue;
-        }
+    @Override
+    public int getSwaps() {
+        return myCounter.getCount("swaps");
+    }
+
+    @Override
+    public int getComparisons() {
+        return myCounter.getCount("comparisons");
+    }
+
+    @Override
+    public void resetCounter() {
+        myCounter.resetAll();
     }
 }

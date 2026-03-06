@@ -1,15 +1,12 @@
-import manager.DrillManager;
-import simulator.SampleSizes;
-import simulator.DrillSimulator;
-import types.Drill;
-import util.BinaryHeapPQ;
-import util.DataContainer;
+import manager.PlayerManager;
+import types.PlayerEnhanced;
+import types.Position;
+import util.ArrayStore;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Comparator;
-import java.util.function.Supplier;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 
@@ -51,16 +48,20 @@ public class Main {
      */
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    public static final String  DRILLS_50 = "data/seahawks_drills_50.csv";
+    public static final String  PLAYERS_50 = "data/seahawks_players_50.csv";
+
+    public static final
+    PlayerEnhanced AYUSH = new PlayerEnhanced(
+            97,
+            "Ayush",
+            Position.QB,
+            1000,
+            110,
+            false);
 
     public static void main(String[] args) throws IOException {
 
-        // drill manger setup
-        Supplier<DataContainer<Drill>> drillContSup = ()->new BinaryHeapPQ<>(Drill.class);
-        DrillManager DM = new DrillManager(drillContSup);
-
-        // simulator set up
-        DrillSimulator drillSimulator = new DrillSimulator();
+        PlayerManager PM = new PlayerManager();
 
         boolean running = true;
 
@@ -70,61 +71,86 @@ public class Main {
 
             switch (choice) {
                 case "1" -> {
-                    // load csv
-                    DM.loadCsvData(DRILLS_50);
-                    logger.info(ANSI_LAVENDER + "\nSuccessfully loaded Seahawks data from CSV.\n" + ANSI_RESET);
-
+                    PM.loadCsvData(PLAYERS_50);
+                    logger.info("Successfully loaded player data.");
                 }
                 case "2" -> {
-                    // Add a drill
-                    Drill newDrill = new Drill(-1,
-                            "Practice Binary Trees",
-                            1000,
-                            60,
-                            100,
-                            1);
-                    DM.addData(newDrill);
-                    logger.info(ANSI_LAVENDER + "\nSuccessfully added new drill: \n" +
-                       newDrill.toStringZ() + "\n" + ANSI_RESET);
-
+                    PM.addPlayer(AYUSH);
+                    logger.info(
+                            ANSI_LAVENDER
+                            + "Successfully added: " + AYUSH
+                            + ANSI_RESET);
                 }
                 case "3" -> {
-                    // peek
-                    Drill nextDrill = DM.peekNextDrill();
-                    logger.info(ANSI_LAVENDER + "\nThe next drill to run is" + ANSI_RESET);
-                    logger.info(ANSI_LAVENDER + nextDrill.toString() +"\n" + ANSI_RESET);
-
+                    int index = PM.searchById(97);
+                    if (index >= 0) {
+                        logger.info(
+                                ANSI_LAVENDER
+                                + "Found: " + PM.get(index)
+                                + ANSI_RESET);
+                    }else {
+                        logger.info("Cound not find player with id: " + 97);
+                    }
                 }
                 case "4" -> {
-                    // run
-                    Drill removed = DM.removeData();
-                    logger.info(ANSI_LAVENDER + "\nSuccessfully processed: " + removed.toString() + "\n" + ANSI_RESET);
+                    int newYards = AYUSH.yards() + 110;
+                    int newTouchDowns = AYUSH.touchdowns() + 3;
+                    PlayerEnhanced newPlayerStats = new PlayerEnhanced(
+                            97,
+                            "Ayush",
+                            Position.QB,
+                            newYards,
+                            newTouchDowns,
+                            false);
+                    try {
+                        PM.updatePlayerStats(newPlayerStats);
+                        logger.info(
+                                ANSI_LAVENDER
+                                    + "Successfully updated " + AYUSH.name()
+                                    + "'s stats to new yards: " + newYards
+                                    + " and touchdowns to: " + newTouchDowns
+                                    + ANSI_RESET);
+                    } catch (NoSuchElementException e) {
+                        logger.warning(
+                                ANSI_LAVENDER
+                                + "Was not able to update " + AYUSH.name() + "'s stats."
+                                + ANSI_RESET
 
+                        );
+                    }
                 }
                 case "5" -> {
-                    // print
-                    logger.info(ANSI_LAVENDER
-                            + "\nPrinting next "
-                            + DM.getData().size()
-                            + " drills\n"
-                            +ANSI_RESET);
-                    DM.printData();
+                    PlayerEnhanced removed = PM.removePlayer(AYUSH);
+                    if (removed != null) {
+                        logger.info(
+                                ANSI_LAVENDER
+                                + "Successfuly removed: " + removed
+                        );
+                    }else {
+                        logger.warning("Could not remove " + AYUSH);
+                    }
                 }
                 case "6" -> {
-                    // update comparator to sort by highest id number (reverse the list)
-                    DM.upDateComparator((a,b) -> b.id() - a.id());
-                    logger.info(ANSI_LAVENDER + "\nSuccessfully updated comparator\n" + ANSI_RESET);
+                    ArrayStore<PlayerEnhanced> players = PM.listPlayersByPosition();
+                    logger.info("Successfully sorted players by position");
+                    for (PlayerEnhanced player: players) {
+                        logger.info(player.toString());
+                    }
                 }
-                case "7" ->
-
-                    // run simulation:
-                    drillSimulator.runSimulation(
-                            SampleSizes.LARGE,  // uses csv with 5000 drills
-                            DM.fairSort());     // - Higher urgency first
-                                                // - Earlier install_by_day first
-                                                // - Lower fatigue_cost preferred (tie-breaker)
-                                                // - Shorter duration preferred (final tie-breaker)
-
+                case "7" -> {
+                    int injuredCount =  PM.countInjuredPlayers();
+                    logger.info(ANSI_LAVENDER + "Successfully counted all injured players:" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + "Total players injured: " + injuredCount + ANSI_RESET);
+                }
+                case "8" -> {
+                    logger.info(ANSI_LAVENDER + "Successfully counted total yards by position" + ANSI_RESET);
+                    logger.info(ANSI_LAVENDER + PM.computeTotalYardsByPosition().toString() + ANSI_RESET);
+                    logger.info(
+                            ANSI_LAVENDER +
+                            "Total yards for Quarterback position was: "
+                            + PM.getTotalYardsByPosition(Position.QB)
+                            + ANSI_RESET);
+                }
                 case "0" -> running = false;
                 default ->
                     logger.info("""
@@ -140,13 +166,14 @@ public class Main {
         logger.info( ANSI_GREEN + """ 
                 Seahawks Data Options
                 =====================
-                1. Load drills from a CSV file
-                2. Add a drill
-                3. Peek next drill (without removing)
-                4. Run next drill (remove)
-                5. Print the next N scheduled drills (simulate “preview”)
-                6. Update Comparator (Shortest Drill First)
-                7. Run a simulation and output metrics (wait time/fairness)
+                1. Load Players
+                2. Insert Player
+                3. Search by Player ID
+                4. Update Player Stats
+                5. Remove Player
+                6. List Players by Position
+                7. Count Injured Players
+                8. Compute Total Yards by Position
                 0. Exit
                 """ + ANSI_RESET);
     }
