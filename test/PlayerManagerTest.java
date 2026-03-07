@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.1
  * @author Chris Chun, Ayush
  */
-public class RosterManagerTest {
+public class PlayerManagerTest {
     static final int THE_NUM_ADDS = 100;
     static final int TEST_TRIALS = 50;
 

@@ -289,6 +289,42 @@ public final class SinglyLinkedList<T> implements DataContainer<T>, Indexable<T>
         throw new NoSuchElementException("Can't find item");
     }
 
+    /**
+     *
+     * @param thePredicate a predicate to test each node item     *
+     * @return the deleted element if present otherwise throws no such element exception
+     */
+    public T remove(Predicate<T> thePredicate) {
+        T removed = null;
+        // check if list is empty list
+        if (isEmpty()) {
+            throw new NoSuchElementException("List is empty");
+        }
+
+        // handle head separate
+        if (thePredicate.test(head.val)) {
+            return remove();
+        }
+
+        Node<T> cur = head;
+        while(cur.next != null) {
+            if (thePredicate.test(cur.next.val)) {
+                removed = cur.next.val;
+                cur.next = cur.next.next;
+                if (cur.next ==null) {
+                    tail = cur;
+                }
+                size--;
+                break;
+            }
+            cur = cur.next;
+        }
+        if (Objects.isNull(removed)){
+            throw new NoSuchElementException("not found");
+        }
+        return removed;
+    }
+
     // ================== updating ========================
 
     @Override

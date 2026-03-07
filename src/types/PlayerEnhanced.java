@@ -7,25 +7,29 @@ import java.util.Objects;
  * @param player_id
  * @param name
  * @param position
- * @param jersey
  * @param yards
  */
-public record Player(int player_id,
+public record PlayerEnhanced(
+                     int player_id,
                      String name,
-                     String position,
-                     int jersey,
-                     int yards) implements DataType{
+                     Position position,
+                     int yards,
+                     int touchdowns,
+                     boolean injured) implements DataType{
 
-    public Player(int player_id,
+    public PlayerEnhanced(
+                  int player_id,
                   String name,
-                  String position,
-                  int jersey,
-                  int yards) {
+                  Position position,
+                  int yards,
+                  int touchdowns,
+                  boolean injured) {
         this.player_id = player_id;
         this.name = name;
         this.position = position;
-        this.jersey = jersey;
         this.yards = yards;
+        this.touchdowns = touchdowns;
+        this.injured = injured;
 
         validate();
     }
@@ -43,24 +47,10 @@ public record Player(int player_id,
         if (name.isBlank()) {
             throw new IllegalArgumentException("Player name cannot be blank");
         }
-
-        if (position.isBlank()) {
-            throw new IllegalArgumentException("Position cannot be blank");
-        }
-
-    }
-
-    /**
-     * Custom toString method
-     * @return formatted string representation of Player
-     */
-    @Override
-    public String toString() {
-        return "Player[player_id =" + player_id +
-                ", name =" + name +
-                ", position =" + position +
-                ", jersey =" + jersey +
-                ", yards =" + yards + "]";
+//
+//        if (position.isBlank()) {
+//            throw new IllegalArgumentException("Position cannot be blank");
+//        }
     }
 
     /**
@@ -72,7 +62,7 @@ public record Player(int player_id,
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Player player = (Player) obj;
+        PlayerEnhanced player = (PlayerEnhanced) obj;
         return player_id == player.player_id &&
                 name.equals(player.name);
     }
