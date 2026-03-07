@@ -2,6 +2,7 @@ package results;
 
 import benchmark.BenchmarkRunner;
 import loader.DataLoader;
+import manager.DataManager;
 import manager.Manager;
 import types.DataType;
 import util.ArrayStore;
@@ -14,6 +15,25 @@ import java.util.logging.Logger;
 
 import exceptions.ResultsConfigException;
 
+/**
+ * An abstract orchestration layer for benchmarking {@link DataManager} performance
+ * across various {@link DataContainer} implementations.
+ * * <p>The {@code Results} class defines the lifecycle of a performance experiment,
+ * ensuring that benchmarks are conducted under controlled conditions. It manages:
+ * <ul>
+ * <li><b>State Isolation:</b> Resets and prepares containers before each timed run
+ * to prevent data pollution.</li>
+ * <li><b>Execution:</b> Utilizes {@link BenchmarkRunner} to perform multiple
+ * trial runs for statistical averaging.</li>
+ * <li><b>Metrics Collection:</b> Captures both execution time and algorithmic
+ * complexity metrics (comparisons/swaps).</li>
+ * </ul>
+ * * Subclasses should implement specific experiment logic (e.g., search or sort)
+ * while leveraging this class's validation and reporting infrastructure.
+ *
+ * @param <T> The {@link DataType} being stored and manipulated.
+ * @param <M> The {@link Manager} implementation under test.
+ */
 public abstract class Results<T extends DataType, M extends Manager<T>>
         implements Experiment{
 
@@ -66,7 +86,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      * Internal storage for the results
      * of various experiments.
      */
-    public DataContainer<BenchmarkResult> myExperiments = new ArrayStore<>(BenchmarkResult.class);
+    public ArrayStore<BenchmarkResult> myExperiments = new ArrayStore<>(BenchmarkResult.class);
 
     /**
      * A functional supplier
@@ -80,8 +100,22 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
      */
     private final ExperimentFormat myExperimentFormat;
 
+    /**
+     * A test container that holds the CSV data from the data loader.
+     * It serves as the container for holding the current data sample
+     * for testing.
+     */
     public DataContainer<T> myTestContainer;
+
+    /**
+     * DataLoader to load CSV data for testing.
+     */
     public DataLoader<T> myDataLoader;
+
+    /**
+     * Results Formater
+     */
+    private final ResultsDisplay resultsDisplay;
 
     /**
      * Constructs a Results controller to manage benchmarks for a specific data type.
@@ -95,12 +129,14 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
             M theManager,
             Supplier<DataContainer<T>> theContainerSupplier,
             ExperimentFormat theExperimentFormat) {
+
         myDataClass = theDataClass;
         myManager = theManager;
         mySupplier = theContainerSupplier;
         myExperimentFormat = theExperimentFormat;
         myTestContainer = new ArrayStore<>(theDataClass);
         myDataLoader = new DataLoader<>(theDataClass, ()-> new ArrayStore<>(theDataClass));
+        resultsDisplay = new ResultsDisplay(theExperimentFormat, getManagerTitle(), getTestResultsTitle());
         verifyConfiguration();
     }
 
@@ -180,18 +216,30 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
 
     }
 
+    /**
+     * Ensures proper intial conditions before performing
+     * add tests.
+     */
     public void validateStateBeforeAddTest() {
         ensureTestContainerNotEmpty();
         ensureManagerContainerEmpty();
         ensureOperationCounterReset();
     }
 
+    /**
+     * Ensure proper intial conditions before performing
+     * remove tests.
+     */
     public void validateStateBeforeRemoveTest() {
         ensureTestContainerNotEmpty();
         ensureManagerContainerNotEmpty();
         ensureOperationCounterReset();
     }
 
+    /**
+     * Ensures proper initial conditions before performing
+     * search testing.
+     */
     public void validateStateBeforeSearch() {
         ensureTestContainerNotEmpty();
         ensureManagerContainerNotEmpty();
@@ -280,7 +328,6 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
         return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
-
     /**
      * Executes the removal benchmark by coordinating setup and timed execution.
      * * @return An {@link BenchmarkResult} capturing size, operation name, and average time.
@@ -296,8 +343,6 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
 
         return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
-
-
 
     // =============================  utlility  ====================================
     public OperationCounts getOpCounts() {
@@ -320,124 +365,14 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
         return myManager.getClass().getSimpleName();
     }
 
-    // =============================  Displaying Results  ====================================
-
-    /**
-     * Helper method to format and print a single row of the results table.
-     * * @param theResult The result to display.
-     */
-    public void logExperiment(BenchmarkResult theResult) {
-
-        String row;
-        int inputSize = theResult.inputSize();
-        String operationName = theResult.method();
-        double avgTime = theResult.avgTime();
-        switch (myExperimentFormat) {
-
-            case BENCHMARK_W_OPS ->
-                    row = String.format("%-10s %-15s %-15.6f %-15s %-10s",
-                    inputSize,
-                    operationName,
-                    avgTime,
-                    theResult.operationCounts().comparisons(),
-                    theResult.operationCounts().swaps()
-                    );
-
-            case BENCHMARK_NO_OPS ->
-                    row = String.format("%-10s %-15s %-15.6f",
-                    inputSize,
-                    operationName,
-                    avgTime);
-            case null, default -> throw new RuntimeException("Experiment Format type cannot be null");
-        }
-
-        logger.info(ANSI_GREEN + row + ANSI_RESET);
-    }
-
-    private String getExperimentResultHeader() {
-        String columnHeader;
-        switch (myExperimentFormat) {
-            case BENCHMARK_W_OPS -> columnHeader =
-                    String.format("%-10s %-15s %-15s %-15s %-10s",
-                            "Size",
-                            "Operation",
-                            "Avg Time (ms)",
-                            "comparisons", "swaps");
-            case BENCHMARK_NO_OPS -> columnHeader =
-                    String.format("%-10s %-15s %-15s%n",
-                            "Size",
-                            "Operation",
-                            "Avg Time (ms)");
-            case null, default -> throw new IllegalArgumentException("FormateType Cannot be null");
-        }
-        return columnHeader;
-    }
-
-    private String getTableHeaderDivider() {
-        switch (myExperimentFormat) {
-            case BENCHMARK_NO_OPS -> {
-                return "========== Benchmark Results ==========";
-            }
-            case BENCHMARK_W_OPS -> {
-                return "====================== Benchmark Results ======================";
-            }
-            case null, default -> {
-                throw new RuntimeException("Encounterred Runtime error: Experiment format type cannot be null.");
-            }
-        }
-    }
-
-    private String getTableDivider() {
-
-        switch (myExperimentFormat) {
-            case BENCHMARK_NO_OPS -> {
-                return "----------------------------------------";
-            }
-            case BENCHMARK_W_OPS -> {
-                return "---------------------------------------------------------------";
-            }
-            case null, default -> {
-                throw new RuntimeException("Encounterred Runtime error: Experiment format type cannot be null.");
-            }
-        }
-
-    }
-
-    // ===============================================================
-    // ---------------------------------------------------------------
-    // ====================== Benchmark Results ======================
-
-    private String getTableFooterDivider() {
-        switch (myExperimentFormat) {
-
-            case BENCHMARK_NO_OPS -> {
-                return "========================================\n";
-            }
-            case BENCHMARK_W_OPS -> {
-                return "===============================================================";
-            }
-            case null, default -> {
-                throw new RuntimeException("Encounterred Runtime error: Experiment format type cannot be null.");
-            }
-        }
-    }
+    // ============================== Displaying Results =============================
 
     /**
      * Prints the final summary table of all stored experiments to the console.
      * Includes a header, data rows, and a footer.
      */
     public void printResults() {
-        logger.info(ANSI_GREEN + "\n"+ getTestResultsTitle() + " " + getManagerTitle() + ANSI_RESET);
-
-        logger.info(ANSI_GREEN + getTableHeaderDivider() + ANSI_RESET);
-
-        logger.info(ANSI_GREEN + getExperimentResultHeader() + ANSI_RESET);
-
-        logger.info(ANSI_GREEN + getTableDivider() + ANSI_RESET);
-        for (BenchmarkResult result: myExperiments) {
-            logExperiment(result);
-        }
-        logger.info(ANSI_GREEN + getTableFooterDivider() + ANSI_RESET);
+        resultsDisplay.printResults(myExperiments);
     }
 
 }

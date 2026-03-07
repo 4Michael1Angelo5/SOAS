@@ -2,53 +2,18 @@ package manager;
 
 import types.DataType;
 import util.DataContainer;
+import util.HashTable;
 
 import java.io.IOException;
 
-/**
- * The Manager interface enforces a contract that all DataManagers
- * must follow to manage data using a {@link DataContainer}.
- * <ul>
- *  <li>
- *      Retrieve and manage the underlying {@link DataContainer} via {@link #getData()}.
- *  </li>
-*   <li>
- *      Provide a capability flag {@link #needsIndexedAccess()} to ensure the
- *      manager is paired with a compatible data structure.
- *  </li>
- *  <li>
- *      Expose standardized mutation methods for adding and removing data
- *  </li>
- *  <li>
- *      Track algorithmic operations, including comparisons and swaps,
- *      to measure computational complexity.
- *  </li>
- * </ul>
- * @param <T> The {@link DataType} managed by this implementation.
- * @author Chris Chun, Ayush.
- * @version 1.3
- */
-public interface Manager<T extends DataType> {
-
-    // ===================== flags =========================
-    /**
-     * Each concrete manager class must specify upfront
-     * if they require indexed based access to efficiently
-     * manage the contents of their containers. This flag
-     * ensures each concrete child class is instantiated with
-     * an appropriate data container.
-     * @return true if the DataManager needs indexed access to
-     * effectively manage their data.
-     */
-    boolean needsIndexedAccess();
-
+public interface HashableManager<T extends DataType> {
     // =====================  getting =======================
 
     /**
      * Gets the data from the DataContainer.
      * @return A DataContainer with the Objects the Manager manages.
      */
-    DataContainer<T> getData();
+    HashTable<Integer, T> getData();
 
     /**
      *
@@ -75,7 +40,7 @@ public interface Manager<T extends DataType> {
      * most efficient method.
      * @return the object removed.
      */
-    T removeData();
+    T removeData(T theData);
 
 
     // =====================  util =======================
@@ -115,5 +80,4 @@ public interface Manager<T extends DataType> {
      * Resets the {@link counter.OperationCounter}
      */
     void resetCounter();
-
 }

@@ -220,7 +220,9 @@ public final class HashTable<K,V> implements MapTable<K,V>, Iterable<Entry<K,V>>
     public void clear() {
         int curCapacity = myTable.size();
         myTable.clear();
+        size = 0;
         initializeHashTable(myTable, curCapacity);
+
     }
 
     @Override

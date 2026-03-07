@@ -122,7 +122,6 @@ public final class PlayerManager extends MapManager<PlayerEnhanced>{
                     Objects.isNull(currentYardsForPos)
                     ? yards
                     : currentYardsForPos + yards);
-
         }
 
         return table;
@@ -138,5 +137,10 @@ public final class PlayerManager extends MapManager<PlayerEnhanced>{
             throw new RuntimeException("Unable to compute total yards for position: " + position);
         }
         return result;
+    }
+
+    @Override
+    public Class<?> getManagerClass() {
+        return PlayerManager.class;
     }
 }

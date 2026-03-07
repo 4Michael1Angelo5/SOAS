@@ -16,7 +16,8 @@ public class DrillResults extends Results<Drill, DrillManager> {
 
     public DrillResults(
             DrillManager theManager,
-            Supplier<DataContainer<Drill>> theSupplier, ExperimentFormat theExperimentFormatType) {
+            Supplier<DataContainer<Drill>> theSupplier,
+            ExperimentFormat theExperimentFormatType) {
         super(Drill.class, theManager, theSupplier, theExperimentFormatType);
     }
 
