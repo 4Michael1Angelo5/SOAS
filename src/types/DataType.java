@@ -5,7 +5,7 @@ package types;
  * the csv data loader, and Data Manager
  */
 public sealed interface DataType extends Comparable<DataType>
-        permits Action, Drill, FanRequest, Player, Transaction, UndoRecord {
+        permits Action, Drill, FanRequest, Player, PlayerEnhanced, Transaction, UndoRecord {
     /**
      *
      * @return the id of Data

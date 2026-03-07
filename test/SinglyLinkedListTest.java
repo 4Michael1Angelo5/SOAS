@@ -1,10 +1,7 @@
 import org.junit.jupiter.api.Test;
 import util.SinglyLinkedList;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -237,7 +234,7 @@ public class SinglyLinkedListTest {
         SinglyLinkedList<String> list = new SinglyLinkedList<>();
         list.addRear(null);
         list.addRear("a");
-        assertNull(list.remove(null));
+        assertNull(list.remove(Objects::isNull));
         assertEquals("a", list.get(0));
     }
 }

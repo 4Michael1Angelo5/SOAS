@@ -110,6 +110,15 @@ public class DataLoader <T extends DataType> {
                         row[1],                    // name
                         row[2],                    // service_type
                         row[3]);                   // arrival_time
+            }else
+            if (myDataClass == PlayerEnhanced.class) {
+                result = new PlayerEnhanced(
+                        Integer.parseInt(row[0]),       // player_id
+                        row[1],                         // name
+                        Position.valueOf(row[2]),       // position
+                        Integer.parseInt(row[3]),       // yards
+                        Integer.parseInt(row[4]),       // touchdowns
+                        Boolean.parseBoolean(row[5]));  // injured
             }
             else {
 
@@ -176,6 +185,7 @@ public class DataLoader <T extends DataType> {
             case "Drill" -> isValid = theHeaderRow.equals("drill_id,name,urgency,duration_min,fatigue_cost,install_by_day");
             case "Action" -> isValid = theHeaderRow.equals("action_id,action_type,target,timestamp");
             case "FanRequest" -> isValid = theHeaderRow.equals("fan_id,name,service_type,arrival_time");
+            case "PlayerEnhanced" -> isValid = theHeaderRow.equals("playerId,name,position,yards,touchdowns,injured");
             default -> throw new RuntimeException("Unsupported DataType for loader");
         }
 

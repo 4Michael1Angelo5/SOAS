@@ -136,7 +136,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     @Override
     public T remove(T theVal) throws NoSuchElementException {
-        T removed;
+
         int index = indexOf(theVal);
 
         if (index == -1) {
@@ -211,7 +211,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return new Iterator<T>() {
+        return new Iterator<>() {
             int i = 0;
 
             @Override
