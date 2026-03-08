@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  * @author Chris C, Ayush.
  * @param <T> Specifies the type of objects this data container will hold
  */
-public sealed interface DataContainer<T> extends Iterable<T>, OperationCountable
+public sealed interface DataContainer<T> extends Iterable<T> , OperationCountable<T>
         permits ArrayStore, SinglyLinkedList, ArrayStack , LinkedQueue, BinaryHeapPQ {
 
     // ================== getting ========================

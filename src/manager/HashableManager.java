@@ -1,8 +1,7 @@
 package manager;
 
 import types.DataType;
-import util.DataContainer;
-import util.HashTable;
+import util.Dictionary;
 
 import java.io.IOException;
 
@@ -13,7 +12,7 @@ public interface HashableManager<T extends DataType> {
      * Gets the data from the DataContainer.
      * @return A DataContainer with the Objects the Manager manages.
      */
-    HashTable<Integer, T> getData();
+    Dictionary<Integer, T> getData();
 
     /**
      *
@@ -64,20 +63,20 @@ public interface HashableManager<T extends DataType> {
 
     // =====================  operation counting =======================
 
-    /**
-     * @return the number of swaps performed over a period of method calls
-     * manipulating data.
-     */
-    int getSwaps();
-
-    /**
-     * @return the number of comparisons performed over a period of method calls
-     * manipulating data.
-     */
-    int getComparisons();
-
-    /**
-     * Resets the {@link counter.OperationCounter}
-     */
-    void resetCounter();
+//    /**
+//     * @return the number of swaps performed over a period of method calls
+//     * manipulating data.
+//     */
+//    int getSwaps();
+//
+//    /**
+//     * @return the number of comparisons performed over a period of method calls
+//     * manipulating data.
+//     */
+//    int getComparisons();
+//
+//    /**
+//     * Resets the {@link counter.OperationCounter}
+//     */
+//    void resetCounter();
 }

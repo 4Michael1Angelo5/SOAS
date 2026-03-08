@@ -24,7 +24,7 @@ public abstract class MapManager <T extends DataType> implements HashableManager
 
 
     public MapManager(Class<T> theDataType) {
-        myMap = new HashTable<>(Integer.class, theDataType);
+        myMap = new HashTable<>(Integer.class, theDataType, 5001);
         myDataLoader = new DataLoader<>(theDataType, () -> new ArrayStore<>(theDataType));
     }
 

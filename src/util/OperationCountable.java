@@ -9,7 +9,7 @@ package util;
  * @version 1.1
  * @author Chris Chun, Ayush.
  */
-public interface OperationCountable {
+public interface OperationCountable<T> {
 
     /**
      *

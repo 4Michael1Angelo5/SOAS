@@ -9,13 +9,13 @@ import types.DataType;
 import types.Player;
 import util.ArrayStore;
 import util.DataContainer;
-import util.MapTable;
+import util.Dictionary;
 
 import java.io.IOException;
 
 /**
  * An abstract orchestration layer for benchmarking {@link MapManager} performance
- * across various {@link MapTable} implementations.
+ * across various {@link Dictionary} implementations.
  * * <p>The {@code HashTableBenchMark} class defines the lifecycle of a performance experiment,
  * ensuring that benchmarks are conducted under controlled conditions. It manages:
  * <ul>

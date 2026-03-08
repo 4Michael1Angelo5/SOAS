@@ -5,14 +5,13 @@ import counter.OperationCounter;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * A HashTable implementation that uses chaining to resolve collisions.
  * @param <K> the class of the key object.
  * @param <V> the class of the value object.
  */
-public final class HashTable<K,V> implements MapTable<K,V>, Iterable<Entry<K,V>>, OperationCountable {
+public final class HashTable<K,V> implements Dictionary<K,V> {
 
     /**
      * HashTable key values
