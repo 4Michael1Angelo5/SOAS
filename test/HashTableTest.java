@@ -105,7 +105,8 @@ public class HashTableTest {
 
         assertAll("update in collision chain",
                 () -> assertEquals(updated, playerTable.get(17), "Should get updated player"),
-                () -> {Player found = playerTable.get(17);
+                () -> {
+                    Player found = playerTable.get(17);
                     assertNotNull(found, "Player 17 should exist");
                     assertEquals(850, found.yards(), "Yards should be updated");
                 },
@@ -214,7 +215,7 @@ public class HashTableTest {
         playerTable.put(17, p2);
         playerTable.put(33, p3);
 
-        playerTable.delete(17); // Remove middle of chain
+        playerTable.delete(17); // Remove middle
 
         assertAll("remove from collision chain",
                 () -> assertEquals(p1, playerTable.get(1), "Should still find p1"),
@@ -314,15 +315,18 @@ public class HashTableTest {
 
         assertAll("high load factor behavior",
                 () -> assertTrue(playerTable.size() >= 50, "Should have 50+ players"),
-                () -> {Player found = playerTable.get(100);
+                () -> {
+                    Player found = playerTable.get(100);
                     assertNotNull(found, "Player 100 should exist");
                     assertEquals("Player100", found.name(), "Should find Player100");
                 },
-                () -> {Player found = playerTable.get(125);
+                () -> {
+                    Player found = playerTable.get(125);
                     assertNotNull(found, "Player 125 should exist");
                     assertEquals("Player125", found.name(), "Should find Player125");
                 },
-                () -> {Player found = playerTable.get(149);
+                () -> {
+                    Player found = playerTable.get(149);
                     assertNotNull(found, "Player 149 should exist");
                     assertEquals("Player149", found.name(), "Should find Player149");
                 },
@@ -341,15 +345,18 @@ public class HashTableTest {
         }
 
         assertAll("resize keeps all entries",
-                () -> {Player found = playerTable.get(1);
+                () -> {
+                    Player found = playerTable.get(1);
                     assertNotNull(found, "Player 1 should exist");
                     assertEquals("P1", found.name(), "Should find first player");
                 },
-                () -> {Player found = playerTable.get(30);
+                () -> {
+                    Player found = playerTable.get(30);
                     assertNotNull(found, "Player 30 should exist");
                     assertEquals("P30", found.name(), "Should find middle player");
                 },
-                () -> {Player found = playerTable.get(60);
+                () -> {
+                    Player found = playerTable.get(60);
                     assertNotNull(found, "Player 60 should exist");
                     assertEquals("P60", found.name(), "Should find last player");
                 },
@@ -359,9 +366,7 @@ public class HashTableTest {
 
     // ================= EDGE CASES =================
 
-    /**
-     * Delete all then reinsert
-     */
+
     @Test
     void deleteAndReinsert() {
         Player p1 = makePlayer(10, "A", "QB", 3, 100);
@@ -379,16 +384,14 @@ public class HashTableTest {
         assertAll("delete all and reinsert",
                 () -> assertEquals(1, playerTable.size(), "Size should be 1"),
                 () -> assertEquals(p3, playerTable.get(10), "Should find new player"),
-                () -> {Player found = playerTable.get(10);
+                () -> {
+                    Player found = playerTable.get(10);
                     assertNotNull(found, "Player 10 should exist");
                     assertEquals("A_New", found.name(), "Name should be updated");
                 }
         );
     }
 
-    /**
-     * Many operations to verify overall integrity
-     */
     @Test
     void manyOperations() {
         // Insert 30 players
@@ -408,12 +411,14 @@ public class HashTableTest {
 
         assertAll("many operations integrity",
                 () -> assertEquals(15, playerTable.size(), "Should have 15 players"),
-                () -> {Player found = playerTable.get(1);
+                () -> {
+                    Player found = playerTable.get(1);
                     assertNotNull(found, "Player 1 should exist");
                     assertEquals("Updated1", found.name(), "Player 1 should be updated");
                 },
                 () -> assertNull(playerTable.get(2), "Player 2 should be deleted"),
-                () -> {Player found = playerTable.get(29);
+                () -> {
+                    Player found = playerTable.get(29);
                     assertNotNull(found, "Player 29 should exist");
                     assertEquals("Updated29", found.name(), "Player 29 should be updated");
                 },
@@ -421,9 +426,61 @@ public class HashTableTest {
         );
     }
 
-    /**
-     * Empty table operations
-     */
+    @Test
+    void duplicateKeyDoesNotGrowSize() {
+        playerTable.put(7, makePlayer(7, "A", "QB", 3, 100));
+        playerTable.put(7, makePlayer(7, "A2", "QB", 3, 200));
+
+        assertAll("duplicate key update",
+                () -> assertEquals(1, playerTable.size(), "Size should stay 1"),
+                () -> {
+                    Player found = playerTable.get(7);
+                    assertNotNull(found, "Player 7 should exist");
+                    assertEquals("A2", found.name(), "Value should be replaced");
+                }
+        );
+    }
+
+    @Test
+    void removeHeadOfCollisionChain() {
+        Player p1 = makePlayer(1, "A", "QB", 3, 100);
+        Player p2 = makePlayer(17, "B", "WR", 14, 200);
+        Player p3 = makePlayer(33, "C", "RB", 24, 300);
+
+        playerTable.put(1, p1);
+        playerTable.put(17, p2);
+        playerTable.put(33, p3);
+
+        playerTable.delete(1);
+
+        assertAll("remove head of collision chain",
+                () -> assertNull(playerTable.get(1), "Head should be removed"),
+                () -> assertEquals(p2, playerTable.get(17), "Second item should still exist"),
+                () -> assertEquals(p3, playerTable.get(33), "Third item should still exist"),
+                () -> assertEquals(2, playerTable.size(), "Size should be 2")
+        );
+    }
+
+    @Test
+    void removeTailOfCollisionChain() {
+        Player p1 = makePlayer(1, "A", "QB", 3, 100);
+        Player p2 = makePlayer(17, "B", "WR", 14, 200);
+        Player p3 = makePlayer(33, "C", "RB", 24, 300);
+
+        playerTable.put(1, p1);
+        playerTable.put(17, p2);
+        playerTable.put(33, p3);
+
+        playerTable.delete(33);
+
+        assertAll("remove tail of collision chain",
+                () -> assertEquals(p1, playerTable.get(1), "First item should still exist"),
+                () -> assertEquals(p2, playerTable.get(17), "Second item should still exist"),
+                () -> assertNull(playerTable.get(33), "Tail should be removed"),
+                () -> assertEquals(2, playerTable.size(), "Size should be 2")
+        );
+    }
+
     @Test
     void emptyTable() {
         assertAll("empty table",
@@ -431,7 +488,7 @@ public class HashTableTest {
                 () -> assertEquals(0, playerTable.size(), "Size should be 0"),
                 () -> assertNull(playerTable.get(1), "Get should return null"),
                 () -> assertFalse(playerTable.containsKey(1), "Should not contain any keys"),
-                () -> assertEquals(0.0, playerTable.loadFactor(), "Load factor should be 0")
+                () -> assertEquals(0.0, playerTable.loadFactor(), 0.001, "Load factor should be 0")
         );
     }
 }
