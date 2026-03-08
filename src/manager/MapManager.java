@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  * This Manager uses a HashTable to manage {@link DataType} objects.
  * @param <T> the DataType this manager manages.
  */
-public abstract class MapManager <T extends DataType>  {
+public abstract class MapManager <T extends DataType> implements HashableManager<T>  {
 
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
@@ -87,6 +87,10 @@ public abstract class MapManager <T extends DataType>  {
         }
     }
 
+    @Override
+    public void clearData() {
+        myMap.clear();
+    }
 
     public int getSwaps() {
         return myMap.getSwaps();

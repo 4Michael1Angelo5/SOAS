@@ -7,7 +7,7 @@ package util;
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-public interface MapTable<K,V> {
+public interface Dictionary<K,V> {
 
     void put(K theKey,V value);
 

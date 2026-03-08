@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @author Chris Chun, Ayush.
  * @version 1.1
  */
-public final class PlayerManager extends MapManager<PlayerEnhanced>{
+public final class PlayerManager extends MapManager<PlayerEnhanced> {
 
 
     public PlayerManager() {
@@ -139,4 +139,10 @@ public final class PlayerManager extends MapManager<PlayerEnhanced>{
         }
         return result;
     }
+
+    @Override
+    public Class<?> getManagerClass() {
+        return PlayerManager.class;
+    }
+
 }
