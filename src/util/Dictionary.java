@@ -46,4 +46,6 @@ public interface Dictionary<K,V> extends OperationCountable<V>, Iterable<Entry<K
     double loadFactor();
 
     boolean isEmpty();
+
+    void clear();
 }

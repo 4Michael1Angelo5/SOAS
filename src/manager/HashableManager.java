@@ -63,20 +63,20 @@ public interface HashableManager<T extends DataType> {
 
     // =====================  operation counting =======================
 
-//    /**
-//     * @return the number of swaps performed over a period of method calls
-//     * manipulating data.
-//     */
-//    int getSwaps();
-//
-//    /**
-//     * @return the number of comparisons performed over a period of method calls
-//     * manipulating data.
-//     */
-//    int getComparisons();
-//
-//    /**
-//     * Resets the {@link counter.OperationCounter}
-//     */
-//    void resetCounter();
+    /**
+     * @return the number of swaps performed over a period of method calls
+     * manipulating data.
+     */
+    int getSwaps();
+
+    /**
+     * @return the number of comparisons performed over a period of method calls
+     * manipulating data.
+     */
+    int getComparisons();
+
+    /**
+     * Resets the {@link counter.OperationCounter}
+     */
+    void resetCounter();
 }

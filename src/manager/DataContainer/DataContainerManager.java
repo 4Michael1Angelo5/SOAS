@@ -16,19 +16,19 @@ import java.util.logging.Logger;
 import static java.util.Objects.isNull;
 
 public abstract class DataContainerManager
-        <T extends DataType, M extends DataContainer<T>>
-        extends OperationsManager<T,M>
+        <T extends DataType, C extends DataContainer<T>>
+        extends OperationsManager<T,C>
         implements Manager<T> {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
     private static final Logger logger = Logger.getLogger(DataContainerManager.class.getName());
 
-    private DataLoader2<T,M> myDataLoader;
+    private DataLoader2<T,C> myDataLoader;
 
     private final Class<T> myDataClass;
 
-    public DataContainerManager(Class<T> theDataClass, Supplier<M> theSupplier){
+    public DataContainerManager(Class<T> theDataClass, Supplier<C> theSupplier){
         super(theDataClass, theSupplier.get());
         myDataClass = theDataClass;
         myDataLoader = new DataLoader2<>(theDataClass, theSupplier);
@@ -54,14 +54,15 @@ public abstract class DataContainerManager
     // =======================  getting and setting ===========================
     /**
      * gets the data array.
+     *
      * @return the data array
      */
     @Override
-    public DataContainer<T> getData() {return myData;}
+    public C getData() {return myData;}
 
     public Class<T> getDataClass() {return myDataClass;}
 
-    public void setDataLoader(Class<T> theDataClass, Supplier<M> theSupplier) {
+    public void setDataLoader(Class<T> theDataClass, Supplier<C> theSupplier) {
 
         DataContainer<T> providedContainer = theSupplier.get();
 
@@ -84,7 +85,7 @@ public abstract class DataContainerManager
      */
     @Override
     public void loadCsvData(String theFilePath) throws IOException {
-        M loaderResults = myDataLoader.loadData(theFilePath);
+        C loaderResults = myDataLoader.loadData(theFilePath);
 
         if (!isValidContainer(loaderResults)) {
             // error example:
@@ -162,4 +163,13 @@ public abstract class DataContainerManager
         myData.clear();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return myData.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return myData.size();
+    }
 }

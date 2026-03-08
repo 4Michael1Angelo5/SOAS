@@ -14,10 +14,10 @@ import java.util.function.Supplier;
  * It provides a concrete way of manipulating Drill data.
  * If instantiated with a Priority Queue it allows for
  */
-public class DrillDataContainerManager
+public class DrillDCManager
         extends DataContainerManager<Drill, DataContainer<Drill>> {
 
-    public DrillDataContainerManager(Supplier<DataContainer<Drill>> theSupplier) {
+    public DrillDCManager(Supplier<DataContainer<Drill>> theSupplier) {
         super(Drill.class, theSupplier);
 
     }

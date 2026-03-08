@@ -42,7 +42,6 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
      String testTitle = enqueue.method() + "/" + dequeue.method();
      double avgTime = (enqueue.avgTime() + dequeue.avgTime()) / 2.0;
 
-     //@TODO: maybe we should be taking the average of the two operations counts?
      return new BenchmarkResult(inputSize, testTitle, avgTime, enqueue.operationCounts());
     }
 
