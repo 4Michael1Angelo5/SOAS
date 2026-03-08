@@ -491,4 +491,22 @@ public class HashTableTest {
                 () -> assertEquals(0.0, playerTable.loadFactor(), 0.001, "Load factor should be 0")
         );
     }
+
+    @Test
+    void testReset() {
+        Player p1 = makePlayer(1, "A", "QB", 3, 100);
+        Player p2 = makePlayer(17, "B", "WR", 14, 200);
+        Player p3 = makePlayer(33, "C", "RB", 24, 300);
+
+        playerTable.put(1, p1);
+        playerTable.put(17, p2);
+        playerTable.put(33, p3);
+
+        playerTable.clear();
+        assertAll("Test reset behavior",
+                ()-> assertTrue(playerTable.isEmpty()),
+                ()-> assertEquals(0, playerTable.size())
+        );
+
+    }
 }
