@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 
@@ -82,11 +83,11 @@ public class Main {
                             + ANSI_RESET);
                 }
                 case "3" -> {
-                    int index = PM.searchById(97);
-                    if (index >= 0) {
+                    PlayerEnhanced player = PM.searchById(97);
+                    if (!Objects.isNull(player)) {
                         logger.info(
                                 ANSI_LAVENDER
-                                + "Found: " + PM.get(index)
+                                + "Found: " + player
                                 + ANSI_RESET);
                     }else {
                         logger.info("Cound not find player with id: " + 97);
@@ -131,8 +132,8 @@ public class Main {
                     }
                 }
                 case "6" -> {
-                    ArrayStore<PlayerEnhanced> players = PM.listPlayersByPosition();
-                    logger.info("Successfully sorted players by position");
+                    ArrayStore<PlayerEnhanced> players = PM.listPlayersByPosition(Position.QB);
+                    logger.info("Successfully found all the quarterbacks");
                     for (PlayerEnhanced player: players) {
                         logger.info(player.toString());
                     }

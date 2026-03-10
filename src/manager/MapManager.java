@@ -49,11 +49,11 @@ public abstract class MapManager <T extends DataType> implements HashableManager
         return myMap.delete(dataObj.id());
     }
 
-    public int searchById(int theId) {
+    public T searchById(int theId) {
         if (containsRecord(theId)) {
-            return theId;
+            return myMap.get(theId);
         }
-        return -1;
+        return null;
     }
 
     public void updateRecord(T theNewRecord) {
