@@ -1,7 +1,12 @@
+import manager.PlayerManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import types.Player;
+import types.PlayerEnhanced;
+import types.Position;
 import util.HashTable;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,11 +17,18 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class HashTableTest {
 
+    final static String PLAYER_50 = "data/seahawks_players_50.csv";
+    final static String PLAYER_500 = "data/seahawks_players_500.csv";
+    final static String PLAYER_5000 = "data/seahawks_players_5000.csv";
+
     private HashTable<Integer, Player> playerTable;
+    private PlayerManager PM;
+
 
     @BeforeEach
     void setup() {
         playerTable = new HashTable<>(Integer.class, Player.class);
+        PM = new PlayerManager();
     }
 
 
@@ -330,7 +342,8 @@ public class HashTableTest {
                     assertNotNull(found, "Player 149 should exist");
                     assertEquals("Player149", found.name(), "Should find Player149");
                 },
-                () -> assertTrue(playerTable.loadFactor() > 0.0, "Load factor should be positive")
+                () -> assertTrue(playerTable.loadFactor() > 0.0, "Load factor should be positive"),
+                () -> assertTrue(playerTable.loadFactor() <= 0.75)
         );
     }
 
@@ -505,8 +518,127 @@ public class HashTableTest {
         playerTable.clear();
         assertAll("Test reset behavior",
                 ()-> assertTrue(playerTable.isEmpty()),
-                ()-> assertEquals(0, playerTable.size())
+                ()-> assertEquals(0, playerTable.size()),
+                () -> assertNull(playerTable.get(1)),
+                () -> assertNull(playerTable.get(17)),
+                () -> assertNull(playerTable.get(33))
+
+
         );
+
+    }
+
+    // ==============  TEST PlayerManager API ==============
+
+    @Test
+    void testAddPlayer() {
+        PM.addPlayer(new PlayerEnhanced(1, "Rocket Raccoon", Position.QB, 3200, 28, false));
+        PM.addPlayer(new PlayerEnhanced(2, "Arnold S.", Position.RB, 1250, 12, false));
+        PM.addPlayer(new PlayerEnhanced(3, "Green Lantern", Position.WR, 980, 10, false));
+        PM.addPlayer(new PlayerEnhanced(4, "Darth Vader", Position.TE, 650, 7, true));
+        PM.addPlayer(new PlayerEnhanced(5, "Not me", Position.LB, 0, 0, false));
+
+        assertAll("Test adding players",
+                () -> assertFalse(PM.getData().isEmpty()),
+                () -> assertEquals(5, PM.getData().size()),
+                () -> assertTrue(PM.getData().containsKey(1)),
+                () -> assertTrue(PM.getData().containsKey(2)),
+                () -> assertTrue(PM.getData().containsKey(3)),
+                () -> assertTrue(PM.getData().containsKey(4)),
+                () -> assertTrue(PM.getData().containsKey(5)),
+                () -> assertFalse(PM.getData().containsKey(6))
+        );
+    }
+
+    @Test
+    void testRMLoadsData() {
+        String[] csvData = {PLAYER_50, PLAYER_500, PLAYER_5000};
+        int[] sizes = {50,500,5000};
+
+        for (int i =0; i < csvData.length; i++) {
+
+            final String csv = csvData[i];
+            final int size = sizes[i];
+            assertAll("Test CSV loading",
+                    () -> assertDoesNotThrow(()->PM.loadCsvData(csv),
+                            "Manager/ loader should not throw IOexceptions" ),
+                    () -> assertEquals(size, PM.getData().size()),
+                    () -> assertFalse(PM.getData().isEmpty())
+                    );
+
+        }
+    }
+
+    @Test
+    void testGetTotalYardsByPosition() {
+
+        // test total yards for quarter back position.
+        // summing up all the number from 1 to 100
+        // is the arithmetic sum n(n+1)/2 = 5050.
+
+        for (int i = 1; i <= 100 ; i++) {
+            PM.addPlayer(new PlayerEnhanced(
+            i,                   // id
+            "player " + i,       // name
+            Position.QB,         // position
+            i,                   // yards
+            i,                   // touchdowns
+            false));             // injured
+        }
+
+        assertEquals(5050, PM.getTotalYardsByPosition(Position.QB));
+    }
+
+    @Test
+    void testSearchByPlayerId() {
+
+        String player = "player ";
+
+        for (int i = 1; i <= 100 ; i++) {
+            PM.addPlayer(new PlayerEnhanced(
+                    i,
+                    player + i, //name
+                    Position.QB,         // position
+                    i,                   // yards
+                    i,                   // touchdowns
+                    false));             // injured
+        }
+
+        for (int i = 1; i <= 100 ; i++) {
+            final int expected = i;
+            final String exptectedPlayer = player + i;
+            final boolean isInjured = false;
+            final PlayerEnhanced playerFound = PM.searchByPlayerId(expected);
+
+            assertAll("test searh for player",
+                    () -> assertNotNull(playerFound),
+                    () -> assertEquals(expected,playerFound.player_id()),
+                    () -> assertEquals(expected, playerFound.yards()),
+                    () -> assertEquals(expected, playerFound.touchdowns()),
+                    () -> assertFalse(isInjured),
+                    () -> assertEquals(Position.QB, playerFound.position())
+                    );
+        }
+    }
+
+    //edge case
+    @Test
+    void testLargeIds() {
+        PM.addPlayer(new PlayerEnhanced(Integer.MAX_VALUE,
+                "Rocket Raccoon",
+                Position.QB,
+                3200,
+                28, false));
+        PM.addPlayer(new PlayerEnhanced(Integer.MIN_VALUE,
+                "Rocky Balboa",
+                Position.QB,
+                3200,
+                28, false));
+
+        assertAll("Testing Edge case for max/min integers id's",
+                () -> assertEquals("Rocket Raccoon", PM.searchById(Integer.MAX_VALUE).name()),
+                () -> assertEquals("Rocky Balboa", PM.searchById(Integer.MIN_VALUE).name())
+                );
 
     }
 }

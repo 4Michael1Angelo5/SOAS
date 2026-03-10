@@ -40,7 +40,7 @@ public final class PlayerManager extends MapManager<PlayerEnhanced> {
      * @param theId the id of the player to search for.
      * @return theId if found and -1 otherwise.
      */
-    public int searchByPlayerId(int theId) {
+    public PlayerEnhanced searchByPlayerId(int theId) {
         return searchById(theId);
     }
 
@@ -71,31 +71,29 @@ public final class PlayerManager extends MapManager<PlayerEnhanced> {
     }
 
     /**
-     * list players position
+     * Filters the list of players to only include players with the matching position.
+     * @param position the filtering argument to list the players.
      * @return an Array of the players sorted lexigraphically by position.
      */
-    public ArrayStore<PlayerEnhanced> listPlayersByPosition() {
-
-        final BinaryHeapPQ<PlayerEnhanced> playersByPosition =
-                new BinaryHeapPQ<>(PlayerEnhanced.class,
-                        Comparator.comparing(PlayerEnhanced::position));
+    public ArrayStore<PlayerEnhanced> listPlayersByPosition(Position position) {
 
         final ArrayStore<types.PlayerEnhanced> result =
                 new ArrayStore<>(PlayerEnhanced.class,64);
 
         for (Entry<Integer, PlayerEnhanced> entry : getData()) {
 
-            playersByPosition.insert(entry.value());
-
-        }
-
-        while (!playersByPosition.isEmpty()) {
-            result.add(playersByPosition.extract());
+            if (Objects.equals(entry.value().position(), position)) {
+                result.add(entry.value());
+            }
         }
 
         return result;
     }
 
+    /**
+     *
+     * @return the number of injured players
+     */
     public int countInjuredPlayers() {
         int count = 0;
 
@@ -108,6 +106,10 @@ public final class PlayerManager extends MapManager<PlayerEnhanced> {
         return count;
     }
 
+    /**
+     * @return a hashmap where the keys are the positions and the values are total yards
+     * by position.
+     */
     public HashTable<Position, Integer> computeTotalYardsByPosition() {
 
         HashTable<Position, Integer> table = new HashTable<>(Position.class, Integer.class);
