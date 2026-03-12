@@ -17,11 +17,11 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Role Assignments
 
-| Role | Member(s) | Primary Responsibilities |
-| :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris | Implemented the `MapManager`, `HashTableBenchMark`, and `HashableManager` |
-| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `HashTableTest` class|
-| **Analyst: Benchmark + Analysis** | Chris and Ayush | Ayush implemented the Results and `OperationCounter`. Ayush analyzed the results, and documented the performance of the hash table operations in the README.|
+| Role | Member(s) | Primary Responsibilities                                                                                                                                     |
+| :--- | :--- |:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Implementer: Core Logic** | Chris | Implemented the `MapManager`, `HashTableBenchMark`, and `HashableManager`                                                                                    |
+| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `HashTableTest` class                                                                                          |
+| **Analyst: Benchmark + Analysis** | Chris and Ayush | Chris implemented the Results and `OperationCounter`. Ayush analyzed the results, and documented the performance of the hash table operations in the README. |
 ---
 
 ## Analysis Section
