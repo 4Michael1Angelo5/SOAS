@@ -24,7 +24,7 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 | **Analyst: Benchmark + Analysis** | Chris and Ayush | Chris implemented the Results and `OperationCounter`. Ayush analyzed the results, and documented the performance of the hash table operations in the README. |
 ---
 
-## Analysis Section
+## Analysis Section:
 
 ### 1. How did collision frequency change as size increased?
 
