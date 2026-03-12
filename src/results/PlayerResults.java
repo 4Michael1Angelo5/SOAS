@@ -40,7 +40,7 @@ public final class PlayerResults extends HashTableBenchMark<PlayerEnhanced, Play
 
     public static void main(String[] args) throws IOException {
         PlayerManager PM = new PlayerManager();
-        PlayerResults results = new PlayerResults(PM, ExperimentFormat.BENCHMARK_NO_OPS);
+        PlayerResults results = new PlayerResults(PM, ExperimentFormat.BENCHMARK_W_OPS);
         results.runAllExperiments();
     }
 

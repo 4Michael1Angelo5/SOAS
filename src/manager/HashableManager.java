@@ -79,4 +79,14 @@ public interface HashableManager<T extends DataType> {
      * Resets the {@link counter.OperationCounter}
      */
     void resetCounter();
+
+    // =====================  hash table metrics =======================
+
+    default double getLoadFactor() {
+        return 0.0;
+    }
+
+    default int getCollisions() {
+        return 0;
+    }
 }

@@ -3,6 +3,7 @@ package util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import counter.OperationCounter;
 import java.util.function.Predicate;
 
 /**
@@ -12,6 +13,8 @@ import java.util.function.Predicate;
 public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     private static final int DEFAULT_CAPACITY = 16;
+
+    private final OperationCounter myCounter = new OperationCounter();
 
     private T[] myData;
     final private Class<T> dataClass;
@@ -38,6 +41,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
     // ================== getting & setting ======================
     @Override
     public void set(int theIndex, T theData) {
+        myCounter.increment("comparisons");
         if (theIndex < 0 || theIndex >= size){
             throw new IndexOutOfBoundsException("Index out of bounds");
         }
@@ -71,6 +75,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     @Override
     public void add(int theIndex, T theVal) {
+        myCounter.increment("comparisons");
         // 1. Bounds check
         if (theIndex < 0 || theIndex > size) {
             throw new IndexOutOfBoundsException(
@@ -97,6 +102,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
 
     public T get(int theIndex) {
+        myCounter.increment("comparisons");
         if (theIndex >= size || theIndex < 0) {
             throw new IndexOutOfBoundsException("Index out of bounds");
         }
@@ -147,9 +153,9 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     @Override
     public T removeAt(int theIndex) {
-
         T theItemRemoved = get(theIndex);
 
+        myCounter.increment("comparisons");
         for (int i = theIndex; i < size-1; i++) {
             myData[i] = myData[i+1];
         }
@@ -169,6 +175,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
         }
 
         int index = -1;
+        myCounter.increment("comparisons");
         for (int i =0; i < size; i++) {
             if (thePredicate.test( myData[i])) {
                 return i;
@@ -180,6 +187,7 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
     public int indexOf(T theItem) {
         int idx = -1;
 
+        myCounter.increment("comparisons");
         for (int i = 0; i < size; i++) {
             if (Objects.equals(theItem, myData[i])) {
                 idx = i;
@@ -244,16 +252,16 @@ public final class ArrayStore<T> implements DataContainer<T>, Indexable<T> {
 
     @Override
     public int getSwaps() {
-        return 0;
+        return myCounter.getCount("swaps");
     }
 
     @Override
     public int getComparisons() {
-        return 0;
+        return myCounter.getCount("comparisons");
     }
 
     @Override
     public void resetCounter() {
-
+        myCounter.resetAll();
     }
 }

@@ -24,7 +24,7 @@ public abstract class MapManager <T extends DataType> implements HashableManager
 
 
     public MapManager(Class<T> theDataType) {
-        myMap = new HashTable<>(Integer.class, theDataType);
+        myMap = new HashTable<>(Integer.class, theDataType, 5001);
         myDataLoader = new DataLoader<>(theDataType, () -> new ArrayStore<>(theDataType));
     }
 
@@ -104,4 +104,10 @@ public abstract class MapManager <T extends DataType> implements HashableManager
     public void resetCounter() {
         myMap.resetCounter();
     }
+
+    @Override
+    public double getLoadFactor() {return myMap.loadFactor();}
+
+    @Override
+    public int getCollisions() {return myMap.getCollisions();}
 }

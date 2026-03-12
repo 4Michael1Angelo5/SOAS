@@ -187,7 +187,8 @@ public class TransactionResults extends Results<Transaction, TransactionFeed> {
                         this::searchListNTimes);
 
         return new BenchmarkResult(inputSize, operationName, avgTime,
-                new OperationCounts(myManager.getSwaps(), myExperiments.getComparisons()));
+                new OperationCounts(myManager.getSwaps(), myExperiments.getComparisons(),  myManager.getLoadFactor(),
+                        myManager.getCollisions()));
     }
 
 

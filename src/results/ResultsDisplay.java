@@ -63,12 +63,12 @@ public class ResultsDisplay {
         switch (myFormat) {
 
             case BENCHMARK_W_OPS ->
-                    row = String.format("%-10s %-15s %-15.6f %-15s %-10s",
+                    row = String.format("%-10s %-15s %-15.6f %-15.6f %-10s",
                             inputSize,
                             operationName,
                             avgTime,
-                            theResult.operationCounts().comparisons(),
-                            theResult.operationCounts().swaps()
+                            theResult.operationCounts().loadFactor(),
+                            theResult.operationCounts().collisions()
                     );
 
             case BENCHMARK_NO_OPS ->
@@ -91,7 +91,7 @@ public class ResultsDisplay {
                             "Size",
                             "Operation",
                             "Avg Time (ms)",
-                            "comparisons", "swaps");
+                            "Load Factor", "Collision");
             case BENCHMARK_NO_OPS -> columnHeader =
                     String.format("%-10s %-15s %-15s%n",
                             "Size",

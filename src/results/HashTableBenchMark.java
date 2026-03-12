@@ -232,8 +232,13 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
         return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
-    private OperationCounts getOpCounts() {
-        return new OperationCounts(myManager.getSwaps(), myManager.getComparisons());
+    public OperationCounts getOpCounts() {
+        return new OperationCounts(
+                myManager.getSwaps(),
+                myManager.getComparisons(),
+                myManager.getLoadFactor(),
+                myManager.getCollisions()
+        );
     }
 
     //========================= Displaying Results =================================

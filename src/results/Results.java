@@ -301,7 +301,12 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
 
     // =============================  utlility  ====================================
     public OperationCounts getOpCounts() {
-        return new OperationCounts(myManager.getSwaps(), myManager.getComparisons());
+        return new OperationCounts(
+                myManager.getSwaps(),
+                myManager.getComparisons(),
+                myManager.getLoadFactor(),
+                myManager.getCollisions()
+        );
     }
 
     /**
@@ -339,8 +344,8 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
                     inputSize,
                     operationName,
                     avgTime,
-                    theResult.operationCounts().comparisons(),
-                    theResult.operationCounts().swaps()
+                    theResult.operationCounts().loadFactor(),
+                    theResult.operationCounts().collisions()
                     );
 
             case BENCHMARK_NO_OPS ->
@@ -362,7 +367,7 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
                             "Size",
                             "Operation",
                             "Avg Time (ms)",
-                            "comparisons", "swaps");
+                            "Load Factor", "Collisions");
             case BENCHMARK_NO_OPS -> columnHeader =
                     String.format("%-10s %-15s %-15s%n",
                             "Size",

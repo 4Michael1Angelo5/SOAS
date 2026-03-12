@@ -71,6 +71,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         myValueClass = theValueClass;
     }
 
+
     // ======================  getters/ setters ===========================
 
     @Override
@@ -95,6 +96,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
     @Override
     public V get(K key) {
+        myCounter.increment("comparisons");
         // 1) hash the key and get the index
         int bucketIndex = getKeyIndex(key);
         SinglyLinkedList<Entry<K,V>> bucketList = myTable.get(bucketIndex);
@@ -103,6 +105,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         // if it is not empty iterate over all entries in the bucket
         // and return it if present.
         for (Entry<K,V> entry: bucketList) {
+            myCounter.increment("comparisons");
             if (Objects.equals(entry.key(), key)) {
                 return entry.value();
             }
@@ -116,6 +119,8 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
     @Override
     public void put(K theKey, V theValue) {
+        myCounter.increment("comparisons");
+
         // 1) create new Entry.
         Entry<K,V> theNewEntry = new Entry<>(theKey, theValue);
 
@@ -140,13 +145,13 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
                 resize();
             }
         }
-
     }
 
     // ======================  removing ===========================
 
     @Override
     public V delete(K key) {
+        myCounter.increment("comparisons");
 
         // 1) check if the key exists in the HashTable
         if (!containsKey(key)) {
@@ -166,11 +171,14 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
     @Override
     public boolean containsKey(K key) {
+        myCounter.increment("comparisons");
+
         // 1) get bucket index of key
         int bucketIndex = getKeyIndex(key);
         SinglyLinkedList<Entry<K,V>> bucketList = myTable.get(bucketIndex);
 
         for (Entry<K,V> entry: bucketList) {
+            myCounter.increment("comparisons");
             if (Objects.equals(entry.key(), key)) {
                 return true;
             }
@@ -264,6 +272,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
             Entry<K,V> theNewEntry) {
 
         for (Entry<K,V>  currentEntry : tableListEntry) {
+            myCounter.increment("comparisons");
             if (Objects.equals(theNewEntry.key(),currentEntry.key())) {
                 currentEntry.setEntry(theNewEntry.value());
                 return true;
@@ -285,6 +294,23 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         myTable = temp.myTable;
         myLoadFactor = temp.loadFactor();
         size = temp.size;
+    }
+
+    public int getCollisions() {
+        int collisions = 0;
+
+        // iterate over all buckets in the hash table
+        for (int i = 0; i < myTable.size(); i++) {
+            SinglyLinkedList<Entry<K,V>> bucket = myTable.get(i);
+
+            // if a bucket has more than 1 entry, keys mapped to the same
+            // index - every entry beyond the first is a collision
+            if (bucket.size() > 1) {
+                collisions += bucket.size() - 1;
+            }
+        }
+
+        return collisions;
     }
 
     @Override

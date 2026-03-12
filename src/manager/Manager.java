@@ -82,4 +82,14 @@ public interface Manager<T extends DataType> {
 
     void resetCounter();
 
+    // =====================  hash table metrics =======================
+
+    default double getLoadFactor() {
+        return 0.0;
+    }
+
+    default int getCollisions() {
+        return 0;
+    }
+
 }
