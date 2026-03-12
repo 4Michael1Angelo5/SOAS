@@ -19,9 +19,9 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 | Role | Member(s) | Primary Responsibilities |
 | :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris | Implemented the `DrillManager`, `BinaryHeapPQ`, and `DrillSimulator` |
-| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `DrillManager`, and `BinaryHeapPQ` class|
-| **Analyst: Benchmark + Analysis** | Chris and Ayush | Ayush implemented the Results and `OperationCounter`. Chris drew on these results and reported them in the README and the `DrillSimulator`|
+| **Implementer: Core Logic** | Chris | Implemented the `MapManager`, `HashTableBenchMark`, and `HashableManager` |
+| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `HashTableTest` class|
+| **Analyst: Benchmark + Analysis** | Chris and Ayush | Ayush implemented the Results and `OperationCounter`. Ayush analyzed the results, and documented the performance of the hash table operations in the README.|
 ---
 
 ## Analysis Section
@@ -246,21 +246,29 @@ The project is organized with separate source and test roots to maintain clean c
     * manager/
       * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction 
             Manager/ TransactionFeed, etc.
+      * `MapManager`: abstract parent class defining common behavior to all future managers using HashTable-based storage, i.e.,
+            PlayerManager, etc.
       * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
       * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
       * `UndoManager`:  concrete child class of `DataManager` that brings specific functionality needed to undo actions from the other managers.
       * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line.
       * `DrillManager`: concrete child class of the `DataManager` that brings specific functionality needed to manage Seahawks Drills.
+      * `PlayerManager`: concrete child class of `MapManager` that brings specific functionality needed to manage Seahawks players.
+      * `HashableManager`: interface defining contract for all managers using HashTable-based storage.
+      * `Manager`: interface defining contract for all managers using DataContainer-based storage.
     * results/
         * `ExperimentResults.java`: A simple Record class used to report a specific result from a benchmark test. 
         * `Results.java`: Abstract parent class defining all common behavior to concrete Benchmark Results classes: `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`. It automates experiments across 50, 500, and 5000 records,
         * `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`: Concrete child classes of the `Results` class that handle specific testing needed for managing their respective `DataTypes`.
         * `Experiment.java`: Interface defining contract for all Results classes.
-        * 
-          calculating the average execution time (ms) for Add, Remove, and Search operations.
+        * calculating the average execution time (ms) for Add, Remove, and Search operations.
+        * `HashTableBenchMark`: Abstract parent class defining common behavior for all HashTable-based benchmark experiments, automating setup, execution, and results display across PlayerResults and future hash-based benchmarks.
+        * `PlayerResults`: Concrete child class of HashTableBenchMark that handles specific benchmark testing for PlayerManager using HashTable across 50, 500, and 5000 player datasets.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
         * `Player.java`, `Drill.java`, `Transaction.java`, `Action.java`, `FanRequest.java`: Data models.
+        * `PlayerEnhanced.java`: Record class for storing enhanced Seahawk player data, including player ID, name, position, yards, touchdowns, and injury status.
+        * `Position.java`: Enum class that lists the supported player positions, such as `QB`, `WR`, `RB`, and `CB`.
         * `UndoRecord.java`: Record class that links an `Action` to its corresponding inverse operation/previous state. 
         * `ActionType.java`: An Enum class that lists all of the supported  `Action` types, e.g., `ADD_PLAYER`, `REMOVE_PLAYER.`
     * simulator/
@@ -276,6 +284,7 @@ The project is organized with separate source and test roots to maintain clean c
       * `ArrayStack.java`: An array-based implementation of a stack.
       * `LinkedQueue.java`: A singly linked list implementation of a Queue.
       * `BinaryHeapPQ.java`: A Binary Heap based implemenation of a Priority Queue.
+      * `HashTable.java`: A hash table implementation that stores key–value pairs using chaining with singly linked lists to handle collisions.
     * `Main` - CLI-driven menu interface for interacting with the SOAS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
