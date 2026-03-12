@@ -26,150 +26,57 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Analysis Section
 
+### 1. How did collision frequency change as size increased?
 
-1) **Why does a heap-based PQ support efficient scheduling?**
+Analysis...
 
-A heap-based priority queue supports efficient scheduling in $O(\log n)$ time. Each insertion 
-and removal of an element in the priority queue must, in the worst case, compare each of its children 
-for removal, or compare the element being added to its parent for insertion. The number of comparisons 
-scales linearly with the height of the tree, and the tree height is given by $\log_2(n)$. Therefore,
-the cost of $n$ insertions is $n \log(n)$. However, insertion efficiency can be improved to $O(n)$ 
-using the build heap procedure by building the entire heap from an array in one pass, performing 
-heapify-down when necessary, instead of adding one element at a time.
+---
 
-The priority queue's main strength is that it can retrieve the element with the highest priority 
-in $O(1)$ constant time. This supports efficient scheduling by organizing which task should be 
-performed first without the need to search the heap for what should come next. The trade-off 
-is that, to maintain this efficiency, we pay the price of $O(\log n)$ insertion and removal.
+### 2. How did load factor affect runtime?
 
-2) **Compare FIFO vs Priority scheduling: what is gained, what is lost?**
+Analysis...
 
-In a regular queue that processes items in first-in-first-out (FIFO) order, we gain back the $O(1)$ 
-efficiency lost in a priority queue in the insertion and removal operations, but we lose the ability 
-to retrieve the item with the highest priority in constant time.
+---
 
-3) **How did comparisons/swaps scale from 50 → 5000?**
+### 3. Did results match expected O(1) behavior?
 
-Our benchmark testing results revealed that the number of comparisons and swaps scales in 
-$n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
+Analysis...
 
-| Size  | Operation | Avg Time (ms) | Comparisons       | swaps   |
-|-------|-----------|---------------|-------------------|---------|
-| 50    | insert    | 0.042163      | 84                | 36      |
-| 50    | extract   | 0.050867      | 301               | 173     |
-| 500   | insert    | 0.102023      | 874               | 376     |
-| 500   | extract   | 0.323800      | 5447              | 2938    |
-| 5000  | insert    | 0.367923      | 9054              | 4058    |
-| 5000  | extract   | 1.581247      | 78381             | 41387   |
+---
 
-These results are consitent with the expeceted $n\log(n)$ behavior for insertion and extraction.
-If the time complexity is $O(n \log n)$, then when the input size grows, the work should grow by about the same ratio as:
+### 4. At what load factor did performance degrade?
 
-$\frac{n_2 \log n_2}{n_1 \log n_1}$
+Analysis...
 
-We compared expected growth vs actual operation growth.
+---
 
-50 → 500
+### 5. What tradeoffs exist between chaining and probing?
 
-Expected (from $n \log n$):
+Discuss the advantages and disadvantages of different collision resolution strategies.
 
-$\frac{500 \log_2 500}{50 \log_2 50} = \frac{4485}{282} \approx 15.9$
+- **Chaining**
+  - Pros:
+  - Cons:
 
-Actual:
-- Insert comparisons: $874 / 84 \approx 10.4$
-- Extract comparisons: $5447 / 301 \approx 18.1$
+- **Probing (Open Addressing)**
+  - Pros:
+  - Cons:
 
-These are in the same general range as 15.9, so that matches the $n \log n$ pattern. 
-Insert consistently runs better than the predicted ratio, this is likely because 
-insertions often don't travel all the way up the tree, so the average case is better 
-than the theoretical bound suggests.
+Explain why the chosen strategy works well for this implementation.
 
-500 → 5000
+---
 
-Expected:
+### 6. Compare performance with PA1 (array) and PA2 (linked list) by filling the following table:
 
-$\frac{5000 \log_2 5000}{500 \log_2 500} = \frac{61450}{4485} \approx 13.7$
+| Structure | Lookup Time | Memory (space + overhead) | Best Use Case |
+|----------|-------------|-------------|-------------|
+| Array (PA1) | | | |
+| Linked List (PA2) | | | |
+| Hash Table (PA5) | | | |
 
-Actual:
-- Insert comparisons: $9054 / 874 \approx 10.4$
-- Extract comparisons: $78381 / 5447 \approx 14.4$
+Analysis...
 
-Again, the numbers are close to the expected 13.7. So overall, the operation counts grow close to what $n \log n$ predicts. 
-So we can say that insert and extract do follow $O(n \log n)$.
-
-Also, operation counts give a clearer picture than time because runtime 
-can change depending on JVM warmup or other background factors, but 
-comparisons and swaps directly measure the actual work the heap is doing.
-
-4) **Did you observe any evidence of starvation?**
-
-We observed significant starvation — drills being continuously denied to be processed because they 
-had a lower priority. We conducted simulations on sample sizes of 50, 500, and 5000, using the 
-following sorting logic to prioritize drills:
-- Higher urgency first
-- Earlier `install_by_day` first
-- Lower `fatigue_cost` preferred (tie-breaker)
-- Shorter duration preferred (final tie-breaker)
-
-The simulation compared wait times required to process Seahawks drills between FIFO behavior Queues 
-and Priority Queues. The results from the sample size of 5000 revealed that the average wait time for
-the Queue was 34,797.50 minutes. The average wait time for the Priority Queue was 34,816.91 minutes,
-so on average, each drill in the Priority Queue experienced a longer wait time compared to the Queue.
-
-For example, the drill that suffered the most was:
-```json
-{
-  "drill_id": 2091,
-  "name": "Run Fits 91",
-  "urgency": 1,
-  "duration_min": 12,
-  "fatigue_cost": 7,
-  "install_by_day": 7
-}
-```
-
-"Run Fits 91" was processed 67,792 minutes later than it would have been processed in a regular 
-queue. This drill was pushed back 4,863 places in line, meaning it was originally in line at position
-91, but instead, 4,953 other drills were processed before this drill. It had a Z-time-score of -2.39,
-meaning this drill's wait time was 2.39 standard deviations worse than the average change in wait time.
-It had a Z-position-score of -2.39, meaning this drill's change in position was 2.39 standard 
-deviations worse than the average change in position.
-
-However, the biggest winner was:
-```json
-{
-  "drill_id": 6927,
-  "name": "Screen Defense 4927",
-  "urgency": 5,
-  "duration_min": 20,
-  "fatigue_cost": 1,
-  "install_by_day": 1
-}
-```
-
-"Screen Defense 4927" was processed 68,397 minutes sooner than it would have been processed in a regular
-queue. This drill was able to skip 4,912 places in line, meaning it was originally in line at position 
-4,927, but because it had a high priority, it jumped to position 15! It had a Z-time-score of 2.41, 
-meaning this drill's wait time was 2.41 standard deviations better than the average change in wait time.
-It had a Z-position-score of 2.41, meaning this drill's change in position was 2.41 standard deviations 
-better than the average change in position.
-
-Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its 
-Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a 
-linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected 
-drills. Meaning that the top 1% of drills that experienced the greatest change in wait time, their deltas
-grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change
-in wait times. This result is statistically significant because it suggests that as the input size tends 
-to infinity, the most affected drills' change in position and time grows without bound.
-
-5) **What would you change in your priority rule to improve fairness?**
-
-The results demonstrated that the sorting strategy results in significant starvation of lower-priority 
-drills. To counteract this, an effective strategy would be to introduce aging. As a drill that gets 
-continually pushed further down the queue, we could introduce another field in the `Drills` class that 
-keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, 
-its priority increases, preventing the drill from being skipped indefinitely. This would effectively 
-balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
+---
 
 # Reflection and Team Process
 
