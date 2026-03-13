@@ -54,7 +54,7 @@ it, it internally calls `hashCode()` on that integer. For integer types in Java,
 gives us back 1001, player ID 1002 gives us 1002, and so on. We can then take that 
 value mod the table capacity to get the bucket index.
 
-### Why we used `& 0x7FFFFFFF` instead of `Math.abs()`
+### Why we used & 0x7FFFFFFF instead of Math.abs():
 
 At first it seems like `Math.abs()` would be the simple way to make sure the hash 
 result is always positive. But there is an edge case where it completely breaks.
