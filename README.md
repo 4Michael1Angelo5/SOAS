@@ -114,7 +114,7 @@ in sequential order, they spread out evenly across the table when the hash
 function is calculating the bucket index.
 
 Another reason collisions stayed at zero was because the table resizes when the load 
-factor exceeded 0.75. Thats keept the table from becoming too full and it helped maintain
+factor exceeded 0.75. Thats kept the table from becoming too full and it helped maintain
 enough buckets for the keys. Since the table kept on expanding when more data was added,
 it prevented multiple keys from being placed in the same bucket.
 
@@ -126,7 +126,7 @@ where operations like add and remove run in constant (O(1)) time.
 ---
 ### 2. How did load factor affect runtime?
 
-Our table started with a initial capacity of 16 buckets. As we kept inserting players, the 
+Our table started with an initial capacity of 16 buckets. As we kept inserting players, the 
 load factor kept climbing until it hit 0.75, at that point the table doubled its 
 size and rehashed everything into the new table. This happened multiple times across 
 each dataset.
@@ -158,13 +158,13 @@ Yes, the results did match what we were expecting. Looking at the numbers, when 
 50 players to 5000 players, that was a 100x increase in data. But the times did not 
 go up 100x.
 
-For search, it went from 0.027ms to 0.158ms. That is only about a 6x increase for 
-100x more data. For remove, it went from 0.057ms to 0.241ms, which is about a 4x 
+For search, it went from 0.027ms to 0.159ms. That is only about a 6x increase for 
+100x more data. For remove, it went from 0.057ms to 0.244ms, which is about a 4x 
 increase. If the hash table was slow like a simple array scan, those numbers would 
 have gone up way more.
 
-Insert was bit different because it jumped from 0.089ms to 0.295ms. The jump at 5000 
-was mostly due to the table resizing when the load factor approached 0.5. That 
+Insert was bit different because it jumped from 0.089ms to 0.322ms. The jump at 5000 
+was mostly due to the table resizing when the load factor approached 0.75. That 
 resize moves all the entries into a bigger table, which adds extra work. Without that, the 
 insert would have stayed more consistent across all three sizes.
 
@@ -192,7 +192,7 @@ not from any real degradation in lookup speed.
 Discuss the advantages and disadvantages of different collision resolution strategies:
 - **Chaining**
   - Pros: 
-      - It handle a lot of collisions without breaking the table.
+      - It can handle a lot of collisions without breaking the table.
       - The table can store more elements than the number of buckets because each bucket can hold a linked list.
       - Insertions and deletions are easier since elements can just be added or removed from the list.
   - Cons:
@@ -222,15 +222,18 @@ and remove players during a live game, chaining was the easiest and most efficie
 | Structure | Lookup Time | Memory (space + overhead) | Best Use Case |
 |----------|-------------|-------------|-------------|
 | Array (PA1) | O(n) ~0.2ms at 5000 |  Low, all stored together in memory | Small datasets, index-based access |
-| Linked List (PA2) ~189.3ms at 5000| O(n) | Higher, each node has a pointer | Frequent insert and deletions |
+| Linked List (PA2) | O(n) ~189.3ms at 5000 | Higher, each node has a pointer | Frequent insertions and deletions |
 | Hash Table (PA5) | O(1) ~0.159ms at 5000 | Higher, buckets and linked lists | Fast lookup by key, large datasets |
 
 In PA1 and PA2, finding a player by ID would check each entry one by one until we found the right one.
 For 5000 players, that can take up to 5000 checks in the worst case, and that's really slow. With the hash 
 table in PA5, we take the player ID and use the hash function to go straight to the correct bucket. In
-most cases, this will only takes one step, so the lookup time is about O(1) on average. That is why the
-hash table works best here. The Seahawks analytics team would need player stats quickly during a game, 
-and the hash table allows us to find players much faster than using an array or a linked list.
+most cases, this will only takes one step, so the lookup time is about O(1) on average. 
+
+To put in different perspective, the linked list from PA2 took 189.3ms to search 
+through 5000 players. The hash table did the same search in 0.159ms. That is over 
+1000x faster. In a live game, situation where you need stats of a player instantly, that 
+difference is huge. That's why the hash table is the right choice here.
 
 ---
 
