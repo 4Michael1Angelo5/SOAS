@@ -48,9 +48,61 @@ returns the integer value itself, this simplifies to:
 ```
 index = playerId % capacity
 ```
+`Objects.hash()` is a built in Java utility method. When you pass an integer key to 
+it, it internally calls `hashCode()` on that integer. For integer types in Java, 
+`hashCode()` just returns the integer value itself. So passing in player ID 1001 
+gives us back 1001, player ID 1002 gives us 1002, and so on. We can then take that 
+value mod the table capacity to get the bucket index.
+
+### Why we used `& 0x7FFFFFFF` instead of `Math.abs()`
+
+At first it seems like `Math.abs()` would be the simple way to make sure the hash 
+result is always positive. But there is an edge case where it completely breaks.
+Java uses Two's Complement to represent integers. Because of this, the range of a 
+32-bit signed integer is not symmetrical:
+
+- Maximum positive value: 2,147,483,647 (2^31 - 1)
+- Minimum negative value: -2,147,483,648 (-2^31)
+
+The negative side can hold one more value than the positive side can. This will cause 
+a problem when we try to use `Math.abs()` on the most negative number possible.
+When you call `Math.abs(-2,147,483,648)`, Java tries to flip it to positive 
+2,147,483,648. But that number is too big to fit in an int. The value wraps 
+all the way around and comes back out as -2,147,483,648 again. So 
+`Math.abs(Integer.MIN_VALUE)` returns a negative number, which would give us an 
+invalid bucket index.
+
+The bitmask `& 0x7FFFFFFF` fixes this completely. Instead of doing any arithmetic, 
+it just forces the sign bit to 0. No addition, no overflow, and no wrapping. The result 
+is always a valid positive number no matter what.
+
+`0x7FFFFFFF` in binary looks like this:
+```
+0 1111111 11111111 11111111 11111111
+```
+Every bit is 1 except the leftmost sign bit which is 0. When we AND any number 
+with this, all the original bits stay the same but the sign bit gets forced to 0, 
+guaranteeing a positive result every time.
 
 ### Benchmark Testing:
 
+We ran our benchmarks using three dataset sizes: 50, 500, and 5000 players. For 
+each size we measured three operations: Insert, Search, and Remove. Every operation 
+was run 30 times and we took the average time to reduce noise in the results.
+The table starts with an initial capacity of 16 buckets. As we insert more players, 
+the load factor is tracked after every insert. Once the load factor exceeds 0.75, the 
+table doubles its capacity and rehashes all existing entries into the new bigger table. 
+This means by the time all players are inserted, the table has already resized several 
+times. For 5000 players the table grew from 16 all the way to 8192 buckets.
+
+We measured two metrics alongside the average time:
+- **Load Factor** — captured after the last trial of each operation. This tells us 
+  how full the table was when the operation finished. Remove always shows 0.0 because 
+  the load factor is captured after all players have been removed and the table is empty.
+
+- **Collisions** — tracked inside `put()`. A collision is counted when a new key maps 
+  to a bucket that is already occupied by a different key. This gives us an accurate 
+  count of how many times two different players competed for the same bucket.
 
 ---
 ### 1. How did collision frequency change as size increased?
