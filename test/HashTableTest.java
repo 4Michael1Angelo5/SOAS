@@ -87,17 +87,26 @@ public class HashTableTest {
         Player p3 = makePlayer(33, "Davis", "S", 33, 0);
         Player p4 = makePlayer(49, "Adams", "OL", 72, 0);
 
+        // default capcity is 16 and all
+        // 1 % 16 = 1
+        // 17 % 16 = 1
+        // 33 % 16 = 1
+        // 49 % 16 = 1
+        // total collissions should be 3.
+
         playerTable.put(1, p1);
         playerTable.put(17, p2);
         playerTable.put(33, p3);
         playerTable.put(49, p4);
 
         assertAll("deliberate collision chain",
+                () -> assertEquals(3, playerTable.getCollisions(), "total collisions should be 3"),
                 () -> assertEquals(p1, playerTable.get(1), "Should find Jimmy"),
                 () -> assertEquals(p2, playerTable.get(17), "Should find Jone"),
                 () -> assertEquals(p3, playerTable.get(33), "Should find Davis"),
                 () -> assertEquals(p4, playerTable.get(49), "Should find Adams"),
                 () -> assertEquals(4, playerTable.size(), "All 4 should be stored")
+
         );
     }
 
@@ -621,23 +630,45 @@ public class HashTableTest {
         }
     }
 
-    //edge case
+    // edge case Math.abs(Integer.MIN_VALUE) still returns a negative number
+    // Java tries to convert -2^31 to a positive number. but since the max range
+    // for a positive number is 2^31-1 and abs(-2^31) is 2^31 this results in overflow.
+    // the computer first flips all the bits and then adds 1 but the addition carries over
+    // into the sign bit resulting -2^31.
     @Test
     void testLargeIds() {
-        PM.addPlayer(new PlayerEnhanced(Integer.MAX_VALUE,
+        int badIndex = Integer.MAX_VALUE + 1; // this actually becomes Integer.MIN_VALUE
+        PlayerEnhanced player1 = new PlayerEnhanced(
+                badIndex,
                 "Rocket Raccoon",
                 Position.QB,
                 3200,
-                28, false));
-        PM.addPlayer(new PlayerEnhanced(Integer.MIN_VALUE,
+                28, false);
+        PlayerEnhanced player2 = new PlayerEnhanced(
+                Integer.MIN_VALUE, // this overwrites Rocket Racoon
                 "Rocky Balboa",
                 Position.QB,
                 3200,
-                28, false));
+                28, false);
+
+        PlayerEnhanced player3 = new PlayerEnhanced(
+                Integer.MAX_VALUE,
+                "Rocket Raccoon",
+                Position.QB,
+                3200,
+                28, false);
+
+        PM.addPlayer(player1);
+        PM.addPlayer(player2);
+        PM.addPlayer(player3);
 
         assertAll("Testing Edge case for max/min integers id's",
-                () -> assertEquals("Rocket Raccoon", PM.searchById(Integer.MAX_VALUE).name()),
-                () -> assertEquals("Rocky Balboa", PM.searchById(Integer.MIN_VALUE).name())
+                () -> assertNotEquals(player1, PM.searchById(badIndex)),
+                () -> assertEquals(player2, PM.searchById(badIndex)),
+                () -> assertEquals(player2, PM.searchById(Integer.MIN_VALUE)),
+                () -> assertEquals(player3, PM.searchById(Integer.MAX_VALUE)),
+                // the number of collissions should be 0 because Integer.MIN_VALUE == Interger.MAX_VAlUE + 1
+                () -> assertEquals(0, PM.getCollisions(), "number of colissions should be 0")
                 );
 
     }
