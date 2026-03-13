@@ -95,12 +95,13 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
     }
 
     public void ensureManagerContainerNotEmpty() {
-        if (myManager.getData().isEmpty()) {
+        if (myManager.getData().isEmpty() || myManager.getData().size() != myTestContainer.size()) {
             throw new RuntimeException(
                     """
                             Misconfigured Experiment:
                             Please ensure to call setUpForRemove
-                            before conducting removal experiments.
+                            before conducting removal experiments or
+                            searh experiments
                             """
             );
         }
@@ -232,8 +233,21 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
         return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
+    public BenchmarkResult testSearch(String theOperationName, Runnable theSearchTask) {
+        final int inputSize = myManager.getData().size();
+        this.setUpForSearch();
+        final double avgTime =
+                myBenchmarkRunner.runSpeedTestWithSetup(
+                        TRIAL_RUNS,
+                        myManager::resetCounter,
+                        theSearchTask);
+
+        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
+    }
+
     private OperationCounts getOpCounts() {
         return new OperationCounts(myManager.getSwaps(), myManager.getComparisons());
+
     }
 
     //========================= Displaying Results =================================

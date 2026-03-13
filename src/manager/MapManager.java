@@ -88,6 +88,11 @@ public abstract class MapManager <T extends DataType> implements HashableManager
     }
 
     @Override
+    public T searchById(T theDataToFind) {
+       return myMap.get(theDataToFind.id());
+    }
+
+    @Override
     public void clearData() {
         myMap.clear();
     }

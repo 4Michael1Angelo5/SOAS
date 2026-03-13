@@ -57,9 +57,9 @@ public class ResultsDisplay {
     public void logExperiment(BenchmarkResult theResult) {
 
         String row;
-        int inputSize = theResult.inputSize();
-        String operationName = theResult.method();
-        double avgTime = theResult.avgTime();
+        int inputSize = theResult.getInputSize();
+        String operationName = theResult.getMethodName();
+        double avgTime = theResult.getAvgTime();
         switch (myFormat) {
 
             case BENCHMARK_W_OPS ->
@@ -67,8 +67,8 @@ public class ResultsDisplay {
                             inputSize,
                             operationName,
                             avgTime,
-                            theResult.operationCounts().comparisons(),
-                            theResult.operationCounts().swaps()
+                            theResult.getComparions(),
+                            theResult.getSwaps()
                     );
 
             case BENCHMARK_NO_OPS ->

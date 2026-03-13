@@ -30,7 +30,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
     /**
      * HashTable's load factor = size/capcity
-     * resize when load factor > 0.5
+     * resize when load factor > LOAD_FACTOR_TOLLERANCE
      */
     private double myLoadFactor;
 
@@ -40,6 +40,10 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
     private int size;
 
     private final OperationCounter myCounter = new OperationCounter();
+
+    private int myCollissions;
+
+    private static final double LOAD_FACTOR_TOLLERANCE = 0.75;
 
 
     /**
@@ -103,6 +107,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         // if it is not empty iterate over all entries in the bucket
         // and return it if present.
         for (Entry<K,V> entry: bucketList) {
+            myCounter.increment("comparisons");
             if (Objects.equals(entry.key(), key)) {
                 return entry.value();
             }
@@ -125,18 +130,31 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         // 3) add the new Entry to the linked list at the hash index.
         SinglyLinkedList<Entry<K,V>> tableListEntry = myTable.get(hashIndex);
 
-        // a) first check if the entry is already in the list and update it if it
-        // is there.
+        // a) check if bucket is empty
+        if (tableListEntry.isEmpty()) {
+            size++;
+            tableListEntry.addFront(theNewEntry);
+            updateLoadLoadFactor();
+            if (myLoadFactor > LOAD_FACTOR_TOLLERANCE) {
+                resize();
+            }
+        } else
+            // b) check if the entry already existis and update if it does.
         if (!wasAbleToUpdateListEntry(tableListEntry, theNewEntry) ) {
-            // b) otherwise add the entry to the front of the bucket list.
+
+            // c) otherwise add the entry to the front of the bucket list.
             tableListEntry.addFront(theNewEntry);
             //4) update size only when the new entry is not already present.
             size++;
             //5) update load factor
             updateLoadLoadFactor();
 
-            //6) resize if necessary
-            if (myLoadFactor > 0.5) {
+            //7) if we got mapped to the same bucket but equality was determined
+            // to not be equal then it means a collission has occured
+            myCollissions++;
+
+            //8) resize if necessary
+            if (myLoadFactor > LOAD_FACTOR_TOLLERANCE) {
                 resize();
             }
         }
@@ -171,6 +189,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         SinglyLinkedList<Entry<K,V>> bucketList = myTable.get(bucketIndex);
 
         for (Entry<K,V> entry: bucketList) {
+            myCounter.increment("comparisons");
             if (Objects.equals(entry.key(), key)) {
                 return true;
             }
@@ -264,6 +283,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
             Entry<K,V> theNewEntry) {
 
         for (Entry<K,V>  currentEntry : tableListEntry) {
+            myCounter.increment("comparisons");
             if (Objects.equals(theNewEntry.key(),currentEntry.key())) {
                 currentEntry.setEntry(theNewEntry.value());
                 return true;
@@ -275,14 +295,13 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
     private void resize() {
         HashTable<K,V> temp = new HashTable<>(myKeyClass, myValueClass, myTable.size()*2);
 
-        Iterator<Entry<K,V>> iterator = iterator();
-
-        while(iterator.hasNext()) {
-            Entry<K,V> entry = iterator.next();
+        for (Entry<K, V> entry : this) {
             temp.put(entry.key(), entry.value());
         }
 
         myTable = temp.myTable;
+        myCounter.increment("comparisons", temp.getComparisons());
+        myCollissions += temp.getCollissons();
         myLoadFactor = temp.loadFactor();
         size = temp.size;
     }
@@ -300,5 +319,13 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
     @Override
     public void resetCounter() {
         myCounter.resetAll();
+    }
+
+    public int getCollissons() {
+        return myCollissions;
+    }
+
+    public void restCollisions() {
+        myCollissions = 0;
     }
 }

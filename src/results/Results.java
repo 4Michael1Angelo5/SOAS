@@ -329,9 +329,9 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
     public void logExperiment(BenchmarkResult theResult) {
 
         String row;
-        int inputSize = theResult.inputSize();
-        String operationName = theResult.method();
-        double avgTime = theResult.avgTime();
+        int inputSize = theResult.getInputSize();
+        String operationName = theResult.getMethodName();
+        double avgTime = theResult.getAvgTime();
         switch (myExperimentFormat) {
 
             case BENCHMARK_W_OPS ->
@@ -339,8 +339,8 @@ public abstract class Results<T extends DataType, M extends Manager<T>>
                     inputSize,
                     operationName,
                     avgTime,
-                    theResult.operationCounts().comparisons(),
-                    theResult.operationCounts().swaps()
+                    theResult.getComparions(),
+                    theResult.getSwaps()
                     );
 
             case BENCHMARK_NO_OPS ->
