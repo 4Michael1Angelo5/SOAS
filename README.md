@@ -26,13 +26,13 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Analysis Section:
 
-## Collision Strategy:
+### Collision Strategy:
 We chose to use separate chaining using SinglyLinkedList as our collision strategy. 
 For this strategy, each bucket holds a linked list of entries. When two keys
 hash to the same bucket index, the new entry is prepended to the front of that 
 bucket's linked list, and lookup traverses the chain until the matching key is found.
 
-## Hash Function:
+### Hash Function:
 We used the **division method**. The hash function computes the bucket index using 
 the following steps:
 
@@ -49,52 +49,57 @@ returns the integer value itself, this simplifies to:
 index = playerId % capacity
 ```
 
-## Benchmark Testing:
+### Benchmark Testing:
 
 
+---
 ### 1. How did collision frequency change as size increased?
 
 The collision count stayed zero for all dataset sizes (50, 500, and 5000). 
-It means, when more players are added to the hash table, the keys still mapped
+It means, everytime we add more players to the hash table, the keys still mapped
 to different buckets instead of putting it in same spot. Because the player IDs are
 in sequential order, they spread out evenly across the table when the hash 
 function is calculating the bucket index.
 
 Another reason collisions stayed at zero was because the table resizes when the load 
-factor gets too high. Thats keept the table from becoming too full and it helped maintain
+factor exceeded 0.75. Thats keept the table from becoming too full and it helped maintain
 enough buckets for the keys. Since the table kept on expanding when more data was added,
 it prevented multiple keys from being placed in the same bucket.
 
-Because of this, the chaining mechanism using the linked list was never really used during these tests.
-Each bucket only had one entry, so the operations didn’t have to search through a chain. This represents
-the best-case behavior for a hash table, where operations like add and remove run in constant (O(1)) time.
+Because of this, the chaining mechanism using the linked list was never really used 
+during these tests. Each bucket only had one entry, so the operations didn’t have 
+to search through a chain. This represents the best-case behavior for a hash table,
+where operations like add and remove run in constant (O(1)) time.
 
 ---
-
 ### 2. How did load factor affect runtime?
 
-When the dataset size increased from 50, 500, and 5000, the load factor increased from about 0.0100 
-to 0.1000 to 0.4999. The load factor is showing us how full the table is. As we added more players,
-the table started filling up more.
+Our table started with a initial capacity of 16 buckets. As we kept inserting players, the 
+load factor kept climbing until it hit 0.75, at that point the table doubled its 
+size and rehashed everything into the new table. This happened multiple times across 
+each dataset.
 
-Looking at the insert times, it went from 0.089ms at size 50, then 0.063ms at size 500, and then 
-0.295ms at size 5000. The drop from 50 to 500 is not really important. That can just happen
-from normal change across the 30 benchmark runs. The big increase at size 5000 is because the 
-load factor gets close to 0.5, which is the point where the table decides it is getting too full 
-and needs to resize. When the table resizes, it doubles in size and moves all the existing entries
-into the new table. And that extra work makes the operation slower.
+By the time all 50 players were inserted, the table had grown to a capacity of 128 
+and the load factor settled at 0.390625. For 500 players it grew to 1024 with a load 
+factor of 0.4882. For 5000 players it grew all the way to 8192 with a load factor of 
+0.6103.
 
-Search and remove show the same pattern. The search times went from 0.027ms to 0.070ms to 0.158ms, 
-and the removal times went from 0.057ms to 0.100ms to 0.241ms as the dataset got bigger. The operations
-get a little slower as more data is stored, but the increase is still small. Since the collision count
-stayed 0, each operation was able to go straight to the correct bucket without needing to go through a chain.
+Looking at the insert times, it was 0.089ms for 50 players, 0.064ms for 500 players, 
+and 0.322ms for 5000 players. The jump at 5000 is because the table had to rehash 
+multiple times going from capacity 16 all the way up to 8192. Every rehash moves all 
+the existing entries into the new table, which adds up over time.
 
-Overall, the load factor stayed low enough that it did not cause big slowdowns. The table resized when needed
-and stayed fairly spread out. Because of that, the operations still behaved close to constant time on average
-even when the dataset got larger.
+Search and remove also got a bit slower as the dataset grew. Search went from 0.027ms 
+to 0.058ms to 0.159ms, and remove went from 0.066ms to 0.096ms to 0.244ms. But since 
+there were zero collisions the whole time, every search and remove just went directly 
+to the right bucket in one step. The slowdown was from the table being bigger, not 
+from having to search through the chains.
+
+This is worth noting, that the load factor showed 0.0 for all remove rows in our 
+results. That is because we capture the load factor after all the players have been 
+removed, so the table is empty at that point.
 
 ---
-
 ### 3. Did results match expected O(1) behavior?
 
 Yes, the results did match what we were expecting. Looking at the numbers, when we went from 
@@ -112,38 +117,68 @@ resize moves all the entries into a bigger table, which adds extra work. Without
 insert would have stayed more consistent across all three sizes.
 
 ---
-
 ### 4. At what load factor did performance degrade?
 
-Analysis...
+We started to see performance slow down as the load factor got above 0.39 and 
+pushed toward 0.61 at size 5000. The biggest jump was at size 5000 where insert 
+went from 0.064ms to 0.322ms.
+
+The slowdown was not because buckets were getting crowded with multiple players. 
+Collisions stayed at zero the whole time. The real cause was the rehashing. Every 
+time the load factor crossed 0.75, we had to double the table size and move all the 
+existing entries into the new table. For 5000 players, that happened multiple times 
+as the table grew from 16 all the way to 8192. All that moving adds up.
+
+Search and remove were not hit as hard because they do not cause any resizing. 
+Search went from 0.027ms to 0.159ms and remove went from 0.066ms to 0.244ms across 
+all three sizes. The increase there is just from the table being bigger in general, 
+not from any real degradation in lookup speed.
 
 ---
-
 ### 5. What tradeoffs exist between chaining and probing?
 
-Discuss the advantages and disadvantages of different collision resolution strategies.
-
+Discuss the advantages and disadvantages of different collision resolution strategies:
 - **Chaining**
-  - Pros:
+  - Pros: 
+      - It handle a lot of collisions without breaking the table.
+      - The table can store more elements than the number of buckets because each bucket can hold a linked list.
+      - Insertions and deletions are easier since elements can just be added or removed from the list.
   - Cons:
-
+      - It uses extra memory for the linked list nodes and pointers.
+      - Searching can be slower, if a bucket ends up with a long chain.
+      - It can have bad cache performance because the linked list nodes are not stored next to each other in memory.
+  
 - **Probing (Open Addressing)**
   - Pros:
+      - Everything is stored directly in the table, so it uses less memory.
+      - It often has better cache performance because the data is stored in one continuous array.
+      - Searches are very fast when the load factor is low.
   - Cons:
+      - Performance can drop quickly if the table gets too full.
+      - Collisions can create clustering that slow down searching.
+      - Deleting elements is harder and sometimes requires tombstone markers.
 
-Explain why the chosen strategy works well for this implementation.
+We went with chaining because we already had a `SinglyLinkedList` built from PA2, 
+so it made sense to reuse it here. The deletions was easier since we just remove 
+the node from the list and go to the next. We also didn't need to leave any markers
+behind like probing requires. Because the system needed to constantly add, search,
+and remove players during a live game, chaining was the easiest and most efficient choice for us.
 
 ---
-
 ### 6. Compare performance with PA1 (array) and PA2 (linked list) by filling the following table:
 
 | Structure | Lookup Time | Memory (space + overhead) | Best Use Case |
 |----------|-------------|-------------|-------------|
-| Array (PA1) | | | |
-| Linked List (PA2) | | | |
-| Hash Table (PA5) | | | |
+| Array (PA1) | O(n) ~0.2ms at 5000 |  Low, all stored together in memory | Small datasets, index-based access |
+| Linked List (PA2) ~189.3ms at 5000| O(n) | Higher, each node has a pointer | Frequent insert and deletions |
+| Hash Table (PA5) | O(1) ~0.159ms at 5000 | Higher, buckets and linked lists | Fast lookup by key, large datasets |
 
-Analysis...
+In PA1 and PA2, finding a player by ID would check each entry one by one until we found the right one.
+For 5000 players, that can take up to 5000 checks in the worst case, and that's really slow. With the hash 
+table in PA5, we take the player ID and use the hash function to go straight to the correct bucket. In
+most cases, this will only takes one step, so the lookup time is about O(1) on average. That is why the
+hash table works best here. The Seahawks analytics team would need player stats quickly during a game, 
+and the hash table allows us to find players much faster than using an array or a linked list.
 
 ---
 
