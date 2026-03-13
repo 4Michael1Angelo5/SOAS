@@ -57,9 +57,9 @@ public class ResultsDisplay {
     public void logExperiment(BenchmarkResult theResult) {
 
         String row;
-        int inputSize = theResult.inputSize();
-        String operationName = theResult.method();
-        double avgTime = theResult.avgTime();
+        int inputSize = theResult.getInputSize();
+        String operationName = theResult.getMethodName();
+        double avgTime = theResult.getAvgTime();
         switch (myFormat) {
 
             case BENCHMARK_W_OPS ->
@@ -67,10 +67,17 @@ public class ResultsDisplay {
                             inputSize,
                             operationName,
                             avgTime,
-                            theResult.operationCounts().comparisons(),
-                            theResult.operationCounts().swaps()
+                            theResult.getComparions(),
+                            theResult.getSwaps()
                     );
-
+            case BENCHMARK_MAP ->
+                    row = String.format("%-10s %-15s %-15.6f %-15s %-10s",
+                            inputSize,
+                            operationName,
+                            avgTime,
+                            theResult.getLoadFactor(),
+                            theResult.getMyCollisions()
+                    );
             case BENCHMARK_NO_OPS ->
                     row = String.format("%-10s %-15s %-15.6f",
                             inputSize,
@@ -92,6 +99,12 @@ public class ResultsDisplay {
                             "Operation",
                             "Avg Time (ms)",
                             "comparisons", "swaps");
+            case BENCHMARK_MAP -> columnHeader =
+                    String.format("%-10s %-15s %-15s %-15s %-10s",
+                            "Size",
+                            "Operation",
+                            "Avg Time (ms)",
+                            "Load Factor", "Collisions");
             case BENCHMARK_NO_OPS -> columnHeader =
                     String.format("%-10s %-15s %-15s%n",
                             "Size",
@@ -107,7 +120,7 @@ public class ResultsDisplay {
             case BENCHMARK_NO_OPS -> {
                 return "========== Benchmark Results ==========";
             }
-            case BENCHMARK_W_OPS -> {
+            case BENCHMARK_W_OPS, BENCHMARK_MAP-> {
                 return "====================== Benchmark Results ======================";
             }
             case null, default -> {
@@ -122,7 +135,7 @@ public class ResultsDisplay {
             case BENCHMARK_NO_OPS -> {
                 return "========================================\n";
             }
-            case BENCHMARK_W_OPS -> {
+            case BENCHMARK_W_OPS, BENCHMARK_MAP-> {
                 return "===============================================================";
             }
             case null, default -> {
@@ -137,7 +150,7 @@ public class ResultsDisplay {
             case BENCHMARK_NO_OPS -> {
                 return "----------------------------------------";
             }
-            case BENCHMARK_W_OPS -> {
+            case BENCHMARK_W_OPS, BENCHMARK_MAP -> {
                 return "---------------------------------------------------------------";
             }
             case null, default -> {

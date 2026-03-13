@@ -79,4 +79,12 @@ public interface HashableManager<T extends DataType> {
      * Resets the {@link counter.OperationCounter}
      */
     void resetCounter();
+
+    T searchById(T theData);
+
+    double getLoadFactor();
+
+    int getCollisions();
+
+    void resetCollisions();
 }

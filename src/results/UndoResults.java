@@ -40,8 +40,8 @@ public class UndoResults extends Results<Action, UndoManager> {
         BenchmarkResult push = this.testAdd("push");
         BenchmarkResult pop = this.testRemove("pop");
 
-        String title = pop.method() + "/" + push.method();
-        double avgTime = (push.avgTime() + pop.avgTime())/ 2.0;
+        String title = pop.getMethodName() + "/" + push.getMethodName();
+        double avgTime = (push.getAvgTime() + pop.getAvgTime())/ 2.0;
         int inputSize = myManager.getData().size();
 
         return new BenchmarkResult(inputSize, title, avgTime, getOpCounts());
