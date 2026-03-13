@@ -71,7 +71,7 @@ public class ResultsDisplay {
                             theResult.getSwaps()
                     );
             case BENCHMARK_MAP ->
-                    row = String.format("%-10s %-15s %-15.6f %-15s %-10s",
+                    row = String.format("%-10s %-15s %-15.6f %-15.6f %-10s",
                             inputSize,
                             operationName,
                             avgTime,

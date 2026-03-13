@@ -24,7 +24,7 @@ public abstract class MapManager <T extends DataType> implements HashableManager
 
 
     public MapManager(Class<T> theDataType) {
-        myMap = new HashTable<>(Integer.class, theDataType);
+        myMap = new HashTable<>(Integer.class, theDataType); // uses default inital capcity of 16 + resizing
         myDataLoader = new DataLoader<>(theDataType, () -> new ArrayStore<>(theDataType));
     }
 
