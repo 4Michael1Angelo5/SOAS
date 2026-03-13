@@ -173,59 +173,64 @@ balance out the sorting strategy to become more fair, so that no drill waits ind
 
 # Reflection and Team Process
 
-The design choices the team implemented in PA3, using a dependency injection strategy into the
-`DataManager` proved to be worth its weight in gold. This decoupled the `DataManager` from its
-Data Structure storage strategy, allowing it to be `DataContainer` agnostic and flexible. This
-meant the team did not need to implement two different drill managers, one backed by a queue and
-one backed by a priority queue, to conduct benchmark testing. We simply were able to instantiate
-two different instances of the same manager, one supplied with a queue and one supplied with a
-priority queue. This saved the team time and expedited iteration and collaboration, freeing up
-the team to tackle more interesting statistical analysis.
-
-The team used the extra time to pursue interdisciplinary collaboration. Chris and Ayush
-collaborated with Chris's Statistics professor, Dr. Kmail, to draw more insights into how to
-make sense of the simulation results. Chris and Ayush felt that the average wait time was not
-statistically interesting. Dr. Kmail showed us that a more statistically significant metric
-would be to compare the changes in the average wait times using a Z-score, which tracks how
-many standard deviations an individual drill was from the mean wait time. This allowed us to
-standardize the data so that when we compared changes in wait time, differences were normalized.
-For example, if a drill waits 40 minutes, it is hard to tell by itself if that is statistically
-significant. Transforming the changes to a Z-score shows directly how significant the change
-was. While we did not observe any extreme outliers of z-scores above 3, we did notice
-significant volatile changes in the wait time of z-scores for the top and bottom 1%.
-
-Using the Z-score revealed that our data showed signs of a typical normal distribution. For
-every drill that experienced an extreme negative change in wait time, there was a corresponding
-positive change in wait time. These results showed us that although it does not change the total
-time to process all the drills, it redistributes fairness, causing huge swings in wait time, so
-For every drill that is rewarded, there is a corresponding drill that was punished.
-
-Another great aspect of the team's architectural choices was to design the `DrillManager` and
-the `PriorityQueue` to accept a comparator to reorder the heap. The benefit of this was that
-the team could compare and contrast different sorting strategies to see how average wait time
-and z-scores were affected.
-
-While designing a `PriorityQueue` that supports a custom comparator was straightforward,
-integrating it into the `DrillManager` presented structural challenges. Because the
-`DrillManager` is decoupled from its `DataContainer`; the specific implementation type is not
-known at compile time. We implemented type-safety 'guard rails' to verify the container type
-before exposing APIs that would otherwise risk runtime errors.
-
-Furthermore, since the abstract `DataManager` owns the `DataLoader`, we had to ensure the
-`Comparator` remained synchronized across both. Without updating the `PriorityQueue` supplier
-within the `DataLoader`, subsequent CSV imports would have reverted the `DrillManager` to its
-initial default sorting logic rather than respecting the newly assigned comparator.
-
-With the machinery in place, the team eagerly tested the flexibility of their new design.
-Perhaps one of the most fascinating discoveries was that while most sorting strategies resulted
-in longer average wait time, there was one sorting strategy that absolutely dominated in terms
-of throughput efficiency — sorting by shortest duration first. By scheduling drills by lowest
-duration, the team observed for sample sizes of 5000, the average wait time for the Queue was
-34,797.50 minutes, but the average wait time for the `PriorityQueue` was 28,787.27 minutes.
-Meaning by scheduling drills by shortest duration, the priority queue saved roughly 6,010
-minutes — or 4 days, 4 hours, and 10 minutes in average wait time! These results are
-fascinating because while the total time to process all the drills remained unchanged, the
-average wait time was vastly improved by scheduling shortest-job-first.
+For PA5, tensions emerged between the design direction of the SOASS application and the integration
+of the sprint requirements. Despite the team's best efforts to streamline the course project by
+abstracting the addition of new Data Structure integrations for the benchmark testing into the
+`DataContainer` interface, PA5 required the implementation of a `HashMap`, which did not fit neatly
+into this abstraction. Namely, the `add(T val)` method guaranteed by the `DataContainer` interface
+does not align with `add(K key, V val)`. This is because the `HashTable` requires key-value pairs
+for insertion. Similarly, `remove(T val)` does not align with `remove(K key)`. The group realized
+that if we were to enforce the implementation of the `DataContainer` interface onto the `HashTable`,
+it would effectively reduce the `PlayerManager`'s usage of the `HashTable` to a `HashSet`, thus not
+fulfilling the sprint requirement of O(1) lookups by Player ID.
+ 
+To solve this, the group decided the best path forward was not to enforce the implementation of the
+`DataContainer` interface onto the `HashTable`. The consequence of this decision was that code
+duplication appeared in the abstract `MapManager` class. It is essentially a duplicate of the
+abstract `DataManager` class but designed only to work with data structures that implement a
+`HashTable`/`Dictionary` interface. The group realized there was a path forward to eliminate the
+code duplication but it would require a major refactor of over 3k lines of code. Considering that
+this was the final sprint for the quarter-long project, the group determined the payout from a
+refactor was too little to be worth it. Rewriting 3k lines of code to eliminate 500 lines of code
+duplication just doesn't make sense.
+ 
+However, if the team decides to continue this project in the future, a refactor would ultimately be
+the right choice, but considering the time constraints, the group chose the path of pragmatic
+delivery. The `DataContainer` abstraction was great and streamlined the group's ability to meet
+sprint requirements, but by PA5, it was clear it was becoming too monolithic and starting to leak.
+What the group learned was that sometimes the current abstraction does not align with business
+logic, and it is better to depart from it when this becomes apparent, rather than enforce guarantees
+that the Data Structure cannot implement.
+ 
+Additionally, the team learned that the developer's mental overhead of managing a library built upon
+so many layers of abstraction can be mentally taxing. For example, `addPlayer` from the
+`HashTableManager` calls the abstract parent's `addData`, which calls
+`HashTable.put(player.id, player)` - just what the heck is `addPlayer` doing? Then there is getting
+lost between what is an actual abstract class vs what is an interface. When using generics, it is
+easy to get lost when there are 3 different type parameters moving around. The group explored a
+possible refactor of the Results class, which would have looked like:
+ 
+```java
+public abstract class ExperimentOrchestrator
+        <T extends DataType,
+         M extends OperationsManager<T,?>>
+        implements OperationCountable<T>, Orchestraction
+```
+ 
+At this level of abstraction, we could not make guarantees about what type of Data Structure the
+manager would use to manage its data because the `Dictionary` interface and the `DataContainer`
+interface were so fundamentally different that we needed to be general enough to accommodate both.
+ 
+One thing is for sure: the group learned so much about generics and got a lot of great experience
+working with abstraction-heavy design.
+ 
+The implementation aspect of the PA was the least challenging part of the assignment. The most
+challenging was defining the problem. Our problem was that we had encountered a data structure that
+challenged our design approach. Once we figured out the best path forward, integration into the
+existing system was fairly straightforward. This experience taught us that the best path forward is
+not a major refactor that risks breaking existing logic in hopes of modest gains, but rather
+accommodating new features to deliver project deliverables on time and adjust for future
+extensibility as needed.
 
 
 ---
