@@ -41,9 +41,11 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
     private final OperationCounter myCounter = new OperationCounter();
 
-    private int myCollissions;
+    private int myCollisions;
 
     private static final double LOAD_FACTOR_TOLLERANCE = 0.75;
+
+    private static final int DEFAULT_CAPCITY = 16;
 
 
     /**
@@ -54,7 +56,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
      */
     public HashTable(Class<K> theKeyClass, Class<V> theValueClass) {
 
-        this(theKeyClass,  theValueClass, 16);
+        this(theKeyClass,  theValueClass, DEFAULT_CAPCITY);
     }
 
     /**
@@ -151,7 +153,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
             //7) if we got mapped to the same bucket but equality was determined
             // to not be equal then it means a collission has occured
-            myCollissions++;
+            myCollisions++;
 
             //8) resize if necessary
             if (myLoadFactor > LOAD_FACTOR_TOLLERANCE) {
@@ -239,6 +241,8 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         int curCapacity = myTable.size();
         myTable.clear();
         size = 0;
+        myCounter.resetAll();
+        resetCollisions();
         initializeHashTable(myTable, curCapacity);
     }
 
@@ -301,7 +305,7 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
 
         myTable = temp.myTable;
         myCounter.increment("comparisons", temp.getComparisons());
-        myCollissions += temp.getCollissons();
+        myCollisions += temp.getCollisions();
         myLoadFactor = temp.loadFactor();
         size = temp.size;
     }
@@ -321,11 +325,11 @@ public final class HashTable<K,V> implements Dictionary<K,V>, Iterable<Entry<K,V
         myCounter.resetAll();
     }
 
-    public int getCollissons() {
-        return myCollissions;
+    public int getCollisions() {
+        return myCollisions;
     }
 
-    public void restCollisions() {
-        myCollissions = 0;
+    public void resetCollisions() {
+        myCollisions = 0;
     }
 }

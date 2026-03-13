@@ -81,4 +81,10 @@ public interface HashableManager<T extends DataType> {
     void resetCounter();
 
     T searchById(T theData);
+
+    double getLoadFactor();
+
+    int getCollisions();
+
+    void resetCollisions();
 }

@@ -87,6 +87,7 @@ public abstract class MapManager <T extends DataType> implements HashableManager
         }
     }
 
+
     @Override
     public T searchById(T theDataToFind) {
        return myMap.get(theDataToFind.id());
@@ -97,16 +98,29 @@ public abstract class MapManager <T extends DataType> implements HashableManager
         myMap.clear();
     }
 
+    @Override
     public int getSwaps() {
         return myMap.getSwaps();
     }
 
-
+    @Override
     public int getComparisons() {
         return myMap.getComparisons();
     }
 
+    @Override
     public void resetCounter() {
         myMap.resetCounter();
+    }
+
+    @Override
+    public int getCollisions() {return myMap.getCollisions();}
+
+    @Override
+    public void resetCollisions() {myMap.resetCollisions();}
+
+    @Override
+    public double getLoadFactor() {
+        return myMap.loadFactor();
     }
 }

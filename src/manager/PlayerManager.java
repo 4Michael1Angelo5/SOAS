@@ -1,18 +1,11 @@
 package manager;
 
-import com.sun.jdi.Value;
-import types.Drill;
-import types.Player;
 import types.PlayerEnhanced;
 import types.Position;
 import util.*;
 
-import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.PriorityQueue;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 /**
  * Manages Seahawks Players -update stats yards injury status etc.
@@ -102,7 +95,6 @@ public final class PlayerManager extends MapManager<PlayerEnhanced> {
                 count++;
             }
         }
-
         return count;
     }
 
@@ -130,6 +122,11 @@ public final class PlayerManager extends MapManager<PlayerEnhanced> {
         return table;
     }
 
+    /**
+     * get the total yards for a specific posiiton.
+     * @param position the {@link Position} of the player eg QB, TE, etc.
+     * @return the total yards for playrs with the matching position.
+     */
     public int getTotalYardsByPosition(Position position) {
 
         HashTable<Position, Integer> table = computeTotalYardsByPosition();

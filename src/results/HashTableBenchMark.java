@@ -119,10 +119,23 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
         }
     }
 
+    private void ensureCollisionReset() {
+        if (myManager.getCollisions() != 0 ) {
+            throw new RuntimeException(
+                    """
+                            Misconfigured Experiment:
+                            Please ensure to reset collission counts
+                            between experiments.
+                            """
+            );
+        }
+    }
+
     public void validateStateBeforeAddTest() {
         ensureTestContainerNotEmpty();
         ensureManagerContainerEmpty();
         ensureOperationCounterReset();
+        ensureCollisionReset();
     }
 
     public void validateStateBeforeRemoveTest() {
@@ -144,8 +157,7 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
      * This must be called before every Add experiment.
      */
     public void setUpForAdd() {
-        myManager.clearData();
-        myManager.resetCounter();
+        myManager.clearData(); // <--- this also resets collisions and operation counts
         validateStateBeforeAddTest();
     }
 
@@ -165,10 +177,16 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
     }
 
     public void setUpForSearch() {
-        for (T dataObj : myTestContainer) {
-            myManager.addData(dataObj);
+        // check if manager test container is empty first
+        if (myManager.getData().isEmpty()) {
+            // if it is, populate it with data to search.
+            for (T dataObj : myTestContainer) {
+                myManager.addData(dataObj);
+            }
         }
+        // reset counter
         myManager.resetCounter();
+        // validate state
         validateStateBeforeSearch();
     }
 
@@ -214,7 +232,7 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
                         this::setUpForAdd,
                         this::addNTimes);
 
-        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
+        return createBenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
     /**
@@ -230,21 +248,42 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
                         this::setUpForRemove,
                         this::removeNTimes);
 
-        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
+        return createBenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
+    /**
+     *
+     * @param theOperationName the name of operation - this will end up as the title for the benchmark result
+     * @param theSearchTask the search task to perform for benchmark testing.
+     * @return an {@link BenchmarkResult} that contains benchmark test result metrics - avg time, input size, etc.
+     */
     public BenchmarkResult testSearch(String theOperationName, Runnable theSearchTask) {
         final int inputSize = myManager.getData().size();
         this.setUpForSearch();
         final double avgTime =
                 myBenchmarkRunner.runSpeedTestWithSetup(
                         TRIAL_RUNS,
-                        myManager::resetCounter,
+                        myManager::resetCounter, // reset operation counter for each trial run.
                         theSearchTask);
-
-        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
+        // report result, note operation counts should be the same across trials
+        // so the final result is the only one we measure.
+        return createBenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
+    private BenchmarkResult createBenchmarkResult(int inputSize,
+                                                  String theOperationName,
+                                                  double avgTime,
+                                                  OperationCounts operationCounts) {
+        BenchmarkResult result = new BenchmarkResult(inputSize, theOperationName, avgTime, operationCounts);
+        result.setLoadFactor(myManager.getLoadFactor());
+        result.setCollisions(myManager.getCollisions());
+        return result;
+    }
+
+    /**
+     *
+     * @return {@link OperationCounts} - contains information on the
+     */
     private OperationCounts getOpCounts() {
         return new OperationCounts(myManager.getSwaps(), myManager.getComparisons());
 
