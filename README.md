@@ -17,159 +17,170 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Role Assignments
 
-| Role | Member(s) | Primary Responsibilities |
-| :--- | :--- | :--- |
-| **Implementer: Core Logic** | Chris | Implemented the `DrillManager`, `BinaryHeapPQ`, and `DrillSimulator` |
-| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `DrillManager`, and `BinaryHeapPQ` class|
-| **Analyst: Benchmark + Analysis** | Chris and Ayush | Ayush implemented the Results and `OperationCounter`. Chris drew on these results and reported them in the README and the `DrillSimulator`|
+| Role | Member(s) | Primary Responsibilities                                                                                                                                     |
+| :--- | :--- |:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Implementer: Core Logic** | Chris | Implemented the `MapManager`, `HashTableBenchMark`, and `HashableManager`                                                                                    |
+| **Tester: JUnit Tests** | Ayush | Ayush designed the Junit 5 test suite for the `HashTableTest` class                                                                                          |
+| **Analyst: Benchmark + Analysis** | Chris and Ayush | Chris implemented the Results and `OperationCounter`. Ayush analyzed the results, and documented the performance of the hash table operations in the README. |
 ---
 
-## Analysis Section
+## Analysis Section:
 
+### Collision Strategy:
+We chose to use separate chaining using SinglyLinkedList as our collision strategy. 
+For this strategy, each bucket holds a linked list of entries. When two keys
+hash to the same bucket index, the new entry is prepended to the front of that 
+bucket's linked list, and lookup traverses the chain until the matching key is found.
 
-1) **Why does a heap-based PQ support efficient scheduling?**
+### Hash Function:
+We used the **division method**. The hash function computes the bucket index using 
+the following steps:
 
-A heap-based priority queue supports efficient scheduling in $O(\log n)$ time. Each insertion 
-and removal of an element in the priority queue must, in the worst case, compare each of its children 
-for removal, or compare the element being added to its parent for insertion. The number of comparisons 
-scales linearly with the height of the tree, and the tree height is given by $\log_2(n)$. Therefore,
-the cost of $n$ insertions is $n \log(n)$. However, insertion efficiency can be improved to $O(n)$ 
-using the build heap procedure by building the entire heap from an array in one pass, performing 
-heapify-down when necessary, instead of adding one element at a time.
-
-The priority queue's main strength is that it can retrieve the element with the highest priority 
-in $O(1)$ constant time. This supports efficient scheduling by organizing which task should be 
-performed first without the need to search the heap for what should come next. The trade-off 
-is that, to maintain this efficiency, we pay the price of $O(\log n)$ insertion and removal.
-
-2) **Compare FIFO vs Priority scheduling: what is gained, what is lost?**
-
-In a regular queue that processes items in first-in-first-out (FIFO) order, we gain back the $O(1)$ 
-efficiency lost in a priority queue in the insertion and removal operations, but we lose the ability 
-to retrieve the item with the highest priority in constant time.
-
-3) **How did comparisons/swaps scale from 50 → 5000?**
-
-Our benchmark testing results revealed that the number of comparisons and swaps scales in 
-$n \log(n)$ time. We observed the following numbers using sample sizes of 50, 500, and 5000:
-
-| Size  | Operation | Avg Time (ms) | Comparisons       | swaps   |
-|-------|-----------|---------------|-------------------|---------|
-| 50    | insert    | 0.042163      | 84                | 36      |
-| 50    | extract   | 0.050867      | 301               | 173     |
-| 500   | insert    | 0.102023      | 874               | 376     |
-| 500   | extract   | 0.323800      | 5447              | 2938    |
-| 5000  | insert    | 0.367923      | 9054              | 4058    |
-| 5000  | extract   | 1.581247      | 78381             | 41387   |
-
-These results are consitent with the expeceted $n\log(n)$ behavior for insertion and extraction.
-If the time complexity is $O(n \log n)$, then when the input size grows, the work should grow by about the same ratio as:
-
-$\frac{n_2 \log n_2}{n_1 \log n_1}$
-
-We compared expected growth vs actual operation growth.
-
-50 → 500
-
-Expected (from $n \log n$):
-
-$\frac{500 \log_2 500}{50 \log_2 50} = \frac{4485}{282} \approx 15.9$
-
-Actual:
-- Insert comparisons: $874 / 84 \approx 10.4$
-- Extract comparisons: $5447 / 301 \approx 18.1$
-
-These are in the same general range as 15.9, so that matches the $n \log n$ pattern. 
-Insert consistently runs better than the predicted ratio, this is likely because 
-insertions often don't travel all the way up the tree, so the average case is better 
-than the theoretical bound suggests.
-
-500 → 5000
-
-Expected:
-
-$\frac{5000 \log_2 5000}{500 \log_2 500} = \frac{61450}{4485} \approx 13.7$
-
-Actual:
-- Insert comparisons: $9054 / 874 \approx 10.4$
-- Extract comparisons: $78381 / 5447 \approx 14.4$
-
-Again, the numbers are close to the expected 13.7. So overall, the operation counts grow close to what $n \log n$ predicts. 
-So we can say that insert and extract do follow $O(n \log n)$.
-
-Also, operation counts give a clearer picture than time because runtime 
-can change depending on JVM warmup or other background factors, but 
-comparisons and swaps directly measure the actual work the heap is doing.
-
-4) **Did you observe any evidence of starvation?**
-
-We observed significant starvation — drills being continuously denied to be processed because they 
-had a lower priority. We conducted simulations on sample sizes of 50, 500, and 5000, using the 
-following sorting logic to prioritize drills:
-- Higher urgency first
-- Earlier `install_by_day` first
-- Lower `fatigue_cost` preferred (tie-breaker)
-- Shorter duration preferred (final tie-breaker)
-
-The simulation compared wait times required to process Seahawks drills between FIFO behavior Queues 
-and Priority Queues. The results from the sample size of 5000 revealed that the average wait time for
-the Queue was 34,797.50 minutes. The average wait time for the Priority Queue was 34,816.91 minutes,
-so on average, each drill in the Priority Queue experienced a longer wait time compared to the Queue.
-
-For example, the drill that suffered the most was:
-```json
-{
-  "drill_id": 2091,
-  "name": "Run Fits 91",
-  "urgency": 1,
-  "duration_min": 12,
-  "fatigue_cost": 7,
-  "install_by_day": 7
-}
+1. Call `Objects.hash(key)` on the player ID
+2. Strip the sign bit using `& 0x7FFFFFFF` to guarantee a positive number
+3. Take the result mod the table capacity to get the bucket index
+```
+index = (Objects.hash(playerId) & 0x7FFFFFFF) % capacity
 ```
 
-"Run Fits 91" was processed 67,792 minutes later than it would have been processed in a regular 
-queue. This drill was pushed back 4,863 places in line, meaning it was originally in line at position
-91, but instead, 4,953 other drills were processed before this drill. It had a Z-time-score of -2.39,
-meaning this drill's wait time was 2.39 standard deviations worse than the average change in wait time.
-It had a Z-position-score of -2.39, meaning this drill's change in position was 2.39 standard 
-deviations worse than the average change in position.
-
-However, the biggest winner was:
-```json
-{
-  "drill_id": 6927,
-  "name": "Screen Defense 4927",
-  "urgency": 5,
-  "duration_min": 20,
-  "fatigue_cost": 1,
-  "install_by_day": 1
-}
+Since `Objects.hash()` calls `hashCode()` internally for integers, and `hashCode()` 
+returns the integer value itself, this simplifies to:
+```
+index = playerId % capacity
 ```
 
-"Screen Defense 4927" was processed 68,397 minutes sooner than it would have been processed in a regular
-queue. This drill was able to skip 4,912 places in line, meaning it was originally in line at position 
-4,927, but because it had a high priority, it jumped to position 15! It had a Z-time-score of 2.41, 
-meaning this drill's wait time was 2.41 standard deviations better than the average change in wait time.
-It had a Z-position-score of 2.41, meaning this drill's change in position was 2.41 standard deviations 
-better than the average change in position.
+### Benchmark Testing:
 
-Our simulation results revealed a near-identical relationship between a drill's Z-time-score and its 
-Z-position-score. Additionally, simulation trials between sample sizes of 50, 500, and 5000 revealed a 
-linear relationship between the sample size and the z-scores of the top and bottom 1% of most affected 
-drills. Meaning that the top 1% of drills that experienced the greatest change in wait time, their deltas
-grew proportionally to the sample size — the larger the sample size, the more extreme/volatile the change
-in wait times. This result is statistically significant because it suggests that as the input size tends 
-to infinity, the most affected drills' change in position and time grows without bound.
 
-5) **What would you change in your priority rule to improve fairness?**
+---
+### 1. How did collision frequency change as size increased?
 
-The results demonstrated that the sorting strategy results in significant starvation of lower-priority 
-drills. To counteract this, an effective strategy would be to introduce aging. As a drill that gets 
-continually pushed further down the queue, we could introduce another field in the `Drills` class that 
-keeps track of how many times this drill was skipped. As the skip count grows to a certain threshold, 
-its priority increases, preventing the drill from being skipped indefinitely. This would effectively 
-balance out the sorting strategy to become more fair, so that no drill waits indefinitely to be processed.
+The collision count stayed zero for all dataset sizes (50, 500, and 5000). 
+It means, everytime we add more players to the hash table, the keys still mapped
+to different buckets instead of putting it in same spot. Because the player IDs are
+in sequential order, they spread out evenly across the table when the hash 
+function is calculating the bucket index.
+
+Another reason collisions stayed at zero was because the table resizes when the load 
+factor exceeded 0.75. Thats keept the table from becoming too full and it helped maintain
+enough buckets for the keys. Since the table kept on expanding when more data was added,
+it prevented multiple keys from being placed in the same bucket.
+
+Because of this, the chaining mechanism using the linked list was never really used 
+during these tests. Each bucket only had one entry, so the operations didn’t have 
+to search through a chain. This represents the best-case behavior for a hash table,
+where operations like add and remove run in constant (O(1)) time.
+
+---
+### 2. How did load factor affect runtime?
+
+Our table started with a initial capacity of 16 buckets. As we kept inserting players, the 
+load factor kept climbing until it hit 0.75, at that point the table doubled its 
+size and rehashed everything into the new table. This happened multiple times across 
+each dataset.
+
+By the time all 50 players were inserted, the table had grown to a capacity of 128 
+and the load factor settled at 0.390625. For 500 players it grew to 1024 with a load 
+factor of 0.4882. For 5000 players it grew all the way to 8192 with a load factor of 
+0.6103.
+
+Looking at the insert times, it was 0.089ms for 50 players, 0.064ms for 500 players, 
+and 0.322ms for 5000 players. The jump at 5000 is because the table had to rehash 
+multiple times going from capacity 16 all the way up to 8192. Every rehash moves all 
+the existing entries into the new table, which adds up over time.
+
+Search and remove also got a bit slower as the dataset grew. Search went from 0.027ms 
+to 0.058ms to 0.159ms, and remove went from 0.066ms to 0.096ms to 0.244ms. But since 
+there were zero collisions the whole time, every search and remove just went directly 
+to the right bucket in one step. The slowdown was from the table being bigger, not 
+from having to search through the chains.
+
+This is worth noting, that the load factor showed 0.0 for all remove rows in our 
+results. That is because we capture the load factor after all the players have been 
+removed, so the table is empty at that point.
+
+---
+### 3. Did results match expected O(1) behavior?
+
+Yes, the results did match what we were expecting. Looking at the numbers, when we went from 
+50 players to 5000 players, that was a 100x increase in data. But the times did not 
+go up 100x.
+
+For search, it went from 0.027ms to 0.158ms. That is only about a 6x increase for 
+100x more data. For remove, it went from 0.057ms to 0.241ms, which is about a 4x 
+increase. If the hash table was slow like a simple array scan, those numbers would 
+have gone up way more.
+
+Insert was bit different because it jumped from 0.089ms to 0.295ms. The jump at 5000 
+was mostly due to the table resizing when the load factor approached 0.5. That 
+resize moves all the entries into a bigger table, which adds extra work. Without that, the 
+insert would have stayed more consistent across all three sizes.
+
+---
+### 4. At what load factor did performance degrade?
+
+We started to see performance slow down as the load factor got above 0.39 and 
+pushed toward 0.61 at size 5000. The biggest jump was at size 5000 where insert 
+went from 0.064ms to 0.322ms.
+
+The slowdown was not because buckets were getting crowded with multiple players. 
+Collisions stayed at zero the whole time. The real cause was the rehashing. Every 
+time the load factor crossed 0.75, we had to double the table size and move all the 
+existing entries into the new table. For 5000 players, that happened multiple times 
+as the table grew from 16 all the way to 8192. All that moving adds up.
+
+Search and remove were not hit as hard because they do not cause any resizing. 
+Search went from 0.027ms to 0.159ms and remove went from 0.066ms to 0.244ms across 
+all three sizes. The increase there is just from the table being bigger in general, 
+not from any real degradation in lookup speed.
+
+---
+### 5. What tradeoffs exist between chaining and probing?
+
+Discuss the advantages and disadvantages of different collision resolution strategies:
+- **Chaining**
+  - Pros: 
+      - It handle a lot of collisions without breaking the table.
+      - The table can store more elements than the number of buckets because each bucket can hold a linked list.
+      - Insertions and deletions are easier since elements can just be added or removed from the list.
+  - Cons:
+      - It uses extra memory for the linked list nodes and pointers.
+      - Searching can be slower, if a bucket ends up with a long chain.
+      - It can have bad cache performance because the linked list nodes are not stored next to each other in memory.
+  
+- **Probing (Open Addressing)**
+  - Pros:
+      - Everything is stored directly in the table, so it uses less memory.
+      - It often has better cache performance because the data is stored in one continuous array.
+      - Searches are very fast when the load factor is low.
+  - Cons:
+      - Performance can drop quickly if the table gets too full.
+      - Collisions can create clustering that slow down searching.
+      - Deleting elements is harder and sometimes requires tombstone markers.
+
+We went with chaining because we already had a `SinglyLinkedList` built from PA2, 
+so it made sense to reuse it here. The deletions was easier since we just remove 
+the node from the list and go to the next. We also didn't need to leave any markers
+behind like probing requires. Because the system needed to constantly add, search,
+and remove players during a live game, chaining was the easiest and most efficient choice for us.
+
+---
+### 6. Compare performance with PA1 (array) and PA2 (linked list) by filling the following table:
+
+| Structure | Lookup Time | Memory (space + overhead) | Best Use Case |
+|----------|-------------|-------------|-------------|
+| Array (PA1) | O(n) ~0.2ms at 5000 |  Low, all stored together in memory | Small datasets, index-based access |
+| Linked List (PA2) ~189.3ms at 5000| O(n) | Higher, each node has a pointer | Frequent insert and deletions |
+| Hash Table (PA5) | O(1) ~0.159ms at 5000 | Higher, buckets and linked lists | Fast lookup by key, large datasets |
+
+In PA1 and PA2, finding a player by ID would check each entry one by one until we found the right one.
+For 5000 players, that can take up to 5000 checks in the worst case, and that's really slow. With the hash 
+table in PA5, we take the player ID and use the hash function to go straight to the correct bucket. In
+most cases, this will only takes one step, so the lookup time is about O(1) on average. That is why the
+hash table works best here. The Seahawks analytics team would need player stats quickly during a game, 
+and the hash table allows us to find players much faster than using an array or a linked list.
+
+---
 
 # Reflection and Team Process
 
@@ -251,21 +262,29 @@ The project is organized with separate source and test roots to maintain clean c
     * manager/
       * `DataManager` abstract class defining common behavior to all future managers, i.e., DrillsManager, Transaction 
             Manager/ TransactionFeed, etc.
+      * `MapManager`: abstract parent class defining common behavior to all future managers using HashTable-based storage, i.e.,
+            PlayerManager, etc.
       * `RosterManager`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks roster.
       * `TransactionFeed`: concrete child class of `DataManager` that brings specific functionality needed to manage the Seahawks transactions.
       * `UndoManager`:  concrete child class of `DataManager` that brings specific functionality needed to undo actions from the other managers.
       * `FanTicketQueue`: concrete child class of the `DataManager` that brings specific functionality needed to manage the Seahawks fan ticket line.
       * `DrillManager`: concrete child class of the `DataManager` that brings specific functionality needed to manage Seahawks Drills.
+      * `PlayerManager`: concrete child class of `MapManager` that brings specific functionality needed to manage Seahawks players.
+      * `HashableManager`: interface defining contract for all managers using HashTable-based storage.
+      * `Manager`: interface defining contract for all managers using DataContainer-based storage.
     * results/
         * `ExperimentResults.java`: A simple Record class used to report a specific result from a benchmark test. 
         * `Results.java`: Abstract parent class defining all common behavior to concrete Benchmark Results classes: `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`. It automates experiments across 50, 500, and 5000 records,
         * `FanTicketResults`, `RosterResults`, `TransactionResults`, `UndoResults`: Concrete child classes of the `Results` class that handle specific testing needed for managing their respective `DataTypes`.
         * `Experiment.java`: Interface defining contract for all Results classes.
-        * 
-          calculating the average execution time (ms) for Add, Remove, and Search operations.
+        * calculating the average execution time (ms) for Add, Remove, and Search operations.
+        * `HashTableBenchMark`: Abstract parent class defining common behavior for all HashTable-based benchmark experiments, automating setup, execution, and results display across PlayerResults and future hash-based benchmarks.
+        * `PlayerResults`: Concrete child class of HashTableBenchMark that handles specific benchmark testing for PlayerManager using HashTable across 50, 500, and 5000 player datasets.
     * types/
         * `DataType`: Sealed interface that ensures all data managed by the system has a consistent identity.
         * `Player.java`, `Drill.java`, `Transaction.java`, `Action.java`, `FanRequest.java`: Data models.
+        * `PlayerEnhanced.java`: Record class for storing enhanced Seahawk player data, including player ID, name, position, yards, touchdowns, and injury status.
+        * `Position.java`: Enum class that lists the supported player positions, such as `QB`, `WR`, `RB`, and `CB`.
         * `UndoRecord.java`: Record class that links an `Action` to its corresponding inverse operation/previous state. 
         * `ActionType.java`: An Enum class that lists all of the supported  `Action` types, e.g., `ADD_PLAYER`, `REMOVE_PLAYER.`
     * simulator/
@@ -280,7 +299,8 @@ The project is organized with separate source and test roots to maintain clean c
       It handles **dynamic resizing** (doubling capacity) via `System.arraycopy` and ensures **contiguous memory** by shifting elements during `removeAtIndex` operations.
       * `ArrayStack.java`: An array-based implementation of a stack.
       * `LinkedQueue.java`: A singly linked list implementation of a Queue.
-      * `BinaryHeapPQ.java`: A Binary Heap based implemenation of a Priority Queue.
+      * `BinaryHeapPQ.java`: A Binary Heap-based implementation of a Priority Queue.
+      * `HashTable.java`: A hash table implementation that stores key–value pairs using chaining with singly linked lists to handle collisions.
     * `Main` - CLI-driven menu interface for interacting with the SOAS application.
 * **test/**: Contains unit tests and test resources.
     * `LoaderTest.java`: JUnit 5 test cases.
