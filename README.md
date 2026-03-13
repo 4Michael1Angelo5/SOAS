@@ -52,13 +52,43 @@ the best-case behavior for a hash table, where operations like add and remove ru
 
 ### 2. How did load factor affect runtime?
 
-Analysis...
+When the dataset size increased from 50, 500, and 5000, the load factor increased from about 0.0100 
+to 0.1000 to 0.4999. The load factor is showing us how full the table is. As we added more players,
+the table started filling up more.
+
+Looking at the insert times, it went from 0.089ms at size 50, then 0.063ms at size 500, and then 
+0.295ms at size 5000. The drop in 50 to 500 is not really important. That can just happen
+from normal change across the 30 benchmark runs. The big increase at size 5000 is because the 
+load factor gets close to 0.5, which is the point where the table decides it is getting too full 
+and needs to resize. When the table resizes, it doubles in size and moves all the existing entries
+into the new table. And that extra work makes the operation slower.
+
+Search and remove shows the same pattern. The search times went from 0.027ms to 0.070ms to 0.158ms, 
+and remove times went from 0.057ms to 0.100ms to 0.241ms as the dataset got bigger. The operations
+get a little slower as more data is stored, but the increase is still small. Since the collision count
+stayed 0, each operation was able to go straight to the correct bucket without needing to go through a chain.
+
+Overall, the load factor stayed low enough that it did not cause big slowdowns. The table resized when needed
+and stayed fairly spread out. Because of that, the operations still behaved close to constant time on average
+even when the dataset got larger.
 
 ---
 
 ### 3. Did results match expected O(1) behavior?
 
-Analysis...
+Yes, the results did matched what we were expecting. Looking at the numbers, when we went from 
+50 players to 5000 players, that was a 100x increase in data. But the times did not 
+go up 100x.
+
+For search, it went from 0.027ms to 0.158ms. That is only about a 6x increase for 
+100x more data. For remove, it went from 0.057ms to 0.241ms, which is about a 4x 
+increase. If the hash table was slow like a simple array scan, those numbers would 
+have gone up way more.
+
+Insert was bit different because it jump from 0.089ms to 0.295ms. The jump at 5000 
+was mostly do to the table having to resize when the load factor got close to 0.5. That 
+resize moves all the entries into a bigger table which adds extra works. Without that, 
+insert would have stayed more consistent across all three sizes.
 
 ---
 
