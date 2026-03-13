@@ -26,9 +26,27 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Analysis Section:
 
+We chose to use separate chaining using SinglyLinkedList as our collision strategy. 
+For this strategy, each bucket holds a linked list of entries. When two keys
+hash to the same bucket index, the new entry is prepended to the front of that 
+bucket's linked list, and lookup traverses the chain until the matching key is found.
+
 ### 1. How did collision frequency change as size increased?
 
-Analysis...
+The collision count stayed zero for all dataset sizes (50, 500, and 5000). 
+It means, when more players are added to the hash table, the keys still mapped
+to different buckets instead of putting it in same spot. Because the player IDs are
+in sequential order, they spread out evenly across the table when the hash 
+function is calculating the bucket index.
+
+Another reason collisions stayed at zero was because the table resizes when the load 
+factor gets too high. Thats keept the table from becoming too full and it helped maintain
+enough buckets for the keys. Since the table kept on expanding when more data was added,
+it prevented multiple keys from being placed in the same bucket.
+
+Because of this, the chaining mechanism using the linked list was never really used during these tests.
+Each bucket only had one entry, so the operations didn’t have to search through a chain. This represents
+the best-case behavior for a hash table, where operations like add and remove run in constant (O(1)) time.
 
 ---
 
