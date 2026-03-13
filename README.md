@@ -26,10 +26,31 @@ The SOAS app is a simple CLI stats analysis application that parses Seahawks dat
 
 ## Analysis Section:
 
+## Collision Strategy:
 We chose to use separate chaining using SinglyLinkedList as our collision strategy. 
 For this strategy, each bucket holds a linked list of entries. When two keys
 hash to the same bucket index, the new entry is prepended to the front of that 
 bucket's linked list, and lookup traverses the chain until the matching key is found.
+
+## Hash Function:
+We used the **division method**. The hash function computes the bucket index using 
+the following steps:
+
+1. Call `Objects.hash(key)` on the player ID
+2. Strip the sign bit using `& 0x7FFFFFFF` to guarantee a positive number
+3. Take the result mod the table capacity to get the bucket index
+```
+index = (Objects.hash(playerId) & 0x7FFFFFFF) % capacity
+```
+
+Since `Objects.hash()` calls `hashCode()` internally for integers, and `hashCode()` 
+returns the integer value itself, this simplifies to:
+```
+index = playerId % capacity
+```
+
+## Benchmark Testing:
+
 
 ### 1. How did collision frequency change as size increased?
 
