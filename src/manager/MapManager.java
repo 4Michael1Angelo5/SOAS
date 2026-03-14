@@ -1,0 +1,126 @@
+package manager;
+
+import loader.DataLoader;
+import types.DataType;
+import util.*;
+
+import java.io.IOException;
+import java.util.logging.Logger;
+
+/**
+ * This Manager uses a HashTable to manage {@link DataType} objects.
+ * @param <T> the DataType this manager manages.
+ */
+public abstract class MapManager <T extends DataType> implements HashableManager<T>  {
+
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
+    private static final Logger LOGGER = Logger.getLogger(MapManager.class.getName());
+
+
+    private final HashTable<Integer, T> myMap;
+    private final DataLoader<T> myDataLoader;
+
+
+    public MapManager(Class<T> theDataType) {
+        myMap = new HashTable<>(Integer.class, theDataType); // uses default inital capcity of 16 + resizing
+        myDataLoader = new DataLoader<>(theDataType, () -> new ArrayStore<>(theDataType));
+    }
+
+    /**
+     * Resets data to the loaded csv.
+     * @param theFilePath the file path to the data you want to load.
+     * @throws IOException if file not found.
+     */
+    public void loadCsvData(String theFilePath) throws IOException {
+        DataContainer<T> loaderResults = myDataLoader.loadData(theFilePath);
+        myMap.clear();
+        for (T dataObject : loaderResults) {
+            myMap.put(dataObject.id(), dataObject);
+        }
+    }
+
+    public void addData(T dataObj) {
+        myMap.put(dataObj.id(), dataObj);
+    }
+
+    public T removeData(T dataObj) {
+        return myMap.delete(dataObj.id());
+    }
+
+    public T searchById(int theId) {
+        if (containsRecord(theId)) {
+            return myMap.get(theId);
+        }
+        return null;
+    }
+
+    public void updateRecord(T theNewRecord) {
+        if (containsRecord(theNewRecord.id())) {
+            myMap.put(theNewRecord.id(), theNewRecord);
+        }
+    }
+
+    public boolean containsRecord(int theId) {
+        return myMap.containsKey(theId);
+    }
+
+    public HashTable<Integer, T> getData() {
+        return myMap;
+    }
+
+    public T get(int theId) {
+        return myMap.get(theId);
+    }
+
+    public void printData() {
+        for (Entry<Integer, T> entry: myMap) {
+            LOGGER.info(
+                    ANSI_GREEN
+                    + "{\n"
+                    + " id: " + entry.key() + ",\n"
+                    + " value: " + entry.value() + "\n"
+                    + "},\n"
+                    + ANSI_RESET
+            );
+        }
+    }
+
+
+    @Override
+    public T searchById(T theDataToFind) {
+       return myMap.get(theDataToFind.id());
+    }
+
+    @Override
+    public void clearData() {
+        myMap.clear();
+    }
+
+    @Override
+    public int getSwaps() {
+        return myMap.getSwaps();
+    }
+
+    @Override
+    public int getComparisons() {
+        return myMap.getComparisons();
+    }
+
+    @Override
+    public void resetCounter() {
+        myMap.resetCounter();
+    }
+
+    @Override
+    public int getCollisions() {return myMap.getCollisions();}
+
+    @Override
+    public void resetCollisions() {myMap.resetCollisions();}
+
+    @Override
+    public double getLoadFactor() {
+        return myMap.loadFactor();
+    }
+}

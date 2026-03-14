@@ -1,0 +1,147 @@
+package manager;
+
+import types.PlayerEnhanced;
+import types.Position;
+import util.*;
+
+import java.util.NoSuchElementException;
+import java.util.Objects;
+
+/**
+ * Manages Seahawks Players -update stats yards injury status etc.
+ * @author Chris Chun, Ayush.
+ * @version 1.1
+ */
+public final class PlayerManager extends MapManager<PlayerEnhanced> {
+
+
+    public PlayerManager() {
+        super(PlayerEnhanced.class);
+    }
+
+    /**
+     * Add a player to the map.
+     * @param thePlayer the player to add.
+     */
+    public void addPlayer(PlayerEnhanced thePlayer) {
+        addData(thePlayer);
+    }
+
+    /**
+     * Search by Player ID.
+     * Deprecated but required for system requirements.
+     * @param theId the id of the player to search for.
+     * @return theId if found and -1 otherwise.
+     */
+    public PlayerEnhanced searchByPlayerId(int theId) {
+        return searchById(theId);
+    }
+
+    /**
+     * Removes a player from the hashtable.
+     * @param thePlayer the player to remove.
+     * @return the player removed or null if not found.
+     */
+    public PlayerEnhanced removePlayer(PlayerEnhanced thePlayer) {
+        return removeData(thePlayer);
+    }
+
+    /**
+     * Attempts to update the hash table with
+     * new player object. If the player record
+     * exists in the hash table its record is updated
+     * with the new one. If it is not found then a
+     * NoSuchElementException is thrown.
+     * @param thePlayer the new player object to update the stats with.
+     */
+    public void updatePlayerStats(PlayerEnhanced thePlayer) {
+        if (containsRecord(thePlayer.player_id())) {
+            addPlayer(thePlayer);
+        } else {
+            throw new NoSuchElementException(
+                    "Cannot update Player because they do not exist it the HashTable");
+        }
+    }
+
+    /**
+     * Filters the list of players to only include players with the matching position.
+     * @param position the filtering argument to list the players.
+     * @return an Array of the players sorted lexigraphically by position.
+     */
+    public ArrayStore<PlayerEnhanced> listPlayersByPosition(Position position) {
+
+        final ArrayStore<types.PlayerEnhanced> result =
+                new ArrayStore<>(PlayerEnhanced.class,64);
+
+        for (Entry<Integer, PlayerEnhanced> entry : getData()) {
+
+            if (Objects.equals(entry.value().position(), position)) {
+                result.add(entry.value());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @return the number of injured players
+     */
+    public int countInjuredPlayers() {
+        int count = 0;
+
+        for (Entry<Integer, PlayerEnhanced> entry: getData()) {
+            if (entry.value().injured()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * @return a hashmap where the keys are the positions and the values are total yards
+     * by position.
+     */
+    public HashTable<Position, Integer> computeTotalYardsByPosition() {
+
+        HashTable<Position, Integer> table = new HashTable<>(Position.class, Integer.class);
+
+        for (Entry<Integer, PlayerEnhanced> entry : getData()) {
+
+            Position position = entry.value().position();
+            int yards = entry.value().yards();
+            Integer currentYardsForPos = table.get(position);
+
+            table.put(position,
+                    Objects.isNull(currentYardsForPos)
+                    ? yards
+                    : currentYardsForPos + yards);
+
+        }
+
+        return table;
+    }
+
+    /**
+     * get the total yards for a specific posiiton.
+     * @param position the {@link Position} of the player eg QB, TE, etc.
+     * @return the total yards for playrs with the matching position.
+     */
+    public int getTotalYardsByPosition(Position position) {
+
+        HashTable<Position, Integer> table = computeTotalYardsByPosition();
+
+        Integer result = table.get(position);
+
+        if (Objects.isNull(result)) {
+            throw new RuntimeException("Unable to compute total yards for position: " + position);
+        }
+        return result;
+    }
+
+    @Override
+    public Class<?> getManagerClass() {
+        return PlayerManager.class;
+    }
+
+}

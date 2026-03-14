@@ -39,11 +39,11 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
 
 
      int inputSize = myManager.getData().size();
-     String testTitle = enqueue.method() + "/" + dequeue.method();
-     double avgTime = (enqueue.avgTime() + dequeue.avgTime()) / 2.0;
+     String testTitle = enqueue.getMethodName() + "/" + dequeue.getMethodName();
+     double avgTime = (enqueue.getAvgTime() + dequeue.getAvgTime()) / 2.0;
 
-     //@TODO: maybe we should be taking the average of the two operations counts?
-     return new BenchmarkResult(inputSize, testTitle, avgTime, enqueue.operationCounts());
+     OperationCounts operationCounts =  new OperationCounts(myManager.getSwaps(), myManager.getComparisons());
+     return new BenchmarkResult(inputSize, testTitle, avgTime, operationCounts);
     }
 
     @Override
