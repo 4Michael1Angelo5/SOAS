@@ -163,10 +163,12 @@ For search, it went from 0.027ms to 0.159ms. That is only about a 6x increase fo
 increase. If the hash table was slow like a simple array scan, those numbers would 
 have gone up way more.
 
-Insert was bit different because it jumped from 0.089ms to 0.322ms. The jump at 5000 
-was mostly due to the table resizing when the load factor approached 0.75. That 
-resize moves all the entries into a bigger table, which adds extra work. Without that, the 
-insert would have stayed more consistent across all three sizes.
+Insert went from 0.089ms to 0.322ms, which is about a 3.5x increase. Remove went 
+from 0.066ms to 0.244ms, which is about a 4x increase. Both were actually very close 
+to each other. Search was the least efficient of the three, going from 0.027ms to 
+0.159ms, which is about a 6x increase. All three operations still scaled much better 
+than the 100x increase in data, which confirms the hash table is running close to 
+O(1) across all operations.
 
 ---
 ### 4. At what load factor did performance degrade?
@@ -221,7 +223,7 @@ and remove players during a live game, chaining was the easiest and most efficie
 
 | Structure | Lookup Time | Memory (space + overhead) | Best Use Case |
 |----------|-------------|-------------|-------------|
-| Array (PA1) | O(n) ~0.2ms at 5000 |  Low, all stored together in memory | Small datasets, index-based access |
+| Array (PA1) | O(n) ~0.2ms at 5000 |  Low, all stored together in memory | Data that does not change often and needs fast index access. |
 | Linked List (PA2) | O(n) ~189.3ms at 5000 | Higher, each node has a pointer | Frequent insertions and deletions |
 | Hash Table (PA5) | O(1) ~0.159ms at 5000 | Higher, buckets and linked lists | Fast lookup by key, large datasets |
 
