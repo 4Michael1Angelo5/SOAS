@@ -2,7 +2,7 @@
 The SOAS app is a simple CLI stats analysis application that parses Seahawks data from CSV files and provides the user with interesting ways to interact with the data.
 
 ## Features
-* The app tracks how many operations the Heapify parsing algorithm performs and generates a report.
+* The app supports instant player lookup, stat updates, injury tracking, and position-based aggregation using a Hash Table backend.
 * Benchmark timer tracks algorithm run time in milliseconds.
 * CLI-driven menu to navigate application options and stylized logger for improved UX.
 * CSV parsing optimized using a `BufferedReader`.
