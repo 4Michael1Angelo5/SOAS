@@ -2,7 +2,7 @@
 The SOAS app is a simple CLI stats analysis application that parses Seahawks data from CSV files and provides the user with interesting ways to interact with the data.
 
 ## Features
-* The app supports instant player lookup, stat updates, injury tracking, and position-based aggregation using a Hash Table backend.
+* The app tracks how many operations the Heapify parsing algorithm performs and generates a report.
 * Benchmark timer tracks algorithm run time in milliseconds.
 * CLI-driven menu to navigate application options and stylized logger for improved UX.
 * CSV parsing optimized using a `BufferedReader`.
@@ -44,11 +44,11 @@ index = (Objects.hash(playerId) & 0x7FFFFFFF) % capacity
 ```
 
 Since `Objects.hash()` calls `hashCode()` internally for integers, and `hashCode()` 
-returns the integer value itself, this simplifies to:
+returns the integer value itself. This simplifies to:
 ```
 index = playerId % capacity
 ```
-`Objects.hash()` is a built in Java utility method. When you pass an integer key to 
+`Objects.hash()` is a built-in Java utility method. When you pass an integer key to 
 it, it internally calls `hashCode()` on that integer. For integer types in Java, 
 `hashCode()` just returns the integer value itself. So passing in player ID 1001 
 gives us back 1001, player ID 1002 gives us 1002, and so on. We can then take that 
@@ -56,9 +56,9 @@ value mod the table capacity to get the bucket index.
 
 ### Why we used & 0x7FFFFFFF instead of Math.abs():
 
-At first it seems like `Math.abs()` would be the simple way to make sure the hash 
+At first, it seems like `Math.abs()` would be the simple way to make sure the hash 
 result is always positive. But there is an edge case where it completely breaks.
-Java uses Two's Complement to represent integers. Because of this, the range of a 
+Java uses Two's Complement to represent integers. Because of this, the range of a
 32-bit signed integer is not symmetrical:
 
 - Maximum positive value: 2,147,483,647 (2^31 - 1)
@@ -80,8 +80,8 @@ is always a valid positive number no matter what.
 ```
 0 1111111 11111111 11111111 11111111
 ```
-Every bit is 1 except the leftmost sign bit which is 0. When we AND any number 
-with this, all the original bits stay the same but the sign bit gets forced to 0, 
+Every bit is 1 except the leftmost sign bit, which is 0. When we perform a bitwise AND on any number 
+with this, all the original bits stay the same, but the sign bit gets forced to 0, 
 guaranteeing a positive result every time.
 
 ### Benchmark Testing:
@@ -93,12 +93,12 @@ The table starts with an initial capacity of 16 buckets. As we insert more playe
 the load factor is tracked after every insert. Once the load factor exceeds 0.75, the 
 table doubles its capacity and rehashes all existing entries into the new bigger table. 
 This means by the time all players are inserted, the table has already resized several 
-times. For 5000 players the table grew from 16 all the way to 8192 buckets.
+times. For 5000 players, the table grew from 16 all the way to 8192 buckets.
 
 We measured two metrics alongside the average time:
 - **Load Factor** — captured after the last trial of each operation. This tells us 
   how full the table was when the operation finished. Remove always shows 0.0 because 
-  the load factor is captured after all players have been removed and the table is empty.
+  the load factor is captured after all players have been removed, and the table is empty.
 
 - **Collisions** — tracked inside `put()`. A collision is counted when a new key maps 
   to a bucket that is already occupied by a different key. This gives us an accurate 
@@ -108,13 +108,13 @@ We measured two metrics alongside the average time:
 ### 1. How did collision frequency change as size increased?
 
 The collision count stayed zero for all dataset sizes (50, 500, and 5000). 
-It means, everytime we add more players to the hash table, the keys still mapped
-to different buckets instead of putting it in same spot. Because the player IDs are
-in sequential order, they spread out evenly across the table when the hash 
+It means that every time we add more players to the hash table, the keys are still mapped
+to different buckets instead of putting them in the same spot. Because the player IDs are
+in sequential order, they are spread out evenly across the table when the hash 
 function is calculating the bucket index.
 
-Another reason collisions stayed at zero was because the table resizes when the load 
-factor exceeded 0.75. Thats kept the table from becoming too full and it helped maintain
+Another reason collisions stayed at zero was that the table resizes when the load 
+factor exceeds 0.75. This keeps the table from becoming too full, and it helps maintain
 enough buckets for the keys. Since the table kept on expanding when more data was added,
 it prevented multiple keys from being placed in the same bucket.
 
@@ -127,18 +127,18 @@ where operations like add and remove run in constant (O(1)) time.
 ### 2. How did load factor affect runtime?
 
 Our table started with an initial capacity of 16 buckets. As we kept inserting players, the 
-load factor kept climbing until it hit 0.75, at that point the table doubled its 
+load factor kept climbing until it hit 0.75. At that point, the table doubled its 
 size and rehashed everything into the new table. This happened multiple times across 
 each dataset.
 
 By the time all 50 players were inserted, the table had grown to a capacity of 128 
-and the load factor settled at 0.390625. For 500 players it grew to 1024 with a load 
-factor of 0.4882. For 5000 players it grew all the way to 8192 with a load factor of 
+and the load factor settled at 0.390625. For 500 players, it grew to 1024 with a load 
+factor of 0.4882. For 5000 players, it grew all the way to 8192 with a load factor of 
 0.6103.
 
 Looking at the insert times, it was 0.089ms for 50 players, 0.064ms for 500 players, 
 and 0.322ms for 5000 players. The jump at 5000 is because the table had to rehash 
-multiple times going from capacity 16 all the way up to 8192. Every rehash moves all 
+multiple times, going from a capacity of 16 all the way up to 8192. Every rehash moves all 
 the existing entries into the new table, which adds up over time.
 
 Search and remove also got a bit slower as the dataset grew. Search went from 0.027ms 
@@ -147,34 +147,53 @@ there were zero collisions the whole time, every search and remove just went dir
 to the right bucket in one step. The slowdown was from the table being bigger, not 
 from having to search through the chains.
 
-This is worth noting, that the load factor showed 0.0 for all remove rows in our 
+It is worth noting that the load factor showed 0.0 for all removed rows in our 
 results. That is because we capture the load factor after all the players have been 
 removed, so the table is empty at that point.
 
 ---
 ### 3. Did results match expected O(1) behavior?
+## Benchmark Results — HashTable
 
-Yes, the results did match what we were expecting. Looking at the numbers, when we went from 
-50 players to 5000 players, that was a 100x increase in data. But the times did not 
-go up 100x.
+We conducted benchmark testing of the following methods over 30 trial runs and computed the average time in ms to perform each operation. Here are the results:
 
-For search, it went from 0.027ms to 0.159ms. That is only about a 6x increase for 
-100x more data. For remove, it went from 0.057ms to 0.244ms, which is about a 4x 
-increase. If the hash table was slow like a simple array scan, those numbers would 
-have gone up way more.
+| Size | Operation | Avg Time (ms) | Load Factor  | Collisions |
+|------|-----------|---------------|--------------|------------|
+| 50   | Insert    | 0.089843      | 0.390625     | 0          |
+| 50   | Search    | 0.027433      | 0.390625     | 0          |
+| 50   | Remove    | 0.066523      | 0.0          | 0          |
+| 500  | Insert    | 0.064667      | 0.48828125   | 0          |
+| 500  | Search    | 0.058093      | 0.48828125   | 0          |
+| 500  | Remove    | 0.096293      | 0.0          | 0          |
+| 5000 | Insert    | 0.322223      | 0.6103515625 | 0          |
+| 5000 | Search    | 0.159817      | 0.6103515625 | 0          |
+| 5000 | Remove    | 0.244817      | 0.0          | 0          |
 
-Insert went from 0.089ms to 0.322ms, which is about a 3.5x increase. Remove went 
-from 0.066ms to 0.244ms, which is about a 4x increase. Both were actually very close 
-to each other. Search was the least efficient of the three, going from 0.027ms to 
-0.159ms, which is about a 6x increase. All three operations still scaled much better 
+The results aligned with our expectations. Looking at the numbers, when we went from 
+50 players to 5000 players, there was a 100x increase in input size, but only a 3.5x increase 
+in insertion time. Likewise, for removal, it went from 0.066523ms to 0.244817ms - roughly a 3.6x increase in time for a 100x increase in input size. 
+
+For search, it went from 0.027ms to 0.159ms. That is about a 6x increase for 100x more data. We think 
+this might be because when we start at an initial size of 16 buckets and keep doubling, the hashtable capacity grows
+to 8192 to ensure the load factor is below 0.75. At this size, the data might not fit an L1/L2 cache 
+(ultra-fast, small memory banks built directly into or very near a CPU core). Then the CPU would need 
+to switch to a slower L3 cache. Additionally, inside the HashTable, each bucket is a LinkedList, but 
+because each node reference is not stored contiguously in memory, there can be cache misses when the 
+CPU tries to retrieve the data. This is one of
+the drawbacks of Chaining. 
+
+The most interesting anomaly is that inserting 50 players took longer than inserting 500 players. 
+This is almost certainly due to JVM warmup. In this phase, the machine must warm up, which can sometimes skew results.
+However, all three operations still scaled much better 
 than the 100x increase in data, which confirms the hash table is running close to 
 O(1) across all operations.
+
 
 ---
 ### 4. At what load factor did performance degrade?
 
 We started to see performance slow down as the load factor got above 0.39 and 
-pushed toward 0.61 at size 5000. The biggest jump was at size 5000 where insert 
+pushed toward 0.61 at size 5000. The biggest jump was at size 5000, where insert 
 went from 0.064ms to 0.322ms.
 
 The slowdown was not because buckets were getting crowded with multiple players. 
@@ -184,7 +203,7 @@ existing entries into the new table. For 5000 players, that happened multiple ti
 as the table grew from 16 all the way to 8192. All that moving adds up.
 
 Search and remove were not hit as hard because they do not cause any resizing. 
-Search went from 0.027ms to 0.159ms and remove went from 0.066ms to 0.244ms across 
+Search went from 0.027ms to 0.159ms, and remove went from 0.066ms to 0.244ms across 
 all three sizes. The increase there is just from the table being bigger in general, 
 not from any real degradation in lookup speed.
 
@@ -199,7 +218,7 @@ Discuss the advantages and disadvantages of different collision resolution strat
       - Insertions and deletions are easier since elements can just be added or removed from the list.
   - Cons:
       - It uses extra memory for the linked list nodes and pointers.
-      - Searching can be slower, if a bucket ends up with a long chain.
+      - Searching can be slower if a bucket ends up with a long chain.
       - It can have bad cache performance because the linked list nodes are not stored next to each other in memory.
   
 - **Probing (Open Addressing)**
@@ -209,33 +228,41 @@ Discuss the advantages and disadvantages of different collision resolution strat
       - Searches are very fast when the load factor is low.
   - Cons:
       - Performance can drop quickly if the table gets too full.
-      - Collisions can create clustering that slow down searching.
+      - Collisions can create clustering that slows down searching.
       - Deleting elements is harder and sometimes requires tombstone markers.
 
 We went with chaining because we already had a `SinglyLinkedList` built from PA2, 
-so it made sense to reuse it here. The deletions was easier since we just remove 
-the node from the list and go to the next. We also didn't need to leave any markers
-behind like probing requires. Because the system needed to constantly add, search,
+so it made sense to reuse it here. The deletions were easier since we just removed 
+the node from the list and went to the next. We also didn't need to leave any markers
+behind, like probing requires. Because the system needed to constantly add, search,
 and remove players during a live game, chaining was the easiest and most efficient choice for us.
 
 ---
-### 6. Compare performance with PA1 (array) and PA2 (linked list) by filling the following table:
+### 6. Comparing performance with PA1 (array) and PA2 (linked list):
 
 | Structure | Lookup Time | Memory (space + overhead) | Best Use Case |
 |----------|-------------|-------------|-------------|
-| Array (PA1) | O(n) ~0.2ms at 5000 |  Low, all stored together in memory | Data that does not change often and needs fast index access. |
-| Linked List (PA2) | O(n) ~189.3ms at 5000 | Higher, each node has a pointer | Frequent insertions and deletions |
+| Array (PA1) | O(n) ~83.328ms at 5000 |  Low, all stored together in memory | Small datasets, index-based access |
+| Linked List (PA2) | O(n) ~219.078ms at 5000 | Higher, each node has a pointer | Frequent insertions and deletions |
 | Hash Table (PA5) | O(1) ~0.159ms at 5000 | Higher, buckets and linked lists | Fast lookup by key, large datasets |
+
 
 In PA1 and PA2, finding a player by ID would check each entry one by one until we found the right one.
 For 5000 players, that can take up to 5000 checks in the worst case, and that's really slow. With the hash 
 table in PA5, we take the player ID and use the hash function to go straight to the correct bucket. In
-most cases, this will only takes one step, so the lookup time is about O(1) on average. 
+most cases, this will only take one step, so the lookup time is about O(1) on average. 
 
-To put in different perspective, the linked list from PA2 took 189.3ms to search 
+To put it in a different perspective, the linked list from PA2 took 219.078ms to search 
 through 5000 players. The hash table did the same search in 0.159ms. That is over 
-1000x faster. In a live game, situation where you need stats of a player instantly, that 
-difference is huge. That's why the hash table is the right choice here.
+1000x faster. In a live game, a situation where you need stats of a player instantly, that 
+difference is huge. That's why the hash table is the right choice here. The following table illustrates the 
+gains in efficiency for search:
+
+| Structure   | Relative to Hash Table |
+|-------------|------------------------|
+| Array       | ~522x slower           |
+| Linked List | ~1371x slower          |
+| Hash Table  | baseline               |
 
 ---
 
