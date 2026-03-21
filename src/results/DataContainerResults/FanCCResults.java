@@ -4,7 +4,9 @@ import manager.DataContainer.FanTicketDCManager;
 import manager.FanTicketQueue;
 import results.BenchmarkResult;
 import results.ExperimentFormat;
+import results.OperationCounts;
 import types.FanRequest;
+import util.ArrayStack;
 import util.DataContainer;
 import util.LinkedQueue;
 
@@ -16,16 +18,21 @@ import java.util.function.Supplier;
  * Inherits automated benchmarking and state management from DataContainerResults.
  */
 public class FanCCResults
-        extends DataContainerResults<FanRequest, DataContainer<FanRequest>, FanTicketDCManager> {
+        extends DataContainerResults<
+        FanRequest,
+        DataContainer<FanRequest>,
+        FanTicketDCManager> {
 
     static final String FAN_50 = "data/seahawks_fan_queue_50.csv";
     static final String FAN_500 = "data/seahawks_fan_queue_500.csv";
     static final String FAN_5000 = "data/seahawks_fan_queue_5000.csv";
 
     public FanCCResults(FanTicketDCManager theManager, ExperimentFormat theFormat) {
-        // We no longer need the Supplier!
-        // The type bounds ensure M (FanTicketQueue) is a DataContainerManager<FanRequest, C>
-        super(FanRequest.class, theManager, theFormat);
+        super(
+                FanRequest.class,
+                theManager, theFormat,
+                new FanRequest(0, "dummy", "dummy", "dummy")
+        );
     }
 
     /**
@@ -41,10 +48,16 @@ public class FanCCResults
         String testTitle = "Enqueue/Dequeue";
 
         // Calculate combined average time
-        double combinedAvg = (enqueue.avgTime() + dequeue.avgTime()) / 2.0;
+        double combinedAvg = (enqueue.getAvgTime() + dequeue.getAvgTime()) / 2.0;
+
+        OperationCounts opCounts = new OperationCounts(getSwaps(),getComparisons());
 
         // Using enqueue counts as a representative for complexity
-        return new BenchmarkResult(inputSize, testTitle, combinedAvg, enqueue.operationCounts());
+        return new BenchmarkResult(
+                inputSize,
+                testTitle,
+                combinedAvg,
+                opCounts);
     }
 
     public void runAllExperiments() throws IOException {
@@ -70,7 +83,7 @@ public class FanCCResults
 
         // 3. Initialize the orchestrator (Notice we don't need the .class param for FanRequest
         // because it's baked into the FanCCResults constructor unlike RosterDCResults)
-        FanCCResults res = new FanCCResults(FM, ExperimentFormat.BENCHMARK_W_OPS);
+        FanCCResults res = new FanCCResults(FM, ExperimentFormat.BENCHMARK_NO_OPS);
 
         // 4. Execute
         res.runAllExperiments();

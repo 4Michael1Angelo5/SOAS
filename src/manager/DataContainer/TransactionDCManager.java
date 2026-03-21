@@ -22,7 +22,7 @@ public class TransactionDCManager
 
 
     public TransactionDCManager(Supplier<DataContainer<Transaction>> theSupplier) {
-        super(Transaction.class,  theSupplier);
+        super(Transaction.class,  theSupplier, new Transaction(0,"dummy","dummy","dummy"));
     }
 
     // ================================= flags =================================

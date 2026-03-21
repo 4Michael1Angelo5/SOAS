@@ -47,10 +47,6 @@ public record PlayerEnhanced(
         if (name.isBlank()) {
             throw new IllegalArgumentException("Player name cannot be blank");
         }
-//
-//        if (position.isBlank()) {
-//            throw new IllegalArgumentException("Position cannot be blank");
-//        }
     }
 
     /**

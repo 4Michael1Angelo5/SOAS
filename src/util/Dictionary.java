@@ -45,6 +45,10 @@ public interface Dictionary<K,V> extends OperationCountable<V>, Iterable<Entry<K
      */
     double loadFactor();
 
+    int getCollisions();
+
+    void resetCollisions();
+
     boolean isEmpty();
 
     void clear();

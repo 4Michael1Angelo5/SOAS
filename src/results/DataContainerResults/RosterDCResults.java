@@ -21,7 +21,11 @@ public class RosterDCResults
             Class<Player> theDataType,
             RosterDCManager theManagerTestSubject,
             ExperimentFormat theExperimentFormat) {
-        super(theDataType, theManagerTestSubject, theExperimentFormat);
+        super(
+                theDataType,
+                theManagerTestSubject,
+                theExperimentFormat,
+                new Player(0, "dummy", "dummy",0,0));
     }
     // =======================   loading ================================
 
@@ -81,28 +85,15 @@ public class RosterDCResults
 
     public void runAllExperiments() throws IOException {
 
-        // Test with 50 players
-        loadRoster(roster50);
-        addExperimentResult(testAddNTimes("add"));
-        addExperimentResult(testRemoveFromFrontNTimes());
-        addExperimentResult(testSearchByNameNTimes());
+        String[] csvData = {roster50, roster500, roster5000};
 
-        //****************************************************************************************************
+        for (String csv: csvData) {
 
-        // Test with 500 players
-        loadRoster(roster500);
-        addExperimentResult(testAddNTimes("add"));
-        addExperimentResult(testRemoveFromFrontNTimes());
-        addExperimentResult(testSearchByNameNTimes());
-
-
-        //****************************************************************************************************
-
-        // Test with 5000 players
-        loadRoster(roster5000);
-        addExperimentResult(testAddNTimes("add"));
-        addExperimentResult(testRemoveFromFrontNTimes());
-        addExperimentResult(testSearchByNameNTimes());
+            loadRoster(csv);
+            addExperimentResult(testAddNTimes("add"));
+            addExperimentResult(testRemoveFromFrontNTimes());
+            addExperimentResult(testSearchByNameNTimes());
+        }
 
         printResults();
     }

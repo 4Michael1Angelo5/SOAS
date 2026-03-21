@@ -37,7 +37,6 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
     public DataContainer<T> myTestContainer;
     private final DataLoader<T> myDataLoader;
     protected final HashableManager<T> myManager;
-    private final ExperimentFormat myExperiementFormat;
     private final BenchmarkRunner myBenchmarkRunner = new BenchmarkRunner();
     private final ResultsDisplay myResultsDisplay;
     private final ExperimentResults myResults = new ExperimentResults();
@@ -49,7 +48,6 @@ public abstract class HashTableBenchMark<T extends DataType, M extends HashableM
         myTestContainer = new ArrayStore<>(theDataClass);
         myDataLoader = new DataLoader<>(theDataClass, ()-> new ArrayStore<>(theDataClass));
         myManager = theManager;
-        myExperiementFormat = theExperimentFormat;
         myResultsDisplay = new ResultsDisplay(theExperimentFormat, getManagerName(), getDataStructureName());
     }
 

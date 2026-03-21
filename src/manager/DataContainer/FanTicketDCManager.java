@@ -20,7 +20,7 @@ public class FanTicketDCManager
     private static final Logger LOGGER = Logger.getLogger(FanTicketDCManager.class.getName());
 
     public FanTicketDCManager(Supplier<DataContainer<FanRequest>> theSupplier) {
-        super(FanRequest.class, theSupplier);
+        super(FanRequest.class, theSupplier, new FanRequest(0,"dummy","dummy","dummy"));
         validateQueue();
     }
 

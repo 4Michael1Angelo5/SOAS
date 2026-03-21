@@ -18,7 +18,11 @@ public class DrillDCManager
         extends DataContainerManager<Drill, DataContainer<Drill>> {
 
     public DrillDCManager(Supplier<DataContainer<Drill>> theSupplier) {
-        super(Drill.class, theSupplier);
+        super(
+                Drill.class,
+                theSupplier,
+                new Drill(0, "name",0,0,0, 0)
+        );
 
     }
 

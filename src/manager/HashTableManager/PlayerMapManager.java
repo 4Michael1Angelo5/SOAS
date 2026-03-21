@@ -7,17 +7,22 @@ import util.*;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Manages Seahawks Players using a {@link HashTable} -update stats yards injury status etc.
  * @author Chris Chun, Ayush.
- * @version 1.1
+ * @version 2.0
  */
 public class PlayerMapManager
         extends HashTableManager<PlayerEnhanced, Dictionary<Integer, PlayerEnhanced>>{
     
-    public PlayerMapManager() {
-        super(PlayerEnhanced.class,  new HashTable<>(Integer.class, PlayerEnhanced.class));
+    public PlayerMapManager(Supplier<Dictionary<Integer, PlayerEnhanced>> theContainerSupplier) {
+        super(
+                PlayerEnhanced.class,
+                theContainerSupplier.get(),
+                new PlayerEnhanced(0, "dummy", Position.QB, 0, 0, false)
+        );
     }
 
     /**

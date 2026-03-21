@@ -1,7 +1,9 @@
+import manager.HashTableManager.PlayerMapManager;
 import manager.PlayerManager;
 import types.PlayerEnhanced;
 import types.Position;
 import util.ArrayStore;
+import util.HashTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -61,7 +63,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        PlayerManager PM = new PlayerManager();
+        PlayerMapManager PM = new PlayerMapManager(()->new HashTable<>(Integer.class, PlayerEnhanced.class));
 
         boolean running = true;
 

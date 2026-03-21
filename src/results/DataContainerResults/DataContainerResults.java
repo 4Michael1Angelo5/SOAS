@@ -1,26 +1,24 @@
 package results.DataContainerResults;
 
-import exceptions.ResultsConfigException;
 import manager.DataContainer.DataContainerManager;
-import manager.telemetry.OperationsManager;
+import results.BenchmarkResult;
 import results.ExperimentFormat;
 import results.orchestration.ExperimentOrchestrator;
 import types.DataType;
 import util.DataContainer;
 
-import java.util.Objects;
-
 public abstract class DataContainerResults <
                 T extends DataType,
                 C extends DataContainer<T>,
                 M extends DataContainerManager<T, C>>
-    extends ExperimentOrchestrator<T,M> {
+    extends ExperimentOrchestrator<T,C,M> {
 
     public DataContainerResults(
             Class<T> theDataType,
             M theManagerTestSubject,
-            ExperimentFormat theExperimentFormat) {
-        super(theDataType, theManagerTestSubject, theExperimentFormat);
+            ExperimentFormat theExperimentFormat,
+            T theTypeToken) {
+        super(theDataType, theManagerTestSubject, theExperimentFormat, theTypeToken);
     }
 
     // ============================ Results Title =================================
@@ -30,35 +28,7 @@ public abstract class DataContainerResults <
         return myManagerTestSubject.getData().getClass().getSimpleName();
     }
 
-    // =============================
-
-    /**
-     * Ensures proper initial conditions before performing
-     * search testing.
-     */
-    public void validateStateBeforeSearch() {
-        ensureTestContainerNotEmpty();
-        ensureManagerContainerNotEmpty();
-        ensureOperationCounterReset();
-    }
-
     // ============================ untimed tasks ===============================
-
-    /**
-     * Non-timed setup task that populates {@code myManager} with data.
-     * This prepares the state for {@link #removeNTimes()} without skewing the benchmark results.
-     * This must be called before each Remove test.
-     * @throws RuntimeException If the Manager's {@code DataContainer} is not empty before starting.
-     */
-    // not timed
-    @Override
-    public void setUpForRemove() {
-        for (T dataObj : myTestContainer) {
-            myManagerTestSubject.addData(dataObj);
-        }
-        myManagerTestSubject.resetCounter();
-        validateStateBeforeRemoveTest();
-    }
 
     public void setUpForSearch() {
         for (T dataObj : myTestContainer) {
@@ -70,19 +40,35 @@ public abstract class DataContainerResults <
 
     // =============================  Timed Tasks/ Experiments ====================================
 
+    @Override
+    public BenchmarkResult testAddNTimes(String theOperationName) {
+
+        int inputSize = myTestContainer.size();
+
+        double avgTime =
+                myBenchmarkRunner.runSpeedTestWithSetup(
+                        TRIAL_RUNS,
+                        this::setUpForAdd,
+                        this::addNTimes);
+
+        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
+    }
+
 
     /**
-     * Timed task that populates a new container with all items from the manager.
-     * Requires data to be loaded via {@link #loadData(String)} first.
-     * * @throws RuntimeException If the manager's data source is empty.
+     * Executes the removal benchmark by coordinating setup and timed execution.
+     * * @return An {@link BenchmarkResult} capturing size, operation name, and average time.
      */
-    // runnable & timed
     @Override
-    public void addNTimes(){
+    public BenchmarkResult testRemoveNTimes(String theOperationName) {
+        final int inputSize = myManagerTestSubject.size();
+        final double avgTime =
+                myBenchmarkRunner.runSpeedTestWithSetup(
+                        TRIAL_RUNS,
+                        this::setUpForRemove,
+                        this::removeNTimes);
 
-        for(T dataObj: myTestContainer) {
-            myManagerTestSubject.addData(dataObj);
-        }
+        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
     }
 
     /**

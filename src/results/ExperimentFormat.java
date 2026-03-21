@@ -8,5 +8,6 @@ package results;
  */
 public enum ExperimentFormat {
     BENCHMARK_NO_OPS,
-    BENCHMARK_W_OPS
+    BENCHMARK_W_OPS,
+    BENCHMARK_MAP
 }

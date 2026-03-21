@@ -16,24 +16,26 @@ import java.util.logging.Logger;
  * Provides a highlevel abstraction for managing
  * Seahawks data using a map.
  * @param <T> the {@link DataType}
- * @param <M> the {@link Dictionary}
+ * @param <C> the {@link Dictionary}
  * @author Chris Chun, Ayush
  * @version 1.1
  */
-public abstract class HashTableManager
-        <T extends DataType, M extends Dictionary<Integer,T>>
-        extends OperationsManager<T,M>
+public abstract class HashTableManager <
+        T extends DataType,
+        C extends Dictionary<Integer,T>>
+        extends OperationsManager<T,C>
         implements HashableManager<T> {
-    private final DataLoader2<T, ArrayStore<T>> myDataLoader;
 
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
     private static final Logger LOGGER = Logger.getLogger(HashTableManager.class.getName());
 
-    public HashTableManager(Class<T> theDataType, M theContainer) {
+    private final DataLoader2<T, ArrayStore<T>> myDataLoader;
+
+    public HashTableManager(Class<T> theDataType, C theContainer, T theTypeToken) {
         super(theDataType, theContainer);
-        myDataLoader = new DataLoader2<>(theDataType, ()->new ArrayStore<>(theDataType));
+        myDataLoader = new DataLoader2<>(()->new ArrayStore<>(theDataType), theTypeToken);
     }
 
     @Override
@@ -64,7 +66,7 @@ public abstract class HashTableManager
     }
 
     @Override
-    public M getData() {
+    public C getData() {
         return myData;
     }
 
@@ -97,6 +99,8 @@ public abstract class HashTableManager
 
     @Override
     public void clearData() {
+        myData.resetCollisions();
+        myData.resetCounter();
         myData.clear();
     }
 

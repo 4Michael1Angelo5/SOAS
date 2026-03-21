@@ -25,7 +25,7 @@ final public class RosterDCManager
 
     public RosterDCManager(Supplier<DataContainer<Player>> theSupplier){
 
-        super(Player.class, theSupplier);
+        super(Player.class, theSupplier, new Player(0,"dummy","dummy",0,0));
     }
 
     // ================================= flags =================================

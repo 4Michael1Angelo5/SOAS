@@ -15,10 +15,12 @@ import java.util.logging.Logger;
 
 import static java.util.Objects.isNull;
 
-public abstract class DataContainerManager
-        <T extends DataType, C extends DataContainer<T>>
+public abstract class DataContainerManager <
+        T extends DataType,
+        C extends DataContainer<T>>
         extends OperationsManager<T,C>
         implements Manager<T> {
+
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
@@ -28,10 +30,13 @@ public abstract class DataContainerManager
 
     private final Class<T> myDataClass;
 
-    public DataContainerManager(Class<T> theDataClass, Supplier<C> theSupplier){
+    private final T myTypeToken;
+
+    public DataContainerManager(Class<T> theDataClass, Supplier<C> theSupplier, T theTypeToken){
         super(theDataClass, theSupplier.get());
+        myTypeToken = theTypeToken;
         myDataClass = theDataClass;
-        myDataLoader = new DataLoader2<>(theDataClass, theSupplier);
+        myDataLoader = new DataLoader2<>(theSupplier, theTypeToken);
         validateManagerConfig();
     }
 
@@ -67,7 +72,7 @@ public abstract class DataContainerManager
         DataContainer<T> providedContainer = theSupplier.get();
 
         if (providedContainer.getClass().equals(myData.getClass())){
-            myDataLoader = new DataLoader2<>(theDataClass, theSupplier);
+            myDataLoader = new DataLoader2<>(theSupplier,myTypeToken);
 
         } else {
             throw new IllegalArgumentException("Cannot update the DataLoader " +

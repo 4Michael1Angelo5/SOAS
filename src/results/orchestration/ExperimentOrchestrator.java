@@ -43,8 +43,9 @@ import java.util.logging.Logger;
  * @param <M> The {@link OperationCountable} container under test.
  */
 public abstract class ExperimentOrchestrator
-        <       T extends DataType,
-                M extends OperationsManager<T,?>>
+                <T extends DataType,
+                C extends OperationCountable<T>,
+                M extends OperationsManager<T,C>> // wild card don't know if it will be of type DataContainer or Dictionary
         implements OperationCountable<T>, Orchestraction{
 
     // logger color formatting
@@ -110,12 +111,13 @@ public abstract class ExperimentOrchestrator
     public ExperimentOrchestrator(
             Class<T> theDataType,
             M theManagerTestSubject,
-            ExperimentFormat theExperimentFormat) {
+            ExperimentFormat theExperimentFormat,
+            T theTypeToken) {
         myDataClass = theDataType;
         myManagerTestSubject = theManagerTestSubject;
 
         myTestContainer = new ArrayStore<>(theDataType);
-        myDataLoader = new DataLoader2<>(theDataType, ()-> new ArrayStore<>(theDataType));
+        myDataLoader = new DataLoader2<>(()-> new ArrayStore<>(theDataType), theTypeToken);
         myResults = new ResultsDisplay(theExperimentFormat,getContainerName(), getMangerName());
 
     }
@@ -134,7 +136,7 @@ public abstract class ExperimentOrchestrator
     }
 
 
-    // ===================== Experiment Tite Formatting  =====================
+    // ===================== Experiment Title Formatting  =====================
 
     private String getMangerName() {
         return myManagerTestSubject.getClass().getSimpleName();
@@ -151,7 +153,7 @@ public abstract class ExperimentOrchestrator
             throw new RuntimeException(
                     """
                             Misconfigured Experiment:
-                            The DataManager's OperationCounter
+                            The Manager's OperationCounter
                             should be reset between Every Experiment.
                             """
             );
@@ -217,57 +219,47 @@ public abstract class ExperimentOrchestrator
         ensureOperationCounterReset();
     }
 
+    /**
+     * Ensures proper initial conditions before performing
+     * search testing.
+     */
+    public void validateStateBeforeSearch() {
+        ensureTestContainerNotEmpty();
+        ensureManagerContainerNotEmpty();
+        ensureOperationCounterReset();
+    }
+
     //=========== set up tasks to run before each experiment (Not Timed) ===========
 
     @Override
     public void setUpForAdd() {
         myManagerTestSubject.clearData();
-        myManagerTestSubject.resetCounter();
         validateStateBeforeAddTest();
     }
 
-    /**
-     * must be implemented by subclasses.
-     */
-    public abstract void setUpForRemove();
+    @Override
+    public void setUpForRemove() {
+        for (T dataObj : myTestContainer) {
+            myManagerTestSubject.addData(dataObj);
+        }
+        myManagerTestSubject.resetCounter();
+        validateStateBeforeRemoveTest();
+    }
 
     // =================== timed tasks =======================
-
-    public abstract void addNTimes();
-
-    public abstract void removeNTimes();
-
-    // =======================================================
-
-    @Override
-    public BenchmarkResult testAddNTimes(String theOperationName) {
-
-        int inputSize = myTestContainer.size();
-
-        double avgTime =
-                myBenchmarkRunner.runSpeedTestWithSetup(
-                        TRIAL_RUNS,
-                        this::setUpForAdd,
-                        this::addNTimes);
-
-        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
+    public void addNTimes() {
+        for (T data : myTestContainer) {
+            myManagerTestSubject.addData(data);
+        }
     }
 
     /**
-     * Executes the removal benchmark by coordinating setup and timed execution.
-     * * @return An {@link BenchmarkResult} capturing size, operation name, and average time.
+     * This must be implemented by the abstract subclasses of this class
+     * because data removal does not behave uniformly across base types.
+     * For example in a HashTable: V delete(K key) vs a Stack: T pop()
      */
-    @Override
-    public BenchmarkResult testRemoveNTimes(String theOperationName) {
-        final int inputSize = myManagerTestSubject.size();
-        final double avgTime =
-                myBenchmarkRunner.runSpeedTestWithSetup(
-                        TRIAL_RUNS,
-                        this::setUpForRemove,
-                        this::removeNTimes);
+    public abstract void removeNTimes();
 
-        return new BenchmarkResult(inputSize, theOperationName, avgTime, getOpCounts());
-    }
     // =============== Recording Results =================
     /**
      * Adds an experiment result to the internal collection for final reporting.

@@ -39,10 +39,10 @@ public class FanTicketResults extends Results<FanRequest, FanTicketQueue> {
 
 
      int inputSize = myManager.getData().size();
-     String testTitle = enqueue.method() + "/" + dequeue.method();
-     double avgTime = (enqueue.avgTime() + dequeue.avgTime()) / 2.0;
+     String testTitle = enqueue.getMethodName() + "/" + dequeue.getMethodName();
+     double avgTime = (enqueue.getAvgTime() + dequeue.getAvgTime()) / 2.0;
 
-     return new BenchmarkResult(inputSize, testTitle, avgTime, enqueue.operationCounts());
+     return new BenchmarkResult(inputSize, testTitle, avgTime, new OperationCounts(dequeue.getSwaps(), dequeue.getComparions()));
     }
 
     @Override

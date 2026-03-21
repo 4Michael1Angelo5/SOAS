@@ -31,10 +31,10 @@ import java.util.logging.Logger;
 public class UndoDCManager
         extends DataContainerManager<Action, DataContainer<Action>> {
 
-    private static final Logger LOGGER = Logger.getLogger(manager.UndoManager.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(manager.DataContainer.UndoDCManager.class.getName());
 
     public UndoDCManager( Supplier<DataContainer<Action>> theSupplier){
-        super(Action.class, theSupplier);
+        super(Action.class, theSupplier, new Action(0, ActionType.ADD_PLAYER,"dummy","dummy"));
         validateStack();
     }
 
